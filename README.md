@@ -4,6 +4,6 @@ This code repository's mission is to keep track of all the coderbyte coding chal
 
 The solved coding challenges are categorized into 3 groups accoding to their difficulty levels:
 
-I.   Easy
-II.  Medium
-III. Hard
+I.   Easy </br>
+II.  Medium </br>
+III. Hard </br>
