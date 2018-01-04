@@ -59,11 +59,7 @@ string SimpleSymbols(string str) {
 
           if ((str[i+1] >= 'a') && (str[i+1] <= 'z')) {
 
-              if (str[i+2] == '+') {
-
-                  // i += 2;                  
-                  continue;
-              }
+              if (str[i+2] == '+') continue;              
 
               else return "false";
           }

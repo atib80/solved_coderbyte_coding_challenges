@@ -47,8 +47,8 @@ string ex_oh(string str) {
 
   str = trim(str);
 
-  const auto o_count = count(cbegin(str), cend(str), 'o');
-  const auto x_count = count(cbegin(str), cend(str), 'x');
+  const auto o_count = count(begin(str), end(str), 'o');
+  const auto x_count = count(begin(str), end(str), 'x');
 
   if (o_count == x_count) return string{"true"};      
   return string{"false"};
