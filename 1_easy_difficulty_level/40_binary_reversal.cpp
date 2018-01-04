@@ -59,14 +59,8 @@ string convert_to_bin_string(int number) {
 
 	reverse(begin(bin_str), end(bin_str));
 
-	if ((i % 8) != 0) {
-
-		const size_t missing_zeros_count { (i / 8 + 1) * 8 - i };
-
-		bin_str.insert(0, move(string( (i / 8 + 1) * 8 - i, '0' )));
-
-    }
-
+	if ((i % 8) != 0) bin_str.insert(0, move(string( (i / 8 + 1) * 8 - i, '0' )));
+    
 	return bin_str;
 }
 
