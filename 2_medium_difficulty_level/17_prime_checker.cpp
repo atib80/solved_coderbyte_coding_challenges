@@ -23,33 +23,35 @@ using namespace std;
 
 bool is_prime_number(long n) {
 
-	if (n < 2) return false;
-
     if (2 == n || 3 == n || 5 == n) return true;
 
-	if ( !(n % 2) || !(n % 5) ) return false;
+    if ((n < 2) || !(n % 2) || !(n % 5)) return false;
 
-    long upper_limit = static_cast<long>(sqrt(static_cast<double>(n)) + 1);	
+    const long upper_limit = static_cast<long>(sqrt(static_cast<double>(n)) + 1);	
+
 	long k{3};
-	vector<long> divisor_factors{3, 7, 9, 11};	
-	size_t index{1u};
 
+	vector<long> divisor_factors{3, 7, 9, 11};
+
+	size_t index{1u};
+	
 	while (k <= upper_limit) {
 
 		if (n % k == 0) return false;
 
-        k = divisor_factors[index];
-        
-        index++;       
+		k = divisor_factors[index++];        
         
         if (index > 3) {
-        	index = 0;
-        	for (auto& factor : divisor_factors) factor += 10;
+
+            index = 0;
+
+            for (auto& factor : divisor_factors) factor += 10;
+
         }
 
 	}
 
-	return true;
+    return true;    
 }
 
 long PrimeChecker(long number) {
