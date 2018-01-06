@@ -51,7 +51,7 @@ string CaesarCipher(string str, size_t num) {
 
 	string encoded_str{str};
 
-	num %= 26u;
+	num %= 26;
 
 	for (auto& ch : encoded_str) {		
 		
@@ -59,18 +59,18 @@ string CaesarCipher(string str, size_t num) {
 
 			if (islower(ch)) {
 
-				if ((static_cast<size_t>(ch) + num) > 122u) {
-					size_t diff = num - (122u - static_cast<size_t>(ch)) - 1u;
-					ch = static_cast<char>(97u + diff);
+				if ((static_cast<size_t>(ch) + num) > 122) {
+					const size_t diff = num - (122 - static_cast<size_t>(ch)) - 1;
+					ch = static_cast<char>(97 + diff);
 				} else {
 					ch = static_cast<char>(static_cast<size_t>(ch) + num);
 				}			
 
 			} else {
 
-				if ((static_cast<size_t>(ch) + num) > 90u) {
-					size_t diff = num - (90u - static_cast<int>(ch)) - 1u;
-					ch = static_cast<char>(65u + diff);
+				if ((static_cast<size_t>(ch) + num) > 90) {
+					const size_t diff = num - (90 - static_cast<int>(ch)) - 1;
+					ch = static_cast<char>(65 + diff);
 				} else {
 					ch = static_cast<char>(static_cast<size_t>(ch) + num);
 				}	
