@@ -73,7 +73,13 @@ size_t TrappingWater(const int* arr, const size_t arr_size) {
 
   			first_max_water_level = last_max_water_level;
 
-  			for (const int water_level : current_water_levels) count += first_max_water_level - water_level;
+  			for (const int water_level : current_water_levels) {
+
+          if (water_level >= first_max_water_level) continue;
+
+          count += first_max_water_level - water_level;
+          
+        }
 
   			break;  		
   		} 
@@ -95,6 +101,8 @@ int main() {
   cout << TrappingWater(C, sizeof(C)/sizeof(*C)) << '\n'; // expected output: 1
   const int D[] = {0, 2, 4, 0, 2, 1, 2, 6};
   cout << TrappingWater(D, sizeof(D)/sizeof(*D)) << '\n'; // expected output: 11
+  const int E[] = {7, 6, 5, 4, 3, 2, 1};
+  cout << TrappingWater(E, sizeof(E)/sizeof(*E)) << '\n'; // expected output: 0
   
   return 0;    
 }
