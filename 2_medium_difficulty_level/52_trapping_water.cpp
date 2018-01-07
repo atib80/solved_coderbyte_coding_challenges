@@ -57,7 +57,15 @@ size_t TrappingWater(const int* arr, const size_t arr_size) {
 
   		if (water_levels[i] >= first_max_water_level) {  			
 
-  			for (const int water_level : current_water_levels) count += first_max_water_level - water_level;
+  			for (const int water_level : current_water_levels) {
+
+          // this is probably unnecessary, because water_level(s) that have already been accumulated and stored into current_water_levels until this point of code execution cannot be greater than first_max_water_level
+
+          if (water_level >= first_max_water_level) continue;
+
+          count += first_max_water_level - water_level;
+
+        }
 
   			first_max_water_level = water_levels[i];
 
@@ -78,13 +86,13 @@ size_t TrappingWater(const int* arr, const size_t arr_size) {
           if (water_level >= first_max_water_level) continue;
 
           count += first_max_water_level - water_level;
-          
+
         }
 
-  			break;  		
-  		} 
+        break;  		
+  	  }
 
-  		current_water_levels.emplace_back(water_levels[i]);
+    current_water_levels.emplace_back(water_levels[i]);
   }
    
   return count;
