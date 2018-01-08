@@ -24,12 +24,12 @@ Output: "3,6"
 */
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <set>
 #include <functional>
 #include <cctype>
-// #include <strsafe.h>
 
 using namespace std;
 
@@ -98,19 +98,19 @@ vector<string> split(const string& source, const char* needle,
 
 string get_needed_weights_string(const size_t first_weight, const size_t second_weight) {
 
-	char buffer[32];
+	ostringstream oss{};
 
 	if (first_weight < second_weight) {
-		// StringCchPrintfA(buffer, sizeof(buffer)/sizeof(*buffer), "%lu,%lu", first_weight, second_weight); // #include <strsafe.h>
-		sprintf(buffer, "%lu,%lu", first_weight, second_weight);
-	
+
+		oss << first_weight << ',' << second_weight;		
+
 	} else {
-		// StringCchPrintfA(buffer, sizeof(buffer)/sizeof(*buffer), "%lu,%lu", second_weight, first_weight); // #include <strsafe.h>
-		sprintf(buffer, "%lu,%lu", second_weight, first_weight);
 
-	}
+		oss << second_weight << ',' << first_weight;
 
-	return string{buffer};	
+	}	
+
+	return oss.str();
 }
 
 string ScaleBalancing(string *str_arr, const size_t array_size) {
@@ -118,33 +118,25 @@ string ScaleBalancing(string *str_arr, const size_t array_size) {
 	if (array_size < 2u) return string { "not possible" };
 
 	str_arr[0] = trim(str_arr[0]);
+	str_arr[0].erase(begin(str_arr[0]));
+	str_arr[0].erase(--end(str_arr[0]));
 
-	const size_t sep_pos { str_arr[0].find(',', 1) };
+	auto left_right_scale_str = split(str_arr[0], ",");	
+	for (auto& str : left_right_scale_str) str = trim(str);
+	if (2u != left_right_scale_str.size()) return string{"not possible"};
 
-	if (string::npos == sep_pos) return string { "not possible" };
-
-	const string left_scale_str { trim(str_arr[0].substr(1, sep_pos - 1)) };
-
-	const size_t end_pos { str_arr[0].find(']', sep_pos) };
-
-	if (string::npos == end_pos) return string{ "not possible" };
-
-	const string right_scale_str{ trim(str_arr[0].substr(sep_pos + 1, end_pos - (sep_pos + 1))) };
-
-	const size_t left_scale = stoul(left_scale_str);
-
-	const size_t right_scale = stoul(right_scale_str);
+	const size_t left_scale = stoul(left_right_scale_str[0]);
+	const size_t right_scale = stoul(left_right_scale_str[1]);
+	if (left_scale == right_scale) return string{"scale already balanced"};
 
 	str_arr[1] = trim(str_arr[1]);
+	str_arr[1].erase(begin(str_arr[1]));
+	str_arr[1].erase(--end(str_arr[1]));
 
-	const string available_weights_str { trim(str_arr[1].substr(1, str_arr[1].length() - 2)) };
-
-	auto weights_str = split(available_weights_str, ",");
-
+	auto weights_str = split(str_arr[1], ",");
 	for (auto& str : weights_str) str = trim(str);
 
 	multiset<size_t, greater<size_t>> aw{};
-
 	for (const auto& weight_str : weights_str) aw.insert(stoul(weight_str));
 
 	const size_t needed_extra_weight = left_scale > right_scale ? left_scale - right_scale : right_scale - left_scale;
