@@ -28,24 +28,25 @@ using namespace std;
 
 string trim(const string& str)
 {
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+  const size_t str_len{str.length()};
 
-  if (0u == str.length()) return string{};
+  if (!str_len) return string{};
 
-  for (; begin_str <= end_str; ++begin_str)
+  size_t first{}, last{str_len - 1};  
+
+  for (; first <= last; ++first)
   {
-    if (!isspace(str[begin_str])) break;
+    if (!isspace(str[first])) break;
   }
 
-  if (begin_str > end_str) return string{};
+  if (first > last) return string{};
 
-  for (; end_str > begin_str; --end_str)
+  for (; last > first; --last)
   {
-    if (!isspace(str[end_str])) break;
+    if (!isspace(str[last])) break;
   }
 
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return str.substr(first, last - first + 1);
 }
 
 string StringZigzag(string* str_arr, const size_t str_arr_size) {
