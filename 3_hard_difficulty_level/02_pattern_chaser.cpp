@@ -53,18 +53,15 @@ string trim(const string& str)
   return str.substr(first, last - first + 1);
 }
 
-bool check_current_string_pattern(const string& src_str, const string& current_pattern, const size_t current_pattern_start_index) {
-
-   const size_t str_len { src_str.length() };
-   const size_t current_pattern_size { current_pattern.length() };
+bool check_current_string_pattern(const string& src_str, const size_t str_len, const string& current_pattern, const size_t current_pattern_len, const size_t current_pattern_start_index) {
 
    size_t current_pattern_count { 1u };
 
    size_t i { current_pattern_start_index };
 
-   while ((i + current_pattern_size) < str_len) {
+   while ((i + current_pattern_len) < str_len) {
 
-      i += current_pattern_size;
+      i += current_pattern_len;
 
       const size_t pos { src_str.find(current_pattern, i) };
 
@@ -112,7 +109,7 @@ string pattern_chaser(string str) {
 
      const string current_pattern { str.substr(current_pattern_start_index, current_pattern_size) };
 
-     if (check_current_string_pattern(str, current_pattern, current_pattern_start_index)) {
+     if (check_current_string_pattern(str, str_len, current_pattern, current_pattern.length(), current_pattern_start_index)) {
 
          return string { "yes " + current_pattern };
 
@@ -138,4 +135,5 @@ int main() {
   cout << pattern_chaser(move(string{"sskfssbbb9bbb"})) << '\n';  // expected output: "yes bbb"
 
   return 0;
+  
 }
