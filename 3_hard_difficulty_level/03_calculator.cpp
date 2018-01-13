@@ -49,7 +49,7 @@ string trim(const string& str)
 	return str.substr(first, last - first + 1);
 }
 
-void insert_missing_multiplication_symbol(string& str) {
+void insert_missing_multiplication_symbols(string& str) {
 
 	size_t current_pos{};
 
@@ -143,9 +143,7 @@ int evaluate_expression_in_parenthesis(string expression) {
 	vector<operation> operations{};
 	vector<int> sub_expression_results{};
 
-	while (true) {
-
-		size_t operation_pos { expression.find_first_of("+-*/") };
+	while (true) {		
 
 		size_t number_start_pos { expression.find_first_of("0123456789") };
 
@@ -161,11 +159,9 @@ int evaluate_expression_in_parenthesis(string expression) {
 
 			string sub_expression_str{ expression.substr(begin_prnths_pos + 1, end_prnths_pos - (begin_prnths_pos + 1)) };
 
-			const int result { evaluate_expression_in_parenthesis(move(sub_expression_str)) };
+			sub_expression_results.emplace_back(evaluate_expression_in_parenthesis(move(sub_expression_str)));
 
-			sub_expression_results.emplace_back(result);
-
-			operation_pos = expression.find_first_of("+-*/", end_prnths_pos + 1);
+			const size_t operation_pos = expression.find_first_of("+-*/", end_prnths_pos + 1);
 
 			begin_prnths_pos = expression.find('(', end_prnths_pos + 1);
 
@@ -204,11 +200,13 @@ int evaluate_expression_in_parenthesis(string expression) {
 
 			continue;
 
-		}
+		}		
 
-		const size_t number_end_pos{ expression.find_first_not_of("0123456789", number_start_pos + 1) };
+		const size_t number_end_pos { expression.find_first_not_of("0123456789", number_start_pos + 1) };
 
 		int number_value = stoi(expression.substr(number_start_pos, number_end_pos - number_start_pos));
+
+		size_t operation_pos { expression.find_first_of("+-*/") };
 
 		if (string::npos == operation_pos) {
 
@@ -219,7 +217,7 @@ int evaluate_expression_in_parenthesis(string expression) {
 		
 		if (operation_pos < number_start_pos) {
 
-			for (size_t i{ operation_pos }; i < number_start_pos; i++) {
+			for (size_t i { operation_pos }; i < number_start_pos; i++) {
 
 				if ('-' == expression[i]) number_value = -number_value;
 
@@ -228,8 +226,10 @@ int evaluate_expression_in_parenthesis(string expression) {
 			operation_pos = expression.find_first_of("+-*/", number_end_pos);
 
 			if (string::npos == operation_pos) {
+
 				sub_expression_results.emplace_back(number_value);
 				break;
+
 			}
 
 		}
@@ -264,9 +264,7 @@ int evaluate_expression_in_parenthesis(string expression) {
 
 		}
 
-		const size_t right_side_start_offset{ expression.find_first_of("+-*/()0123456789", operation_pos + 1) };
-
-		expression.erase(begin(expression), begin(expression) + right_side_start_offset);
+		expression.erase( begin(expression), begin(expression) + expression.find_first_of("+-*/()0123456789", operation_pos + 1) );
 
 	}
 
@@ -366,7 +364,7 @@ string calculator(string str) {
 		return to_string(number_value);
 	}
 
-	insert_missing_multiplication_symbol(str);
+	insert_missing_multiplication_symbols(str);
 
 	return to_string(evaluate_expression_in_parenthesis(move(str)));
 
@@ -380,10 +378,10 @@ int main() {
 	cout << calculator(move(string{ "6*(4/2)+3*1" })) << '\n';  // expected output: "15"
 	cout << calculator(move(string{ "6/3-1" })) << '\n';        // expected output: "1"	
 	cout << calculator(move(string{ "7-4-1+8(3)/2" })) << '\n'; // expected output: "14"
-	// cout << calculator(move(string{ "20" })) << '\n';          // expected output: "20"
-	// cout << calculator(move(string{ "(20)" })) << '\n';        // expected output: "20"
-	// cout << calculator(move(string{ "-20" })) << '\n';         // expected output: "-20"
-	// cout << calculator(move(string{ "(-20)" })) << '\n';       // expected output: "-20"
+	cout << calculator(move(string{ "20" })) << '\n';          // expected output: "20"
+	cout << calculator(move(string{ "(20)" })) << '\n';        // expected output: "20"
+	cout << calculator(move(string{ "-20" })) << '\n';         // expected output: "-20"
+	cout << calculator(move(string{ "(-20)" })) << '\n';       // expected output: "-20"
 	
 	return 0;
 }
