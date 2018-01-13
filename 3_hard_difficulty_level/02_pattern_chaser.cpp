@@ -91,17 +91,17 @@ string pattern_chaser(string str) {
 
    if (str_len < 3u) return "no null";
 
-   size_t current_pattern_size { str_len / 2u };
+   size_t current_pattern_size { str_len / 2 };
 
-   size_t current_pattern_start_index { 0u };
+   size_t current_pattern_start_index {};
    
-   while (current_pattern_size != 1u) {
+   while (current_pattern_size > 1u) {
 
       if ((current_pattern_start_index + (2 * current_pattern_size)) > str_len) {       
 
         current_pattern_size--;
 
-        if (current_pattern_size < 2u) return string{"no null"};
+        if (current_pattern_size < 2u) return "no null";
 
         current_pattern_start_index = 0u;
 
@@ -135,5 +135,5 @@ int main() {
   cout << pattern_chaser(move(string{"sskfssbbb9bbb"})) << '\n';  // expected output: "yes bbb"
 
   return 0;
-  
+
 }
