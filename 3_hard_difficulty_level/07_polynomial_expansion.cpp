@@ -73,6 +73,7 @@ vector<string> split(const string& source, const char* needle,
   size_t number_of_parts{}, prev{};
 
   while (true) {
+
     const size_t current{source.find(needle_st, prev)};
 
     if (string::npos == current) break;
@@ -101,6 +102,7 @@ vector<string> split(const string& source, const char* needle,
 }
 
 string clean_and_correctly_format_input_string(const string& input) {
+  
   string output{};
   output.reserve(input.length());
   bool is_prev_char_sign_symbol{};
