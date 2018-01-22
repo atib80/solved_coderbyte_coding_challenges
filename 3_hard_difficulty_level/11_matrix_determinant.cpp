@@ -333,7 +333,7 @@ ostream &operator<<(ostream &ostr, const matrix<U> &m)
 {
 	const auto& matrix_contents = m.get_matrix_contents();
 
-    for (const auto &row : m.matrix_)
+    for (const auto &row : matrix_contents)
     {
         for (const auto &element : row)
             ostr << element;
