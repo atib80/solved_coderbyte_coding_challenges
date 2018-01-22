@@ -1,16 +1,16 @@
 /*
 Coderbyte coding challenge: Matrix Determinant
 
-Using the C++ language, have the function MatrixDeterminant(strArr) read strArr which will be an array of integers represented as strings.
-Within the array there will also be "<>" elements which represent break points.
-The array will make up a matrix where the (number of break points + 1) represents the number of rows.
-Here is an example of how strArr may look: ["1","2","<>","3","4"].
-The contents of this array are row1=[1 2] and row2=[3 4].
-Your program should take the given array of elements, create the proper matrix, and then calculate the determinant.
-For the example above, your program should return -2.
-If the matrix is not a square matrix, return -1.
-The maximum size of strArr will be a 6x6 matrix.
-The determinant will always be an integer.
+Using the C++ language, have the function MatrixDeterminant(strArr) read strArr
+which will be an array of integers represented as strings. Within the array
+there will also be "<>" elements which represent break points. The array will
+make up a matrix where the (number of break points + 1) represents the number of
+rows. Here is an example of how strArr may look: ["1","2","<>","3","4"]. The
+contents of this array are row1=[1 2] and row2=[3 4]. Your program should take
+the given array of elements, create the proper matrix, and then calculate the
+determinant. For the example above, your program should return -2. If the matrix
+is not a square matrix, return -1. The maximum size of strArr will be a 6x6
+matrix. The determinant will always be an integer.
 
 Sample test cases:
 
@@ -57,7 +57,8 @@ string trim(const string &str)
     return str.substr(first, last - first + 1);
 }
 
-vector<string> split(const string &source, const char *needle,
+vector<string> split(const string &source,
+                     const char *needle,
                      size_t const max_count = string::npos)
 {
     vector<string> parts{};
@@ -106,12 +107,11 @@ vector<string> split(const string &source, const char *needle,
     return parts;
 }
 
-template <typename T = int>
+template <typename T>
 class matrix
 {
 public:
-    explicit matrix(const size_t row_count = 0,
-                    const size_t col_count = 0)
+    explicit matrix(const size_t row_count = 0, const size_t col_count = 0)
     {
         if (!row_count || !col_count)
             return;
@@ -145,8 +145,7 @@ public:
                 if (!prev_col_width)
                     prev_col_width = row.size();
                 else if (row.size() != prev_col_width)
-                    throw runtime_error{
-                        "Matrix rows must have equal column widths!"};
+                    throw runtime_error{"Matrix rows must have equal column widths!"};
                 matrix_.emplace_back(row);
                 row.clear();
             }
@@ -206,7 +205,6 @@ public:
 
         for (size_t p{}; p < N; p++)
         {
-
             vector<vector<T>> sm(N - 1, vector<T>{});
             for (auto &row : sm)
                 row.resize(N - 1);
@@ -231,7 +229,7 @@ public:
     }
 
     vector<vector<T>> &get_matrix_contents() { return matrix_; };
-    
+
     const vector<vector<T>> &get_matrix_contents() const { return matrix_; };
 
     bool operator==(const matrix &m) const
@@ -258,7 +256,7 @@ public:
         return true;
     }
 
-    int operator()(const size_t i, const size_t j) const
+    T operator()(const size_t i, const size_t j) const
     {
         if (i >= matrix_.size())
         {
@@ -277,7 +275,7 @@ public:
         return matrix_[i][j];
     }
 
-    int &operator()(const size_t i, const size_t j)
+    T &operator()(const size_t i, const size_t j)
     {
         if (i >= matrix_.size())
         {
@@ -322,16 +320,14 @@ public:
         return ss.str();
     }
 
-
 private:
     vector<vector<T>> matrix_;
 };
 
-
 template <typename U>
 ostream &operator<<(ostream &ostr, const matrix<U> &m)
 {
-	const auto& matrix_contents = m.get_matrix_contents();
+    const auto &matrix_contents = m.get_matrix_contents();
 
     for (const auto &row : matrix_contents)
     {
@@ -345,7 +341,7 @@ ostream &operator<<(ostream &ostr, const matrix<U> &m)
 template <typename U>
 istream &operator>>(istream &istr, matrix<U> &m)
 {
-	auto& matrix = m.get_matrix_contents();
+    auto &matrix = m.get_matrix_contents();
 
     matrix.clear();
 
@@ -406,19 +402,24 @@ int main()
     // string A[] = gets(stdin);
     // cout << MatrixDeterminant(A, sizeof(A) / sizeof(*A));
     string B[] = {"1", "2", "<>", "3", "4"};
-    cout << MatrixDeterminant(B, sizeof(B) / sizeof(*B)) << '\n'; // expected output: -2
+    cout << MatrixDeterminant(B, sizeof(B) / sizeof(*B))
+         << '\n'; // expected output: -2
     string C[] = {"5", "0", "<>", "0", "5"};
-    cout << MatrixDeterminant(C, sizeof(C) / sizeof(*C)) << '\n'; // expected output: 25
+    cout << MatrixDeterminant(C, sizeof(C) / sizeof(*C))
+         << '\n'; // expected output: 25
     string D[] = {"1", "2", "4", "<>", "2", "1", "1", "<>", "4", "1", "1"};
-    cout << MatrixDeterminant(D, sizeof(D) / sizeof(*D)) << '\n'; // expected output: -4
-    string E[] = {"1", "2", "3", "4", "5", "<>", "2", "2", "4", "5", "6",
-                  "<>", "3", "4", "4", "5", "6", "<>", "4", "5", "5", "0",
-                  "1", "<>", "5", "6", "6", "1", "1"};
-    cout << MatrixDeterminant(E, sizeof(E) / sizeof(*E)) << '\n'; // expected output: 43
-    string F[] = {"1000", "2", "3", "4", "5", "<>", "2", "2", "4", "5", "6",
-                  "<>", "3", "4", "4", "5", "6", "<>", "4", "5", "5", "0", "1",
-                  "<>", "5", "6", "6", "1", "1000"};
-    cout << MatrixDeterminant(F, sizeof(F) / sizeof(*F)) << '\n'; // expected output: 49801192
+    cout << MatrixDeterminant(D, sizeof(D) / sizeof(*D))
+         << '\n'; // expected output: -4
+    string E[] = {"1", "2", "3", "4", "5", "<>", "2", "2", "4", "5",
+                  "6", "<>", "3", "4", "4", "5", "6", "<>", "4", "5",
+                  "5", "0", "1", "<>", "5", "6", "6", "1", "1"};
+    cout << MatrixDeterminant(E, sizeof(E) / sizeof(*E))
+         << '\n'; // expected output: 43
+    string F[] = {"1000", "2", "3", "4", "5", "<>", "2", "2", "4", "5",
+                  "6", "<>", "3", "4", "4", "5", "6", "<>", "4", "5",
+                  "5", "0", "1", "<>", "5", "6", "6", "1", "1000"};
+    cout << MatrixDeterminant(F, sizeof(F) / sizeof(*F))
+         << '\n'; // expected output: 49801192
 
     return 0;
 }
