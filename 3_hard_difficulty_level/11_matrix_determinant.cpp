@@ -22,7 +22,6 @@ Output: -4
 */
 
 #include <cctype>
-#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -203,6 +202,8 @@ public:
 
         T determinant{};
 
+        int sign_factor{1};
+
         for (size_t p{}; p < N; p++)
         {
 
@@ -222,13 +223,16 @@ public:
                 }
             }
 
-            determinant += pow(-1, p) * matrix[0][p] * calculate_determinant(sm);
+            determinant += sign_factor * matrix[0][p] * calculate_determinant(sm);
+            sign_factor = -sign_factor;
         }
 
         return determinant;
     }
 
-    const vector<vector<int>> &get_matrix_contents() const { return matrix_; };
+    vector<vector<T>> &get_matrix_contents() { return matrix_; };
+    
+    const vector<vector<T>> &get_matrix_contents() const { return matrix_; };
 
     bool operator==(const matrix &m) const
     {
@@ -318,16 +322,17 @@ public:
         return ss.str();
     }
 
-    friend istream &operator>>(istream &, matrix<T> &);
-    friend ostream &operator<<(ostream &, const matrix<T> &);
 
 private:
     vector<vector<T>> matrix_;
 };
 
-template <typename T>
-ostream &operator<<(ostream &ostr, const matrix<T> &m)
+
+template <typename U>
+ostream &operator<<(ostream &ostr, const matrix<U> &m)
 {
+	const auto& matrix_contents = m.get_matrix_contents();
+
     for (const auto &row : m.matrix_)
     {
         for (const auto &element : row)
@@ -337,12 +342,14 @@ ostream &operator<<(ostream &ostr, const matrix<T> &m)
     return ostr;
 }
 
-template <typename T>
-istream &operator>>(istream &istr, matrix<T> &m)
+template <typename U>
+istream &operator>>(istream &istr, matrix<U> &m)
 {
-    m.matrix_.clear();
+	auto& matrix = m.get_matrix_contents();
 
-    vector<T> row{};
+    matrix.clear();
+
+    vector<U> row{};
     string line{};
     size_t prev_col_width{};
 
@@ -353,7 +360,7 @@ istream &operator>>(istream &istr, matrix<T> &m)
 
         if (line != "<>")
         {
-            T value{};
+            U value{};
             iss >> value;
             row.emplace_back(value);
         }
@@ -364,14 +371,14 @@ istream &operator>>(istream &istr, matrix<T> &m)
             else if (row.size() != prev_col_width)
                 throw runtime_error{
                     "The rows of matrix must have equal column widths!"};
-            m.matrix_.emplace_back(row);
+            matrix.emplace_back(row);
             row.clear();
         }
 
         if (prev_col_width && (row.size() != prev_col_width))
             throw runtime_error{"The rows of matrix must have equal column widths!"};
 
-        m.matrix_.emplace_back(row);
+        matrix.emplace_back(row);
     }
 
     return istr;
@@ -388,7 +395,7 @@ string MatrixDeterminant(string *str_arr, const size_t str_arr_size)
 
         return to_string(m.get_determinant());
     }
-    catch (exception&)
+    catch (exception &)
     {
         return "-1";
     }
