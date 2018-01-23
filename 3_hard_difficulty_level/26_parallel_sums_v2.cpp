@@ -69,7 +69,7 @@ string ParallelSums2(const int *arr, const size_t arr_size)
 
     vector<int> left_numbers{};
     vector<int> right_numbers{};
-    const int half_sum{sum /= 2};
+    const int half_sum{sum / 2};
 
     set<size_t> found_indices{};
 
@@ -94,16 +94,16 @@ string ParallelSums2(const int *arr, const size_t arr_size)
 
     if (left_numbers[0] < right_numbers[0])
     {
-        for (size_t i{}; i < left_numbers.size(); i++)
-            oss << left_numbers[i] << ',';
+        for (const auto n : left_numbers)
+            oss << n << ',';
         for (size_t i{}; i < right_numbers.size() - 1; i++)
             oss << right_numbers[i] << ',';
         oss << right_numbers.back();
     }
     else
     {
-        for (size_t i{}; i < right_numbers.size(); i++)
-            oss << right_numbers[i] << ',';
+        for (const auto n : right_numbers)
+            oss << n << ',';
         for (size_t i{}; i < left_numbers.size() - 1; i++)
             oss << left_numbers[i] << ',';
         oss << left_numbers.back();
@@ -115,7 +115,7 @@ string ParallelSums2(const int *arr, const size_t arr_size)
 int main()
 {
     // const int A[] = gets(stdin);
-    // cout << ParallelSums(A, sizeof(A)/sizeof(*A));
+    // cout << ParallelSums2(A, sizeof(A)/sizeof(*A));
     const int B[] = {16, 22, 35, 8, 20, 1, 21, 11};
     cout << ParallelSums2(B, sizeof(B) / sizeof(*B)) << '\n'; // expected output: "1,11,20,35,8,16,21,22"
     const int C[] = {1, 2, 3, 4};
