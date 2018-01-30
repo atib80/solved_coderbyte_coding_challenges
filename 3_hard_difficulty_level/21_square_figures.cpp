@@ -28,13 +28,13 @@ int64_t find_minimum_number_for_specified_length(const int64_t current_number, c
 	int64_t next_number{current_number};
 	string number_str{to_string(current_number * current_number)};
 	const vector<int64_t> decrement_factors{
-		0LL, 1LL, 10LL, 100LL, 1000LL, 10000LL, 100000LL, 1000000LL, 10000000LL,
-		100000000LL, 1000000000LL, 10000000000LL, 100000000000LL
+		0LL, 1LL, 10LL, 100LL, 1'000LL, 10'000LL, 100'000LL, 1'000'000LL, 10'000'000LL,
+		100'000'000LL, 1'000'000'000LL, 10'000'000'000LL, 100'000'000'000LL
 	};
-	const int number_factor_len{static_cast<int>(to_string(current_number).length())};
+	const size_t initial_decrement_factor_index{to_string(current_number).length()};
 
 	// could decrement number by 1000, 100, 10 and then 1 depending on its original initial length (specified by 'target_number_len')
-	for (int i{number_factor_len}; i > 0; i--)
+	for (size_t i{initial_decrement_factor_index}; i >= 1; i--)
 	{
 		while (true)
 		{
@@ -55,7 +55,7 @@ int64_t find_minimum_number_for_specified_length(const int64_t current_number, c
 }
 
 int64_t SquareFigures(const size_t target_number_len)
-{
+{	// the first initial step is to find the closest number using the binary search algorithm
 	int64_t lower_bound{}, upper_bound{static_cast<int64_t>(sqrt(numeric_limits<int64_t>::max()))};
 
 	while (true)
