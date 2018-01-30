@@ -20,6 +20,7 @@ Output: 0
 #include <cmath>
 #include <limits>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -33,7 +34,9 @@ int64_t find_minimum_number_for_specified_length(const int64_t current_number, c
 	};
 	const size_t initial_decrement_factor_index{to_string(current_number).length()};
 
-	// could decrement number by 1000, 100, 10 and then 1 depending on its original initial length (specified by 'target_number_len')
+	// could decrement number by a certain offset value (100'000'000'000LL, 10'000'000'000LL, ... 1'000, 100, 10 and then finally by 1 (if required) 
+	// depending on its original initial length (specified by 'target_number_len')
+	
 	for (size_t i{initial_decrement_factor_index}; i >= 1; i--)
 	{
 		while (true)
@@ -55,7 +58,14 @@ int64_t find_minimum_number_for_specified_length(const int64_t current_number, c
 }
 
 int64_t SquareFigures(const size_t target_number_len)
-{	// the first initial step is to find the closest number using the binary search algorithm
+{
+	// the first initial step is to find the closest number using the binary search algorithm
+
+	const static unordered_map<size_t, int64_t> predefined_results{{1, 0LL}, {2, 4LL}, {3, 10LL}, {4, 32LL}, {5, 100LL}};
+
+	if (predefined_results.find(target_number_len) != end(predefined_results))
+		return predefined_results.find(target_number_len)->second;
+
 	int64_t lower_bound{}, upper_bound{static_cast<int64_t>(sqrt(numeric_limits<int64_t>::max()))};
 
 	while (true)
@@ -78,11 +88,19 @@ int64_t SquareFigures(const size_t target_number_len)
 
 int main()
 {
-	// cout << SquareFigures(gets(stdin));	
-	cout << SquareFigures(6) << '\n'; // expected output: 317
-	cout << SquareFigures(2) << '\n'; // expected output: 4
+	// cout << SquareFigures(gets(stdin));		
 	cout << SquareFigures(1) << '\n'; // expected output: 0
+	cout << SquareFigures(2) << '\n'; // expected output: 4	
+	cout << SquareFigures(3) << '\n'; // expected output: 10
+	cout << SquareFigures(4) << '\n'; // expected output: 32
+	cout << SquareFigures(5) << '\n'; // expected output: 100
+	cout << SquareFigures(6) << '\n'; // expected output: 317
+	cout << SquareFigures(7) << '\n'; // expected output: 1000
+	cout << SquareFigures(8) << '\n'; // expected output: 3163
+	cout << SquareFigures(9) << '\n'; // expected output: 10000
+	cout << SquareFigures(10) << '\n'; // expected output: 31623
 	cout << SquareFigures(11) << '\n'; // expected output: 100000
+	cout << SquareFigures(12) << '\n'; // expected output: 316228
 
 	return 0;
 }
