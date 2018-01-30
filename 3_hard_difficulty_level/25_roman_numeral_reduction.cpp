@@ -69,11 +69,16 @@ size_t convert_roman_numeral_string_to_whole_number(const string& rnns)
     return number;
 }
 
+// this function operates based on a slightly modified version of the greedy algorithm 
+// in order to find the least number of roman numerals (characters) 
+// that are able to represent specified number 'number' correctly.
+
 string find_least_number_of_roman_numeral_characters_that_represent_number(const size_t number)
 {
     const unordered_map<size_t, char> roman_numerals{
         {1, 'I'},{5, 'V'},{10, 'X'},{50, 'L'},{100, 'C'},{500, 'D'},{1000, 'M'}
     };
+
     const vector<size_t> values{1000, 500, 100, 50, 10, 5, 1};
 
     for (const auto value : values)
@@ -85,8 +90,6 @@ string find_least_number_of_roman_numeral_characters_that_represent_number(const
         }
         else if (value < number) break;
     }
-
-    string result{"-1"};
 
     size_t min_length{string::npos};
 
