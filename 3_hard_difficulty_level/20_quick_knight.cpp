@@ -24,6 +24,9 @@ Output: 2
 #include <string>
 #include <vector>
 #include <utility>
+// #include <crtdbg.h>
+
+#define ASSERT _ASSERTE
 
 using namespace std;
 
@@ -65,8 +68,14 @@ vector<string> split(const string& source, const char* needle,
 
 	const size_t needle_len{needle_st.size()};
 
-	if ((0u == source_len) || (0u == needle_len))
+	if (!source_len) return parts;
+
+	if (!needle_len)
+	{
+		const size_t upper_limit{max_count < source_len ? max_count : source_len};
+		for (size_t i{}; i < upper_limit; i++) parts.emplace_back(1, source[i]);
 		return parts;
+	}
 
 	size_t number_of_parts{}, prev{};
 
@@ -205,6 +214,11 @@ void find_minimum_number_of_jumps(const vector<vector<int>>& chessboard, const p
 
 string QuickKnight(string str)
 {
+	// vector<string> characters = split("abcdefghijklmnopqrstuvwxyz", "");
+	// ASSERT(26 == characters.size());
+	// characters = split("abcdefghijklmnopqrstuvwxyz", "", 12);
+	// ASSERT(12 == characters.size());
+
 	str = trim(str);
 	str.erase(begin(str));
 	str.erase(--end(str));
