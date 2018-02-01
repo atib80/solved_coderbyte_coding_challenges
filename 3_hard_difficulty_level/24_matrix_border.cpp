@@ -1,5 +1,5 @@
 /*
-Coderbyte coding challenge: Matrix Border
+Coderbyte coding challenge: Matrix Border (works correctly)
 
 Using the C++ language, have the function MatrixBorder(strArr) read the strArr parameter being passed
 which will represent an NxN matrix filled with 1's and 0's.
@@ -27,7 +27,7 @@ Output: 2
 
 using namespace std;
 
-string trim(const string &str)
+string trim(const string& str)
 {
     const size_t str_len{str.length()};
 
@@ -54,8 +54,8 @@ string trim(const string &str)
     return str.substr(first, last - first + 1);
 }
 
-vector<string> split(const string &source,
-                     const char *needle,
+vector<string> split(const string& source,
+                     const char* needle,
                      size_t const max_count = string::npos)
 {
     vector<string> parts{};
@@ -112,7 +112,7 @@ vector<string> split(const string &source,
     return parts;
 }
 
-void swap_matrix_rows(vector<vector<int>> &matrix, const size_t i, const size_t j)
+void swap_matrix_rows(vector<vector<int>>& matrix, const size_t i, const size_t j)
 {
     if (matrix.empty() || i == j || i >= matrix.size() || j >= matrix.size() || matrix[i].size() != matrix[j].size())
         return;
@@ -123,10 +123,9 @@ void swap_matrix_rows(vector<vector<int>> &matrix, const size_t i, const size_t 
     }
 }
 
-void swap_matrix_columns(vector<vector<int>> &matrix, const size_t i, const size_t j)
+void swap_matrix_columns(vector<vector<int>>& matrix, const size_t i, const size_t j)
 {
-    if (matrix.empty() || i == j || i >= matrix.size() || j >= matrix.size())
-        return;
+    if (matrix.empty() || i == j || i >= matrix.size() || j >= matrix.size()) return;
 
     for (size_t x{}; x < matrix[i].size(); x++)
     {
@@ -134,7 +133,7 @@ void swap_matrix_columns(vector<vector<int>> &matrix, const size_t i, const size
     }
 }
 
-vector<vector<int>> create_matrix_from_input_string_array(string *str_arr, const size_t str_arr_size)
+vector<vector<int>> create_matrix_from_input_string_array(string* str_arr, const size_t str_arr_size)
 {
     vector<vector<int>> matrix(str_arr_size, vector<int>(str_arr_size, 0));
 
@@ -144,97 +143,84 @@ vector<vector<int>> create_matrix_from_input_string_array(string *str_arr, const
         str_arr[i].erase(begin(str_arr[i]));
         str_arr[i].erase(--end(str_arr[i]));
         const auto row_values = split(str_arr[i], ",", str_arr_size);
-        for (size_t j{}; j < row_values.size(); j++)
-            matrix[i][j] = stoi(row_values[j]);
+        for (size_t j{}; j < row_values.size(); j++) matrix[i][j] = stoi(row_values[j]);
     }
 
     return matrix;
 }
 
-bool check_matrix_border_values(const vector<vector<int>> &matrix)
+bool check_matrix_border_values(const vector<vector<int>>& matrix)
 {
-    if (matrix.empty())
-        return false;
+    if (matrix.empty()) return false;
 
     for (size_t y{}; y < matrix.size(); y++)
     {
-        if (!matrix[0][y])
-            return false;
+        if (!matrix[0][y]) return false;
     }
 
     for (size_t x{}; x < matrix.size(); x++)
     {
-        if (!matrix[x][0])
-            return false;
+        if (!matrix[x][0]) return false;
     }
 
     for (size_t y{}; y < matrix.size(); y++)
     {
-        if (!matrix[matrix.size() - 1][y])
-            return false;
+        if (!matrix[matrix.size() - 1][y]) return false;
     }
 
     for (size_t x{}; x < matrix.size(); x++)
     {
-        if (!matrix[x][matrix.size() - 1])
-            return false;
+        if (!matrix[x][matrix.size() - 1]) return false;
     }
 
     return true;
 }
 
-bool check_matrix_center_values(const vector<vector<int>> &matrix)
+bool check_matrix_center_values(const vector<vector<int>>& matrix)
 {
-    if (matrix.empty())
-        return false;
+    if (matrix.empty()) return false;
 
     for (size_t x{1}; x < matrix.size() - 1; x++)
     {
         for (size_t y{1}; y < matrix.size() - 1; y++)
         {
-            if (matrix[x][y])
-                return false;
+            if (matrix[x][y]) return false;
         }
     }
 
     return true;
 }
 
-bool check_matrix_row(const vector<vector<int>> &matrix, const size_t row_index, const int flag_value)
+bool check_matrix_row(const vector<vector<int>>& matrix, const size_t row_index, const int flag_value)
 {
-    if (matrix.empty() || row_index >= matrix.size())
-        return false;
+    if (matrix.empty() || row_index >= matrix.size()) return false;
 
     for (size_t y{}; y < matrix[row_index].size(); y++)
     {
-        if (flag_value != matrix[row_index][y])
-            return false;
+        if (flag_value != matrix[row_index][y]) return false;
     }
 
     return true;
 }
 
-bool check_matrix_column(const vector<vector<int>> &matrix, const size_t col_index, const int flag_value)
+bool check_matrix_column(const vector<vector<int>>& matrix, const size_t col_index, const int flag_value)
 {
-    if (matrix.empty() || col_index >= matrix.size())
-        return false;
+    if (matrix.empty() || col_index >= matrix.size()) return false;
 
     for (size_t x{}; x < matrix.size(); x++)
     {
-        if (flag_value != matrix[x][col_index])
-            return false;
+        if (flag_value != matrix[x][col_index]) return false;
     }
 
     return true;
 }
 
-bool check_if_already_visited_matrix_row(const vector<vector<int>> &matrix, const size_t row_index,
-                                         vector<vector<int>> &visited_rows)
+bool check_if_already_visited_matrix_row(const vector<vector<int>>& matrix, const size_t row_index,
+                                         vector<vector<int>>& visited_rows)
 {
-    if (matrix.empty() || row_index >= matrix.size())
-        return true;
+    if (matrix.empty() || row_index >= matrix.size()) return true;
 
-    for (const auto &row : visited_rows)
+    for (const auto& row : visited_rows)
     {
         bool found_match{true};
 
@@ -247,15 +233,14 @@ bool check_if_already_visited_matrix_row(const vector<vector<int>> &matrix, cons
             }
         }
 
-        if (found_match)
-            return true;
+        if (found_match) return true;
     }
 
     return false;
 }
 
-bool add_matrix_row_to_visited_rows(const vector<vector<int>> &matrix, const size_t row_index,
-                                    vector<vector<int>> &visited_rows)
+bool add_matrix_row_to_visited_rows(const vector<vector<int>>& matrix, const size_t row_index,
+                                    vector<vector<int>>& visited_rows)
 {
     if (!check_if_already_visited_matrix_row(matrix, row_index, visited_rows))
     {
@@ -266,13 +251,12 @@ bool add_matrix_row_to_visited_rows(const vector<vector<int>> &matrix, const siz
     return false;
 }
 
-bool check_if_already_visited_matrix_column(const vector<vector<int>> &matrix, const size_t col_index,
-                                            vector<vector<int>> &visited_columns)
+bool check_if_already_visited_matrix_column(const vector<vector<int>>& matrix, const size_t col_index,
+                                            vector<vector<int>>& visited_columns)
 {
-    if (matrix.empty() || col_index >= matrix.size())
-        return true;
+    if (matrix.empty() || col_index >= matrix.size()) return true;
 
-    for (const auto &column : visited_columns)
+    for (const auto& column : visited_columns)
     {
         bool found_match{true};
 
@@ -285,21 +269,19 @@ bool check_if_already_visited_matrix_column(const vector<vector<int>> &matrix, c
             }
         }
 
-        if (found_match)
-            return true;
+        if (found_match) return true;
     }
 
     return false;
 }
 
-bool add_matrix_column_to_visited_columns(const vector<vector<int>> &matrix, const size_t col_index,
-                                          vector<vector<int>> &visited_columns)
+bool add_matrix_column_to_visited_columns(const vector<vector<int>>& matrix, const size_t col_index,
+                                          vector<vector<int>>& visited_columns)
 {
     if (!check_if_already_visited_matrix_column(matrix, col_index, visited_columns))
     {
         vector<int> column{};
-        for (size_t x{}; x < matrix.size(); x++)
-            column.emplace_back(matrix[x][col_index]);
+        for (size_t x{}; x < matrix.size(); x++) column.emplace_back(matrix[x][col_index]);
         visited_columns.emplace_back(column);
         return true;
     }
@@ -307,20 +289,18 @@ bool add_matrix_column_to_visited_columns(const vector<vector<int>> &matrix, con
     return false;
 }
 
-void find_minimum_number_of_swap_operations(const vector<vector<int>> &matrix, vector<vector<int>> &visited_rows1,
-                                            vector<vector<int>> &visited_rows2, vector<vector<int>> &visited_columns1,
-                                            vector<vector<int>> &visited_columns2, size_t &minimum_number_of_swaps,
+void find_minimum_number_of_swap_operations(vector<vector<int>>& matrix, vector<vector<int>>& visited_rows1,
+                                            vector<vector<int>>& visited_rows2, vector<vector<int>>& visited_columns1,
+                                            vector<vector<int>>& visited_columns2, size_t& minimum_number_of_swaps,
                                             const size_t iter_count = 0)
 {
     const int nth{static_cast<int>(matrix.size() - 1)};
 
-    if (iter_count >= minimum_number_of_swaps)
-        return;
+    if (iter_count >= minimum_number_of_swaps) return;
 
     if (check_matrix_border_values(matrix))
     {
-        if (iter_count < minimum_number_of_swaps)
-            minimum_number_of_swaps = iter_count;
+        if (iter_count < minimum_number_of_swaps) minimum_number_of_swaps = iter_count;
         return;
     }
 
@@ -328,23 +308,23 @@ void find_minimum_number_of_swap_operations(const vector<vector<int>> &matrix, v
     {
         if (!check_matrix_column(matrix, 0, 1))
         {
-            vector<vector<int>> matrix_swapped{matrix};
-            swap_matrix_columns(matrix_swapped, 0, col1);
-            if (add_matrix_column_to_visited_columns(matrix_swapped, 0, visited_columns1))
+            if (add_matrix_column_to_visited_columns(matrix, col1, visited_columns1))
             {
-                find_minimum_number_of_swap_operations(matrix_swapped, visited_rows1, visited_rows2, visited_columns1,
+                swap_matrix_columns(matrix, 0, col1);
+                find_minimum_number_of_swap_operations(matrix, visited_rows1, visited_rows2, visited_columns1,
                                                        visited_columns2, minimum_number_of_swaps, iter_count + 1);
+                swap_matrix_columns(matrix, 0, col1);
             }
         }
 
         if (!check_matrix_column(matrix, nth, 1))
         {
-            vector<vector<int>> matrix_swapped{matrix};
-            swap_matrix_columns(matrix_swapped, nth, col2);
-            if (add_matrix_column_to_visited_columns(matrix_swapped, nth, visited_columns2))
+            if (add_matrix_column_to_visited_columns(matrix, col2, visited_columns2))
             {
-                find_minimum_number_of_swap_operations(matrix_swapped, visited_rows1, visited_rows2, visited_columns1,
+                swap_matrix_columns(matrix, nth, col2);
+                find_minimum_number_of_swap_operations(matrix, visited_rows1, visited_rows2, visited_columns1,
                                                        visited_columns2, minimum_number_of_swaps, iter_count + 1);
+                swap_matrix_columns(matrix, nth, col2);
             }
         }
     }
@@ -353,31 +333,31 @@ void find_minimum_number_of_swap_operations(const vector<vector<int>> &matrix, v
     {
         if (!check_matrix_row(matrix, 0, 1))
         {
-            vector<vector<int>> matrix_swapped{matrix};
-            swap_matrix_rows(matrix_swapped, 0, row1);
-            if (add_matrix_row_to_visited_rows(matrix_swapped, 0, visited_rows1))
+            if (add_matrix_row_to_visited_rows(matrix, row1, visited_rows1))
             {
-                find_minimum_number_of_swap_operations(matrix_swapped, visited_rows1, visited_rows2, visited_columns1,
+                swap_matrix_rows(matrix, 0, row1);
+                find_minimum_number_of_swap_operations(matrix, visited_rows1, visited_rows2, visited_columns1,
                                                        visited_columns2, minimum_number_of_swaps, iter_count + 1);
+                swap_matrix_rows(matrix, 0, row1);
             }
         }
 
         if (!check_matrix_row(matrix, nth, 1))
         {
-            vector<vector<int>> matrix_swapped{matrix};
-            swap_matrix_rows(matrix_swapped, nth, row2);
-            if (add_matrix_row_to_visited_rows(matrix_swapped, nth, visited_rows2))
+            if (add_matrix_row_to_visited_rows(matrix, row2, visited_rows2))
             {
-                find_minimum_number_of_swap_operations(matrix_swapped, visited_rows1, visited_rows2, visited_columns1,
+                swap_matrix_rows(matrix, nth, row2);
+                find_minimum_number_of_swap_operations(matrix, visited_rows1, visited_rows2, visited_columns1,
                                                        visited_columns2, minimum_number_of_swaps, iter_count + 1);
+                swap_matrix_rows(matrix, nth, row2);
             }
         }
     }
 }
 
-string MatrixBorder(string *str_arr, const size_t str_arr_size)
+string MatrixBorder(string* str_arr, const size_t str_arr_size)
 {
-    const vector<vector<int>> matrix{create_matrix_from_input_string_array(str_arr, str_arr_size)};
+    vector<vector<int>> matrix{create_matrix_from_input_string_array(str_arr, str_arr_size)};
     vector<vector<int>> visited_rows1{}, visited_rows2{}, visited_columns1{}, visited_columns2{};
     add_matrix_column_to_visited_columns(matrix, 0, visited_columns1);
     add_matrix_column_to_visited_columns(matrix, matrix.size() - 1, visited_columns2);
@@ -393,19 +373,19 @@ int main()
 {
     // string A[] = gets(stdin);
     // cout << MatrixBorder(A, sizeof(A)/sizeof(*A));
-    string B[] = {"(0,1,1)", "(1,1,1)", "(1,1,1)"};
+    string B[] = {"(0,1,1)","(1,1,1)","(1,1,1)"};
     cout << MatrixBorder(B, sizeof(B) / sizeof(*B)) << '\n'; // expected output: "2"
-    string C[] = {"(0,1,0,1)", "(1,1,1,1)", "(0,1,0,1)", "(1,1,1,1)"};
+    string C[] = {"(0,1,0,1)","(1,1,1,1)","(0,1,0,1)","(1,1,1,1)"};
     cout << MatrixBorder(C, sizeof(C) / sizeof(*C)) << '\n'; // expected output: "2"
-    string D[] = {"(0,1,0,1)", "(1,1,1,1)", "(1,1,1,1)", "(0,1,0,1)"};
+    string D[] = {"(0,1,0,1)","(1,1,1,1)","(1,1,1,1)","(0,1,0,1)"};
     cout << MatrixBorder(D, sizeof(D) / sizeof(*D)) << '\n'; // expected output: "3"
-    string E[] = {"(1,1,1,1,1)", "(1,0,0,1,0)", "(1,0,0,1,0)", "(1,0,0,1,0)", "(1,1,1,1,1)"};
+    string E[] = {"(1,1,1,1,1)","(1,0,0,1,0)","(1,0,0,1,0)","(1,0,0,1,0)","(1,1,1,1,1)"};
     cout << MatrixBorder(E, sizeof(E) / sizeof(*E)) << '\n'; // expected output: "1"
-    string F[] = {"(1,0,0,1,0)", "(1,1,1,1,1)", "(1,0,0,1,0)", "(1,0,0,1,0)", "(1,1,1,1,1)"};
+    string F[] = {"(1,0,0,1,0)","(1,1,1,1,1)","(1,0,0,1,0)","(1,0,0,1,0)","(1,1,1,1,1)"};
     cout << MatrixBorder(F, sizeof(F) / sizeof(*F)) << '\n'; // expected output: "2"
-    string G[] = {"(0,1,0,1,0)", "(1,1,1,1,1)", "(0,1,0,1,0)", "(0,1,0,1,0)", "(1,1,1,1,1)"};
+    string G[] = {"(0,1,0,1,0)","(1,1,1,1,1)","(0,1,0,1,0)","(0,1,0,1,0)","(1,1,1,1,1)"};
     cout << MatrixBorder(G, sizeof(G) / sizeof(*G)) << '\n'; // expected output: "3"
-    string H[] = {"(1,0,0,0,0,1)", "(1,1,1,1,1,1)", "(1,0,0,0,0,1)", "(1,0,0,0,0,1)", "(1,1,1,1,1,1)", "(1,0,0,0,0,1)"};
+    string H[] = {"(1,0,0,0,0,1)","(1,1,1,1,1,1)","(1,0,0,0,0,1)","(1,0,0,0,0,1)","(1,1,1,1,1,1)","(1,0,0,0,0,1)"};
     cout << MatrixBorder(H, sizeof(H) / sizeof(*H)) << '\n'; // expected output: "2"
 
     return 0;
