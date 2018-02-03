@@ -26,6 +26,7 @@ using namespace std;
 
 size_t find_number_of_combinations(const size_t number_of_stairs,
                                    const size_t current_steps_count = 0) {
+  
   if (number_of_stairs == current_steps_count)
     return 1;
 
@@ -34,6 +35,7 @@ size_t find_number_of_combinations(const size_t number_of_stairs,
   if (current_steps_count < number_of_stairs)
     combinations +=
         find_number_of_combinations(number_of_stairs, current_steps_count + 1);
+
   if (current_steps_count < number_of_stairs - 1)
     combinations +=
         find_number_of_combinations(number_of_stairs, current_steps_count + 2);
@@ -50,15 +52,15 @@ size_t StepWalking(const size_t num) {
 int main() {
   // cout << StepWalking(gets(stdin));
   cout << StepWalking(1) << '\n';   // expected output: 1
-  cout << StepWalking(2) << '\n';   // expected output: 3
+  cout << StepWalking(2) << '\n';   // expected output: 2
   cout << StepWalking(3) << '\n';   // expected output: 3
-  cout << StepWalking(4) << '\n';   // expected output: 3
-  cout << StepWalking(5) << '\n';   // expected output: 3
-  cout << StepWalking(6) << '\n';   // expected output: 1
-  cout << StepWalking(7) << '\n';   // expected output: 3
-  cout << StepWalking(8) << '\n';   // expected output: 3
-  cout << StepWalking(9) << '\n';   // expected output: 3
-  cout << StepWalking(10) << '\n';  // expected output: 3
+  cout << StepWalking(4) << '\n';   // expected output: 5
+  cout << StepWalking(5) << '\n';   // expected output: 8
+  cout << StepWalking(6) << '\n';   // expected output: 13
+  cout << StepWalking(7) << '\n';   // expected output: 21
+  cout << StepWalking(8) << '\n';   // expected output: 34
+  cout << StepWalking(9) << '\n';   // expected output: 55
+  cout << StepWalking(10) << '\n';  // expected output: 89
 
   return 0;
 }
