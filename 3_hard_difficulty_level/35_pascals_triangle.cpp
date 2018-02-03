@@ -26,35 +26,105 @@ Output: 5
 
 #include <algorithm>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 using namespace std;
 
+vector<int> generate_next_pascal_triangle_row(
+    const pair<bool, int>& reset_state_to_specific_row = pair<bool, int>{false,
+                                                                         0}) {
+  static int current_row_index{-1};
+  static vector<int> current_row{1};
+
+  if (reset_state_to_specific_row.first) {
+    current_row_index = reset_state_to_specific_row.second;
+
+    if (!current_row_index) {
+      current_row = {1};
+      return current_row;
+    }
+
+    if (1 == current_row_index) {
+      current_row = {1, 1};
+      return current_row;
+    }
+
+    if (2 == current_row_index) {
+      current_row = {1, 2, 1};
+      return current_row;
+    }
+
+    current_row = {1, 2, 1};
+
+    for (int i{3}; i <= current_row_index; i++) {
+      current_row.emplace(begin(current_row), 1);
+
+      for (size_t j{1}; j < current_row.size() - 1; j++) {
+        current_row[j] = current_row[j] + current_row[j + 1];
+      }
+    }
+
+    return current_row;
+  }
+
+  current_row_index++;
+
+  if (!current_row_index) {
+    return current_row;
+  }
+
+  if (1 == current_row_index) {
+    current_row = {1, 1};
+    return current_row;
+  }
+
+  if (2 == current_row_index) {
+    current_row = {1, 2, 1};
+    return current_row;
+  }
+
+  current_row.emplace(begin(current_row), 1);
+
+  for (size_t i{1}, j{1}; i < current_row.size() - 1; i++, j++) {
+    current_row[j] = current_row[i] + current_row[i + 1];
+  }
+
+  return current_row;
+}
+
 vector<vector<int>> generate_pascal_triangle_rows(
     const size_t pascal_row_number) {
-  vector<vector<int>> pascal_triangle{};
+  static vector<vector<int>> current_pascal_triangle{1};
+  static size_t current_pascal_row_number{};
+
+  if (pascal_row_number == current_pascal_row_number)
+    return current_pascal_triangle;
+
+  current_pascal_triangle.clear();
+  current_pascal_row_number = pascal_row_number;
 
   if (!pascal_row_number) {
-    pascal_triangle.emplace_back(vector<int>{1});
-    return pascal_triangle;
+    current_pascal_triangle.emplace_back(vector<int>{1});
+    return current_pascal_triangle;
   }
 
   if (1 == pascal_row_number) {
-    pascal_triangle.emplace_back(vector<int>{1});
-    pascal_triangle.emplace_back(vector<int>{1, 1});
-    return pascal_triangle;
+    current_pascal_triangle.emplace_back(vector<int>{1});
+    current_pascal_triangle.emplace_back(vector<int>{1, 1});
+    return current_pascal_triangle;
   }
 
   if (2 == pascal_row_number) {
-    pascal_triangle.emplace_back(vector<int>{1});
-    pascal_triangle.emplace_back(vector<int>{1, 1});
-    pascal_triangle.emplace_back(vector<int>{1, 2, 1});
-    return pascal_triangle;
+    current_pascal_triangle.emplace_back(vector<int>{1});
+    current_pascal_triangle.emplace_back(vector<int>{1, 1});
+    current_pascal_triangle.emplace_back(vector<int>{1, 2, 1});
+    return current_pascal_triangle;
   }
 
-  pascal_triangle.emplace_back(vector<int>{1});
-  pascal_triangle.emplace_back(vector<int>{1, 1});
-  pascal_triangle.emplace_back(vector<int>{1, 2, 1});
+  current_pascal_triangle.emplace_back(vector<int>{1});
+  current_pascal_triangle.emplace_back(vector<int>{1, 1});
+  current_pascal_triangle.emplace_back(vector<int>{1, 2, 1});
 
   vector<int> prev_pascal_triangle_numbers{1, 2, 1};
   vector<int> next_pascal_triangle_numbers{};
@@ -69,53 +139,42 @@ vector<vector<int>> generate_pascal_triangle_rows(
 
     next_pascal_triangle_numbers.emplace_back(1);
 
-    pascal_triangle.emplace_back(next_pascal_triangle_numbers);
+    current_pascal_triangle.emplace_back(next_pascal_triangle_numbers);
 
     prev_pascal_triangle_numbers.clear();
 
     swap(prev_pascal_triangle_numbers, next_pascal_triangle_numbers);
   }
 
-  return pascal_triangle;
+  return current_pascal_triangle;
 }
 
 int PascalsTriangle(const int* arr, const size_t arr_size) {
-  vector<int> prev_pascal_triangle_numbers{1, 2, 1};
-  vector<int> next_pascal_triangle_numbers{};
+  generate_next_pascal_triangle_row({true, 2});
 
   size_t iter_count{};
 
   while (iter_count < 1000) {
-    next_pascal_triangle_numbers.emplace_back(1);
+    const vector<int> next_pascal_triangle_row{
+        generate_next_pascal_triangle_row()};
 
-    for (size_t i{}; i != prev_pascal_triangle_numbers.size() - 1; i++)
-      next_pascal_triangle_numbers.emplace_back(
-          prev_pascal_triangle_numbers[i] +
-          prev_pascal_triangle_numbers[i + 1]);
-
-    next_pascal_triangle_numbers.emplace_back(1);
-
-    if (arr_size <= next_pascal_triangle_numbers.size()) {
+    if (arr_size <= next_pascal_triangle_row.size()) {
       bool is_found_partial_match{true};
 
       for (size_t i{}; i < arr_size; i++) {
-        if (arr[i] != next_pascal_triangle_numbers[i]) {
+        if (arr[i] != next_pascal_triangle_row[i]) {
           is_found_partial_match = false;
           break;
         }
       }
 
       if (is_found_partial_match) {
-        if (arr_size == next_pascal_triangle_numbers.size())
+        if (arr_size == next_pascal_triangle_row.size())
           return -1;
 
-        return next_pascal_triangle_numbers[arr_size];
+        return next_pascal_triangle_row[arr_size];
       }
     }
-
-    prev_pascal_triangle_numbers.clear();
-
-    swap(prev_pascal_triangle_numbers, next_pascal_triangle_numbers);
 
     iter_count++;
   }
