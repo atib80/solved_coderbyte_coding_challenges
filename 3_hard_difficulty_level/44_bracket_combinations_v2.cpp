@@ -19,81 +19,74 @@ Input:  2
 Output: 2
 */
 
-#include <algorithm>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
-bool is_valid_combinations_of_bracket_pairs(const string& str) {
-  int brackets_balance_count{};
+bool is_valid_combinations_of_bracket_pairs(const string& str)
+{
+	int brackets_balance_count{};
 
-  size_t start{};
+	if (')' == str[0]) return false;	
 
-  while ('(' != str[start]) {
-    if (')' == str[start])
-      return false;
-    start++;
-  }
+	if ('(' == str[str.length() - 1]) return false;
 
-  size_t last{str.length() - 1};
+	for (size_t i{}; i <= str.length(); i++)
+	{
+		if ('(' == str[i]) brackets_balance_count++;
 
-  while (')' != str[last]) {
-    if ('(' == str[last])
-      return false;
-    last--;
-  }
+		else if (')' == str[i])
+		{
+			if (brackets_balance_count <= 0) return false;
 
-  for (size_t i{start}; i <= last; i++) {
-    if ('(' == str[i])
-      brackets_balance_count++;
+			brackets_balance_count--;
+		}
+	}
 
-    else if (')' == str[i]) {
-      if (brackets_balance_count <= 0)
-        return false;
+	if (brackets_balance_count) return false;
 
-      brackets_balance_count--;
-    }
-  }
-
-  if (brackets_balance_count)
-    return false;
-
-  return true;
+	return true;
 }
 
-size_t find_number_of_possible_combinations(const size_t number_of_pairs) {
-  size_t combinations{};
+size_t find_number_of_possible_combinations(const size_t number_of_pairs)
+{
+	size_t combinations{};
 
-  string brackets{string(number_of_pairs, '(') + string(number_of_pairs, ')')};
+	string brackets{string(number_of_pairs, '(') + string(number_of_pairs, ')')};
 
-  sort(begin(brackets), end(brackets));
+	sort(begin(brackets), end(brackets));
 
-  do {
-    if (is_valid_combinations_of_bracket_pairs(brackets))
-      combinations++;
-  } while (next_permutation(begin(brackets), end(brackets)));
+	do
+	{
+		if (is_valid_combinations_of_bracket_pairs(brackets)) combinations++;
+	}
+	while (next_permutation(begin(brackets), end(brackets)));
 
-  return combinations;
+
+	return combinations;
 }
 
-size_t BracketCombinations2(const size_t num) {
-  return find_number_of_possible_combinations(num);
+size_t BracketCombinations2(const size_t num)
+{
+	return find_number_of_possible_combinations(num);
 }
 
-int main() {
-  // cout << BracketCombinations2(gets(stdin));
-  cout << BracketCombinations2(2) << '\n';   // expected output: 2
-  cout << BracketCombinations2(3) << '\n';   // expected output: 5
-  cout << BracketCombinations2(4) << '\n';   // expected output: 14
-  cout << BracketCombinations2(5) << '\n';   // expected output: 42
-  cout << BracketCombinations2(6) << '\n';   // expected output: 132
-  cout << BracketCombinations2(7) << '\n';   // expected output: 429
-  cout << BracketCombinations2(8) << '\n';   // expected output: 1430
-  cout << BracketCombinations2(9) << '\n';   // expected output: 4862
-  cout << BracketCombinations2(10) << '\n';  // expected output: 16796
-  cout << BracketCombinations2(11) << '\n';  // expected output: 58786
-  cout << BracketCombinations2(12) << '\n';  // expected output: 208012
+int main()
+{
+	// cout << BracketCombinations2(gets(stdin));
+	cout << BracketCombinations2(2) << '\n'; // expected output: 2
+	cout << BracketCombinations2(3) << '\n'; // expected output: 5
+	cout << BracketCombinations2(4) << '\n'; // expected output: 14
+	cout << BracketCombinations2(5) << '\n'; // expected output: 42
+	cout << BracketCombinations2(6) << '\n'; // expected output: 132	
+	cout << BracketCombinations2(7) << '\n'; // expected output: 429	
+	cout << BracketCombinations2(8) << '\n'; // expected output: 1430	
+	cout << BracketCombinations2(9) << '\n'; // expected output: 4862	
+	cout << BracketCombinations2(10) << '\n'; // expected output: 16796
+	cout << BracketCombinations2(11) << '\n'; // expected output: 58786
+	cout << BracketCombinations2(12) << '\n'; // expected output: 208012
 
-  return 0;
+	return 0;
 }
