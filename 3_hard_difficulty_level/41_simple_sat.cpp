@@ -97,7 +97,7 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
       string sub_expression_str{expression.substr(
           begin_prnths_pos + 1, end_prnths_pos - (begin_prnths_pos + 1))};
 
-      const int result{
+      const bool result{
           evaluate_boolean_expression_in_parenthesis(move(sub_expression_str))};
 
       sub_expression_results.push_back(result);
