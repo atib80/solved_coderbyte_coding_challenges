@@ -1,5 +1,17 @@
 /*
-Coderbyte coding challenge: Simple SAT
+Coderbyte coding challenge: Simple SAT 
+
+(I must admit, that it is not so simple after all :), 
+although it's not the hardest coding challenge I've faced so far either.
+The solution to this coding challenge is based upon my earlier submitted
+solution for the 'Calculator' coding challenge. This program uses one of 
+'Calculator's most significat functions (evaluate_expression_in_parenthesis) 
+with a few small changes made to its code and a couple of additional
+useful functions added to it to make it work with boolean expressions correctly 
+for this coding challenge.)
+
+
+Problem statement:
 
 Using the C++ language, have the function SimpleSAT(str) read str which will be
 a string consisting of letters, parenthesis, logical operators and tilde's
