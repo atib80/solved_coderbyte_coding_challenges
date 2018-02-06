@@ -7,8 +7,8 @@ and then that will be followed by a comma separated list of its neighboring citi
 For example: strArr may be ["1:[5]", "4:[5]", "3:[5]", "5:[1,4,3,2]", "2:[5,15,7]", "7:[2,8]", "8:[7,38]", "15:[2]", "38:[8]"].
 This graph then looks like the following picture:
 
-		 38
-	     /
+         38
+         /
         8
        /
       7
@@ -139,8 +139,8 @@ vector<string> split(const string& source,
 
 struct node
 {
-	explicit node(const int id = -1, const vector<int>& neighboring_node_ids = {}) :
-		node_id{id}, neighbors{neighboring_node_ids}
+	explicit node(const int id, vector<int>&& neighboring_node_ids) :
+		node_id{id}, neighbors{move(neighboring_node_ids)}
 	{
 	}
 
@@ -189,7 +189,7 @@ map<int, node> create_city_graph_from_input_string_array(string* str_arr, const 
 		auto neighbor_parts = split(parts[1], ",");
 		vector<int> neighbor_ids{};
 		for (const auto& np : neighbor_parts) neighbor_ids.emplace_back(stoi(np));
-		city_graph.insert(make_pair(stoi(parts[0]), node{stoi(parts[0]), neighbor_ids}));
+		city_graph.insert(make_pair(stoi(parts[0]), node{stoi(parts[0]), move(neighbor_ids)}));
 	}
 
 	return city_graph;
