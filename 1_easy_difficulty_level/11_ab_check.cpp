@@ -106,10 +106,8 @@ string ABCheck_v2(string str) {
     if (string::npos == next_char_pos)
       return "false";
 
-    if (prev_char != str[next_char_pos]) {
-      if (next_char_pos - start == 4)
-        return "true";
-    }
+    if ((prev_char != str[next_char_pos]) && (next_char_pos - start == 4)) 
+      return "true";    
 
     start = next_char_pos;
   }
