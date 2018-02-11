@@ -34,5 +34,6 @@ int main() {
   cout << CheckNums(3, 122) << '\n'; // expected output: "true"
   cout << CheckNums(67, 67) << '\n'; // expected output: "-1"
   cout << CheckNums(35, 17) << '\n'; // expected output: "false"
+  
   return 0;  
 }

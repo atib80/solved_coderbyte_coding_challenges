@@ -21,26 +21,28 @@ Output: "false"
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-	if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
+  size_t first{}, last{str_len - 1};
 
-	if (begin_str > end_str) return string{};
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
 
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
+  if (first > last)
+    return string{};
 
-	return str.substr(begin_str, end_str - begin_str + 1);
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
 }
 
 string ex_oh(string str) {

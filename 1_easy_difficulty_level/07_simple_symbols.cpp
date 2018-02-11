@@ -23,10 +23,13 @@ using namespace std;
 
 string trim(const string& str)
 {
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+  
+  const size_t str_len{str.length()};
 
   if (0u == str.length()) return string{};
+
+  size_t begin_str{};
+  size_t end_str{str_len - 1};  
 
   for (; begin_str <= end_str; ++begin_str)
   {
