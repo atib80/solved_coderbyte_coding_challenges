@@ -25,24 +25,16 @@ Output: 1
 using namespace std;
 
 int MeanMode(vector<int> numbers) {
-
   sort(begin(numbers), end(numbers));
 
   const int sum{accumulate(begin(numbers), end(numbers), 0)};
 
-  const int numbers_size{static_cast<int>(numbers.size())};
-
-  const int mean{sum / numbers_size};
+  const int mean = sum / numbers.size();
 
   unordered_map<int, size_t> number_occurrences{};
 
-  for (const int n : numbers) {
-    if (number_occurrences.find(n) != end(number_occurrences)) {
-      number_occurrences[n]++;
-    } else {
-      number_occurrences.insert(make_pair(n, 1u));
-    }
-  }
+  for (const int n : numbers)
+    number_occurrences[n]++;
 
   vector<pair<int, size_t>> number_freq{};
 
@@ -61,7 +53,6 @@ int MeanMode(vector<int> numbers) {
 }
 
 int main() {
-	
   // cout << MeanMode ( move(vector<int>{ gets(stdin) } ) );
   cout << MeanMode(move(vector<int>{5, 3, 3, 3, 1}))
        << '\n';                                          // expected output: 1
