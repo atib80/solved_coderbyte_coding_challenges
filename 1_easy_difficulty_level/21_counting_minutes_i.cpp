@@ -105,17 +105,17 @@ vector<string> split(const string& source,
 string counting_minutes_i(string str) {
   str = trim(str);
 
-  vector<string> times_str = split(str, "-");
+  const vector<string> times_str{split(str, "-")};
 
   if (2u != times_str.size())
     return string{"Not possible!"};
 
-  vector<string> start_times_str = split(times_str[0], ":");
+  const vector<string> start_times_str{split(times_str[0], ":")};
 
   if (2u != start_times_str.size())
     return string{"Not possible!"};
 
-  vector<string> end_times_str = split(times_str[1], ":");
+  const vector<string> end_times_str{split(times_str[1], ":")};
 
   if (2u != end_times_str.size())
     return string{"Not possible!"};
