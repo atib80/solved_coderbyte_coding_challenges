@@ -1,9 +1,12 @@
 /*
 Coderbyte coding challenge: Letter Count I
 
-Using the C++ language, have the function LetterCountI(str) take the str parameter being passed and return the first word with the greatest number of repeated letters. 
-For example: "Today, is the greatest day ever!" should return greatest because it has 2 e's (and 2 t's) and it comes before ever which also has 2 e's. 
-If there are no words with repeating letters return -1. Words will be separated by spaces.
+Using the C++ language, have the function LetterCountI(str) take the str
+parameter being passed and return the first word with the greatest number of
+repeated letters. For example: "Today, is the greatest day ever!" should return
+greatest because it has 2 e's (and 2 t's) and it comes before ever which also
+has 2 e's. If there are no words with repeating letters return -1. Words will be
+separated by spaces.
 
 Sample test cases:
 
@@ -14,40 +17,43 @@ Input:  "No words"
 Output: -1
 */
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <string>
-#include <cctype>
-#include <vector>
 #include <utility>
-#include <algorithm>
+#include <vector>
 
 using namespace std;
 
-string trim(const string& str)
-{
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-  if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-  for (; begin_str <= end_str; ++begin_str)
-  {
-    if (!isspace(str[begin_str])) break;
+  size_t first{}, last{str_len - 1};
+
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
   }
 
-  if (begin_str > end_str) return string{};
+  if (first > last)
+    return string{};
 
-  for (; end_str > begin_str; --end_str)
-  {
-    if (!isspace(str[end_str])) break;
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
   }
 
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return str.substr(first, last - first + 1);
 }
 
-vector<string> split(const string& source, const char* needle, size_t const max_count = string::npos)
-{
-  vector<string> parts{}; 
+vector<string> split(const string& source,
+                     const char* needle,
+                     size_t const max_count = string::npos) {
+  vector<string> parts{};
 
   string needle_st{needle};
 
@@ -55,77 +61,87 @@ vector<string> split(const string& source, const char* needle, size_t const max_
 
   const size_t needle_len{needle_st.size()};
 
-  if ((0u == source_len) || (0u == needle_len)) return parts;
+  if (!source_len)
+    return parts;
+
+  if (!needle_len) {
+    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    for (size_t i{}; i < upper_limit; i++)
+      parts.emplace_back(1, source[i]);
+    return parts;
+  }
 
   size_t number_of_parts{}, prev{};
 
-  while (true)
-  {
-    const size_t current = source.find(needle_st, prev);
+  while (true) {
+    const size_t current{source.find(needle_st, prev)};
 
-    if (string::npos == current) break;
+    if (string::npos == current)
+      break;
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count)) break;
+    if ((string::npos != max_count) && (parts.size() == max_count))
+      break;
 
-    if ((current - prev) > 0) parts.emplace_back(source.substr(prev, current - prev));
+    if ((current - prev) > 0)
+      parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
 
-    if (prev >= source_len) break;
-  } 
+    if (prev >= source_len)
+      break;
+  }
 
-  if (prev < source_len)
-  {
-    
-    if (string::npos == max_count) parts.emplace_back(source.substr(prev));
+  if (prev < source_len) {
+    if (string::npos == max_count)
+      parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count)) parts.emplace_back(source.substr(prev));
+    else if ((string::npos != max_count) && (parts.size() < max_count))
+      parts.emplace_back(source.substr(prev));
   }
 
   return parts;
 }
 
-string LetterCountI(string str) { 
+string LetterCountI(string str) {
+  str = trim(str);
 
-	str = trim(str);
+  const vector<string> words{split(str, " ")};
 
-	vector<string> words = split(str, " ");
+  int current_max_rep_characters{1};
+  string found_word{};
 
-	vector<pair<string, size_t>> word_char_freq{};
+  for (const auto& word : words) {
+    int rep_char_count{};
 
-	for (const auto& word : words) {
+    for (const char ch : word) {
+      const int ch_freq = count(begin(word), end(word), ch);
 
-		size_t rep_char_count{};
+      if (ch_freq > 1)
+        rep_char_count += ch_freq;
+    }
 
-		for (const char ch : word) {
+    if (rep_char_count > current_max_rep_characters) {
+      current_max_rep_characters = rep_char_count;
+      found_word = word;
+    }
+  }
 
-			const size_t ch_freq = count(begin(word), end(word), ch);
+  if (current_max_rep_characters > 1)
+    return found_word;
 
-			if (ch_freq > 1) rep_char_count += ch_freq;
-		}
-
-		word_char_freq.emplace_back(make_pair(word, rep_char_count));
-	}
-
-	stable_sort(begin(word_char_freq), end(word_char_freq), [](const pair<string, size_t>& lhs, const pair<string, size_t>& rhs) {
-
-		return (lhs.second > rhs.second);
-
-	});
-
-	if (word_char_freq[0].second > 1u) return word_char_freq[0].first;
-
-  	return string{"-1"};
-            
+  return "-1";
 }
 
-int main() { 
-  
+int main() {
   // cout << LetterCountI(move(string{gets(stdin)}));
-  cout << LetterCountI(move(string{"Today, is the greatest day ever!"})) << '\n'; // expected output: "greatest"
-  cout << LetterCountI(move(string{"Hello apple pie"})) << '\n'; 			      // expected output: "Hello"
-  cout << LetterCountI(move(string{"No words"})) << '\n';						  // expected output: "-1"
+  cout << LetterCountI(move(string{"Today, is the greatest day ever!"}))
+       << '\n';  // expected output: "greatest"
+  cout << LetterCountI(move(string{"Hello apple pie"}))
+       << '\n';  // expected output: "Hello"
+  cout << LetterCountI(move(string{"No words"}))
+       << '\n';  // expected output: "-1"
+
   return 0;
 }
