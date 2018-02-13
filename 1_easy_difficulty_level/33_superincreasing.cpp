@@ -1,10 +1,13 @@
 /*
 Coderbyte coding challenge: Superincreasing
 
-Using the C++ language, have the function Superincreasing(arr) take the array of numbers stored in arr and determine if the array forms a superincreasing sequence 
-where each element in the array is greater than the sum of all previous elements. The array will only consist of positive integers. 
-For example: if arr is [1, 3, 6, 13, 54] then your program should return the string "true" because it forms a superincreasing sequence. 
-If a superincreasing sequence isn't formed, then your program should return the string "false".
+Using the C++ language, have the function Superincreasing(arr) take the array of
+numbers stored in arr and determine if the array forms a superincreasing
+sequence where each element in the array is greater than the sum of all previous
+elements. The array will only consist of positive integers. For example: if arr
+is [1, 3, 6, 13, 54] then your program should return the string "true" because
+it forms a superincreasing sequence. If a superincreasing sequence isn't formed,
+then your program should return the string "false".
 
 Sample test cases:
 
@@ -22,27 +25,29 @@ Output: "true"
 using namespace std;
 
 string Superincreasing(vector<int> numbers) {
+	if (numbers.empty())
+		return "Not possible!";
 
-	if (numbers.empty()) return string{"Not possible!"};
+	int prev_sum{ numbers[0] };
 
-	int prev_sum{numbers.front()};
+	for (size_t i{1}; i < numbers.size(); i++) {
+		if (numbers[i] <= prev_sum)
+			return "false";
 
-	for (size_t i{1u}; i != numbers.size(); i++) {
-
-		if (numbers[i] <= prev_sum) return string{"false"};
-
-		prev_sum += numbers[i];	
-	
+		prev_sum += numbers[i];
 	}
 
-	return string{"true"};
+	return "true";
 }
 
 int main() {
-
 	// cout << Superincreasing(move(vector<int>{gets(stdin)}));
-	cout << Superincreasing(move(vector<int>{1, 3, 6, 13, 54})) << '\n'; // expected output: "true"
-	cout << Superincreasing(move(vector<int>{1,2,3,4})) << '\n';         // expected output: "false"
-	cout << Superincreasing(move(vector<int>{1,2,5,10})) << '\n';        // expected output: "true"
+	cout << Superincreasing(move(vector<int>{1, 3, 6, 13, 54}))
+		<< '\n';  // expected output: "true"
+	cout << Superincreasing(move(vector<int>{1, 2, 3, 4}))
+		<< '\n';  // expected output: "false"
+	cout << Superincreasing(move(vector<int>{1, 2, 5, 10}))
+		<< '\n';  // expected output: "true"
+
 	return 0;
 }
