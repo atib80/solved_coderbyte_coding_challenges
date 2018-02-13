@@ -18,11 +18,9 @@ Input:  "(0 0)","(1 0)","(1 1)","(0 1)"
 Output: 1
 */
 
-#include <cmath>
 #include <functional>
 #include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
