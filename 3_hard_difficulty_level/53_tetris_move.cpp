@@ -36,6 +36,7 @@ Input:  "O", "4", "3", "2", "3", "5", "1", "0", "1", "2", "4", "3", "4"
 Output: 0
 */
 
+#include <conio.h>
 #include <algorithm>
 #include <cctype>
 #include <iostream>
@@ -75,91 +76,139 @@ enum class tetris_game_item { I, J, L, O, S, T, Z };
 
 enum class tetris_game_item_angle { angle_0, angle_90, angle_180, angle_270 };
 
-const vector<vector<tetris>>& generate_tetris_brick(
+tetris_game_item get_correct_tetris_game_piece(const char letter) {
+  static string game_item_letters{"IJLOSTZ"};
+  static random_device rd{};
+  static mt19937 rand_engine{rd()};
+  static auto game_item_distr =
+      uniform_int_distribution<size_t>(0, game_item_letters.length() - 1);
+
+  switch (letter) {
+    case 'i':
+    case 'I':
+      return tetris_game_item::I;
+
+    case 'j':
+    case 'J':
+      return tetris_game_item::J;
+
+    case 'l':
+    case 'L':
+      return tetris_game_item::L;
+
+    case 'o':
+    case 'O':
+      return tetris_game_item::O;
+
+    case 's':
+    case 'S':
+      return tetris_game_item::S;
+
+    case 't':
+    case 'T':
+      return tetris_game_item::T;
+
+    case 'z':
+    case 'Z':
+      return tetris_game_item::Z;
+
+    default:
+      return get_correct_tetris_game_piece(
+          game_item_letters[game_item_distr(rand_engine)]);
+  }
+}
+
+tetris_game_item_angle get_correct_tetris_game_piece_rotation_angle(
+    const int rotation_angle_index) {
+  static random_device rd{};
+  static mt19937 rand_engine{rd()};
+  static auto game_piece_angle_distr = uniform_int_distribution<int>(0, 3);
+
+  switch (rotation_angle_index) {
+    case 0:
+      return tetris_game_item_angle::angle_0;
+
+    case 1:
+      return tetris_game_item_angle::angle_90;
+
+    case 2:
+      return tetris_game_item_angle::angle_180;
+
+    case 3:
+      return tetris_game_item_angle::angle_270;
+
+    default:
+      return get_correct_tetris_game_piece_rotation_angle(
+          game_piece_angle_distr(rand_engine));
+  }
+}
+
+vector<vector<tetris>> generate_tetris_brick(
     const tetris_game_item& game_item_type,
     const tetris_game_item_angle& orientation_angle =
         tetris_game_item_angle::angle_0) {
-  static tetris_game_item last_game_item_type{tetris_game_item::I};
-  static tetris_game_item_angle last_game_item_angle{
-      tetris_game_item_angle::angle_0};
-  static vector<vector<tetris>> last_game_item{
-      {tetris::brick, tetris::brick, tetris::brick, tetris::brick}};
-
-  if ((game_item_type == last_game_item_type) &&
-      (orientation_angle == last_game_item_angle))
-    return last_game_item;
-
-  last_game_item_type = game_item_type;
-  last_game_item_angle = orientation_angle;
+  static string game_item_letters{"IJLOSTZ"};
+  static random_device rd{};
+  static mt19937 rand_engine{rd()};
+  static auto game_piece_distr =
+      uniform_int_distribution<size_t>(0, game_item_letters.length() - 1);
+  static auto game_piece_angle_distr = uniform_int_distribution<int>(0, 3);
 
   switch (game_item_type) {
     case tetris_game_item::I:
       switch (orientation_angle) {
         case tetris_game_item_angle::angle_0:
         case tetris_game_item_angle::angle_180:
-          last_game_item = {
-              {tetris::brick, tetris::brick, tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::brick, tetris::brick, tetris::brick}};
 
         case tetris_game_item_angle::angle_90:
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::brick},
-                            {tetris::brick},
-                            {tetris::brick},
-                            {tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick},
+                  {tetris::brick},
+                  {tetris::brick},
+                  {tetris::brick}};
       }
 
     case tetris_game_item::J:
       switch (orientation_angle) {
         case tetris_game_item_angle::angle_0:
-          last_game_item = {{tetris::brick, tetris::brick, tetris::brick},
-                            {tetris::empty, tetris::empty, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::brick, tetris::brick},
+                  {tetris::empty, tetris::empty, tetris::brick}};
 
         case tetris_game_item_angle::angle_90:
-          last_game_item = {{tetris::brick, tetris::brick},
-                            {tetris::brick, tetris::empty},
-                            {tetris::brick, tetris::empty}};
-
-          return last_game_item;
+          return {{tetris::brick, tetris::brick},
+                  {tetris::brick, tetris::empty},
+                  {tetris::brick, tetris::empty}};
 
         case tetris_game_item_angle::angle_180:
-          last_game_item = {{tetris::brick, tetris::empty, tetris::empty},
-                            {tetris::brick, tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::empty, tetris::empty},
+                  {tetris::brick, tetris::brick, tetris::brick}};
 
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::empty, tetris::brick},
-                            {tetris::empty, tetris::brick},
-                            {tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::empty, tetris::brick},
+                  {tetris::empty, tetris::brick},
+                  {tetris::brick, tetris::brick}};
       }
 
     case tetris_game_item::L:
       switch (orientation_angle) {
         case tetris_game_item_angle::angle_0:
-          last_game_item = {{tetris::empty, tetris::empty, tetris::brick},
-                            {tetris::brick, tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::empty, tetris::empty, tetris::brick},
+                  {tetris::brick, tetris::brick, tetris::brick}};
 
         case tetris_game_item_angle::angle_90:
-          last_game_item = {{tetris::brick, tetris::brick},
-                            {tetris::empty, tetris::brick},
-                            {tetris::empty, tetris::brick}};
-
-          return last_game_item;
+          return {{tetris::brick, tetris::brick},
+                  {tetris::empty, tetris::brick},
+                  {tetris::empty, tetris::brick}};
 
         case tetris_game_item_angle::angle_180:
-          last_game_item = {{tetris::brick, tetris::brick, tetris::brick},
-                            {tetris::brick, tetris::empty, tetris::empty}};
-          return last_game_item;
+          return {{tetris::brick, tetris::brick, tetris::brick},
+                  {tetris::brick, tetris::empty, tetris::empty}};
 
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::brick, tetris::empty},
-                            {tetris::brick, tetris::empty},
-                            {tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::empty},
+                  {tetris::brick, tetris::empty},
+                  {tetris::brick, tetris::brick}};
       }
 
     case tetris_game_item::O:
@@ -169,50 +218,43 @@ const vector<vector<tetris>>& generate_tetris_brick(
         case tetris_game_item_angle::angle_90:
         case tetris_game_item_angle::angle_180:
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::brick, tetris::brick},
-                            {tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::brick},
+                  {tetris::brick, tetris::brick}};
       }
 
     case tetris_game_item::S:
       switch (orientation_angle) {
         case tetris_game_item_angle::angle_0:
         case tetris_game_item_angle::angle_180:
-          last_game_item = {{tetris::empty, tetris::brick, tetris::brick},
-                            {tetris::brick, tetris::brick, tetris::empty}};
-          return last_game_item;
+          return {{tetris::empty, tetris::brick, tetris::brick},
+                  {tetris::brick, tetris::brick, tetris::empty}};
 
         case tetris_game_item_angle::angle_90:
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::brick, tetris::empty},
-                            {tetris::brick, tetris::brick},
-                            {tetris::empty, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::empty},
+                  {tetris::brick, tetris::brick},
+                  {tetris::empty, tetris::brick}};
       }
 
     case tetris_game_item::T:
       switch (orientation_angle) {
         case tetris_game_item_angle::angle_0:
-          last_game_item = {{tetris::brick, tetris::brick, tetris::brick},
-                            {tetris::empty, tetris::brick, tetris::empty}};
-          return last_game_item;
+          return {{tetris::brick, tetris::brick, tetris::brick},
+                  {tetris::empty, tetris::brick, tetris::empty}};
 
         case tetris_game_item_angle::angle_90:
-          last_game_item = {{tetris::brick, tetris::empty},
-                            {tetris::brick, tetris::brick},
-                            {tetris::brick, tetris::empty}};
-          return last_game_item;
+          return {{tetris::brick, tetris::empty},
+                  {tetris::brick, tetris::brick},
+                  {tetris::brick, tetris::empty}};
 
         case tetris_game_item_angle::angle_180:
-          last_game_item = {{tetris::empty, tetris::brick, tetris::empty},
-                            {tetris::brick, tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::empty, tetris::brick, tetris::empty},
+                  {tetris::brick, tetris::brick, tetris::brick}};
 
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::empty, tetris::brick},
-                            {tetris::brick, tetris::brick},
-                            {tetris::empty, tetris::brick}};
-          return last_game_item;
+          return {{tetris::empty, tetris::brick},
+                  {tetris::brick, tetris::brick},
+                  {tetris::empty, tetris::brick}};
       }
 
     case tetris_game_item::Z:
@@ -220,40 +262,36 @@ const vector<vector<tetris>>& generate_tetris_brick(
       switch (orientation_angle) {
         case tetris_game_item_angle::angle_0:
         case tetris_game_item_angle::angle_180:
-          last_game_item = {{tetris::brick, tetris::brick, tetris::empty},
-                            {tetris::empty, tetris::brick, tetris::brick}};
-          return last_game_item;
+          return {{tetris::brick, tetris::brick, tetris::empty},
+                  {tetris::empty, tetris::brick, tetris::brick}};
 
         case tetris_game_item_angle::angle_90:
         case tetris_game_item_angle::angle_270:
-          last_game_item = {{tetris::empty, tetris::brick},
-                            {tetris::brick, tetris::brick},
-                            {tetris::brick, tetris::empty}};
-          return last_game_item;
+          return {{tetris::empty, tetris::brick},
+                  {tetris::brick, tetris::brick},
+                  {tetris::brick, tetris::empty}};
       }
 
     default:
-      return last_game_item;
+      const auto game_piece_type = get_correct_tetris_game_piece(
+          game_item_letters[game_piece_distr(rand_engine)]);
+      const auto game_piece_rotation_angle =
+          get_correct_tetris_game_piece_rotation_angle(
+              game_piece_angle_distr(rand_engine));
+      return generate_tetris_brick(game_piece_type, game_piece_rotation_angle);
   }
 }
 
-const vector<vector<vector<tetris>>>&
+vector<vector<vector<tetris>>>
 generate_all_possible_states_for_specified_game_item(
     const tetris_game_item& game_item_type) {
-  static vector<vector<vector<tetris>>> game_item_states{
-      {generate_tetris_brick(tetris_game_item::I,
-                             tetris_game_item_angle::angle_0)},
-      {generate_tetris_brick(tetris_game_item::I,
-                             tetris_game_item_angle::angle_90)}};
+  static string game_item_letters{"IJLOSTZ"};
+  static random_device rd{};
+  static mt19937 rand_engine{rd()};
+  static auto game_piece_distr =
+      uniform_int_distribution<size_t>(0, game_item_letters.length() - 1);
 
-  static tetris_game_item last_game_item_type{tetris_game_item::I};
-
-  if (game_item_type == last_game_item_type)
-    return game_item_states;
-
-  last_game_item_type = game_item_type;
-
-  game_item_states.clear();
+  vector<vector<vector<tetris>>> game_item_states{};
 
   switch (game_item_type) {
     case tetris_game_item::I:
@@ -316,7 +354,11 @@ generate_all_possible_states_for_specified_game_item(
       return game_item_states;
 
     default:
-      return game_item_states;
+      const auto randomly_picked_game_piece_type =
+          get_correct_tetris_game_piece(
+              game_item_letters[game_piece_distr(rand_engine)]);
+      return generate_all_possible_states_for_specified_game_item(
+          randomly_picked_game_piece_type);
   }
 }
 
@@ -340,63 +382,21 @@ vector<vector<tetris>> create_tetris_game_board_from_input_string_array(
   return game_board;
 }
 
-tetris_game_item get_correct_tetris_game_item(const char letter) {
-  static string game_item_letters{"IJLOSTZ"};
-  static random_device rd{};
-  static mt19937 rand_engine{rd()};
-  static auto game_item_distr =
-      uniform_int_distribution<size_t>(0, game_item_letters.length() - 1);
-
-  switch (letter) {
-    case 'i':
-    case 'I':
-      return tetris_game_item::I;
-
-    case 'j':
-    case 'J':
-      return tetris_game_item::J;
-
-    case 'l':
-    case 'L':
-      return tetris_game_item::L;
-
-    case 'o':
-    case 'O':
-      return tetris_game_item::O;
-
-    case 's':
-    case 'S':
-      return tetris_game_item::S;
-
-    case 't':
-    case 'T':
-      return tetris_game_item::T;
-
-    case 'z':
-    case 'Z':
-      return tetris_game_item::Z;
-
-    default:
-      return get_correct_tetris_game_item(
-          game_item_letters[game_item_distr(rand_engine)]);
-  }
-}
-
 void print_game_board(const vector<vector<tetris>>& game_board) {
   size_t start_row{};
 
   for (; start_row < game_board.size(); start_row++) {
-    if (0 != count(begin(game_board[start_row]), end(game_board[start_row]),
-                   tetris::game_piece))
-      break;
-    if (0 != count(begin(game_board[start_row]), end(game_board[start_row]),
-                   tetris::brick))
+    if (end(game_board[start_row]) !=
+        find_if(begin(game_board[start_row]), end(game_board[start_row]),
+                [](const tetris& game_item) {
+                  return (game_item == tetris::brick ||
+                          game_item == tetris::game_piece);
+                }))
       break;
   }
 
   const string empty_line(game_board[0].size(), ' ');
 
-  printf("\n|%s|", empty_line.c_str());
   printf("\n|%s|\n", empty_line.c_str());
 
   for (size_t x{start_row}; x < game_board.size(); x++) {
@@ -409,8 +409,9 @@ void print_game_board(const vector<vector<tetris>>& game_board) {
     printf("|\n");
   }
 
-  printf("Press ENTER to continue...");
-  cin.get();
+  printf("Press any key to continue...");
+  // cin.get();
+  (void)_getch();
 }
 
 void add_coordinate_pair_to_list_of_temporarily_filled_fields(
@@ -454,7 +455,7 @@ size_t count_number_of_completed_lines_on_game_board(
 
 size_t find_max_number_of_lines_for_current_game_item_position(
     vector<vector<tetris>>& game_board,
-    const vector<int>& column_fill_heights,
+    const vector<int>& column_fill_levels,
     const vector<vector<tetris>>& game_item_state) {
   size_t max_lines_count{};
 
@@ -468,7 +469,7 @@ size_t find_max_number_of_lines_for_current_game_item_position(
   for (int y{}; y + game_item_width <= game_board_width; y++) {
     bool is_placement_done{};
 
-    int row_index{column_fill_heights[y] - 1};
+    int row_index{column_fill_levels[y] - 1};
 
     for (; (!is_placement_done && (row_index >= game_item_height - 1));
          row_index--) {
@@ -515,20 +516,30 @@ size_t find_max_number_of_lines_for_current_game_item_position(
   return max_lines_count;
 }
 
-size_t calculate_greatest_number_of_completed_lines(
-    const vector<vector<tetris>>& game_board,
-    const tetris_game_item& game_item) {
+vector<int> find_current_fill_levels_for_all_columns_of_tetris_game_board(
+    const vector<vector<tetris>>& game_board) {
   const int game_board_width{static_cast<int>(game_board[0].size())};
   const int game_board_height{static_cast<int>(game_board.size())};
-  vector<int> column_fill_heights(game_board_width, game_board_height);
+
+  vector<int> column_fill_levels(game_board_width, game_board_height);
 
   for (int x{}; x < game_board_height; x++) {
     for (int y{}; y < game_board_width; y++) {
       if ((tetris::brick == game_board[x][y]) &&
-          (game_board_height == column_fill_heights[y]))
-        column_fill_heights[y] = x;
+          (game_board_height == column_fill_levels[y]))
+        column_fill_levels[y] = x;
     }
   }
+
+  return column_fill_levels;
+}
+
+size_t calculate_greatest_number_of_completed_lines(
+    const vector<vector<tetris>>& game_board,
+    const tetris_game_item& game_item) {
+  const vector<int> column_fill_levels{
+      find_current_fill_levels_for_all_columns_of_tetris_game_board(
+          game_board)};
 
   const auto& game_item_states =
       generate_all_possible_states_for_specified_game_item(game_item);
@@ -540,7 +551,7 @@ size_t calculate_greatest_number_of_completed_lines(
   for (const auto& game_item_state : game_item_states) {
     const size_t current_number_of_max_lines{
         find_max_number_of_lines_for_current_game_item_position(
-            board, column_fill_heights, game_item_state)};
+            board, column_fill_levels, game_item_state)};
     if (current_number_of_max_lines > max_number_of_lines)
       max_number_of_lines = current_number_of_max_lines;
   }
@@ -551,7 +562,8 @@ size_t calculate_greatest_number_of_completed_lines(
 string TetrisMove(string* str_arr, const size_t str_arr_size) {
   *str_arr = trim(*str_arr);
 
-  const tetris_game_item game_item{get_correct_tetris_game_item(str_arr[0][0])};
+  const tetris_game_item game_item{
+      get_correct_tetris_game_piece(str_arr[0][0])};
 
   const vector<vector<tetris>> game_board{
       create_tetris_game_board_from_input_string_array(str_arr + 1,
@@ -562,7 +574,6 @@ string TetrisMove(string* str_arr, const size_t str_arr_size) {
 }
 
 int main() {
-    
   // string A[] = gets(stdin);
   // cout << TetrisMove(A, sizeof(A)/sizeof(*A));
   string B[] = {"L", "3", "4", "4", "5", "6", "2",
