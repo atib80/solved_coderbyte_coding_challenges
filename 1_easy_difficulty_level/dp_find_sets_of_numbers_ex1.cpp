@@ -1,7 +1,7 @@
 /*
-Dynamic programming related coding challenge: 
+Dynamic programming related coding challenge:
 
-Find the max. number of subsets of numbers in the given input array of whole numbers that add up 
+Find the max. number of subsets of numbers in the given input array of whole numbers that add up
 to the given sum value specified as the first number in the input array.
 
 Sample test cases:
@@ -19,39 +19,41 @@ Output: 2
 using namespace std;
 
 string trim(const string& str) {
-  const size_t str_len{str.length()};
+	const size_t str_len{ str.length() };
 
-  if (!str_len)
-    return string{};
+	if (!str_len)
+		return string{};
 
-  size_t first{}, last{str_len - 1};
+	size_t first{}, last{ str_len - 1 };
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
+	for (; first <= last; ++first) {
+		if (!isspace(str[first]))
+			break;
+	}
 
-  if (first > last)
-    return string{};
+	if (first > last)
+		return string{};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
+	for (; last > first; --last) {
+		if (!isspace(str[last]))
+			break;
+	}
 
-  return str.substr(first, last - first + 1);
+	return str.substr(first, last - first + 1);
 }
 
-size_t find_number_of_subsets(int argc, char** argv) {
+size_t find_number_of_subsets(const char** str_arr, const size_t str_arr_size) {
 
-	if (argc < 3) return 0;	
+	const int sum{ stoi(trim(string{ str_arr[0] })) };
 
-	const int sum { stoi(trim(string{argv[1]})) };
+	if (1 == str_arr_size || 0 == sum) return 1;
+
+	if ((2 == str_arr_size) && (str_arr[0] == str_arr[1])) return 1;
 
 	vector<int> numbers{};
 
-	for (int i{2}; i < argc; i++) {
-		numbers.emplace_back(stoi(trim(string{argv[i]})));
+	for (size_t i{ 1 }; i < str_arr_size; i++) {
+		numbers.emplace_back(stoi(trim(string{ str_arr[i] })));
 	}
 
 	sort(begin(numbers), end(numbers), [](const int ln, const int rn) {
@@ -64,14 +66,16 @@ size_t find_number_of_subsets(int argc, char** argv) {
 
 		int current_sum{};
 		bool is_continue_search{};
-		
-		for (size_t j{i}; j < numbers.size(); j++) {
+
+		for (size_t j{ i }; j < numbers.size(); j++) {
 
 			if (current_sum + numbers[j] == sum) {
 				number_of_subsets++;
 				is_continue_search = true;
 				continue;
-			} else if (current_sum + numbers[j] > sum) {
+			}
+			
+			if (current_sum + numbers[j] > sum) {
 				is_continue_search = true;
 				continue;
 			}
@@ -86,10 +90,12 @@ size_t find_number_of_subsets(int argc, char** argv) {
 	return number_of_subsets;
 }
 
-int main(int argc, char** argv) {	
-
-	cout << find_number_of_subsets(argc, argv) << '\n';
+int main() {
+	
+	const char* arr1[] = { "13", "1", "3", "2", "5", "6", "7", "8", "4" };
+	cout << find_number_of_subsets(arr1, sizeof(arr1) / sizeof(*arr1)) << '\n'; // expected output: 6
+	const char* arr2[] = { "16", "2", "4", "6", "10" };
+	cout << find_number_of_subsets(arr2, sizeof(arr2) / sizeof(*arr2)) << '\n'; // expected output: 2
 
 	return 0;
-
 }

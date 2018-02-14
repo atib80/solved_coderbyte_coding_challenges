@@ -2,5 +2,4 @@
 @echo off
 pushd build
 cl ..\%1 -nologo -W4 -Fetest -EHsc -O2 -Ot -Ox -Ob2 -Oy -Oi
-.\test.exe
 popd

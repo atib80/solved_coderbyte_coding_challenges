@@ -541,8 +541,8 @@ size_t calculate_greatest_number_of_completed_lines(
       find_current_fill_levels_for_all_columns_of_tetris_game_board(
           game_board)};
 
-  const auto& game_item_states =
-      generate_all_possible_states_for_specified_game_item(game_item);
+  const vector<vector<vector<tetris>>> game_item_states{
+      generate_all_possible_states_for_specified_game_item(game_item)};
 
   size_t max_number_of_lines{};
 
