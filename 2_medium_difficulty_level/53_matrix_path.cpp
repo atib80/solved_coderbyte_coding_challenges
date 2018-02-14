@@ -47,26 +47,27 @@ Output: "not possible"
 using namespace std;
 
 string trim(const string& str) {
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+  const size_t str_len{str.length()};
 
-  if (0u == str.length())
+  if (!str_len)
     return string{};
 
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
+  size_t first{}, last{str_len - 1};
+
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
       break;
   }
 
-  if (begin_str > end_str)
+  if (first > last)
     return string{};
 
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
       break;
   }
 
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return str.substr(first, last - first + 1);
 }
 
 bool is_matrix_path_connected(vector<vector<bool>>& matrix,
@@ -169,9 +170,7 @@ string MatrixPath(string* str_arr, const size_t str_arr_size) {
         "leftmost (0,0) and/or rightmost (row_size - 1, col_size - 1) "
         "cells have false values!");
 
-  vector<vector<bool>> m{matrix};
-
-  if (is_matrix_path_connected(m, 0u, 0u, row_size, col_size))
+  if (is_matrix_path_connected(matrix, 0u, 0u, row_size, col_size))
     return string{"true"};
 
   const size_t possible_connections_count{
