@@ -124,12 +124,10 @@ size_t find_connected_paths_in_matrix(vector<vector<bool>>& matrix,
 
   for (size_t i{}; i != row_size; i++) {
     for (size_t j{}; j != col_size; j++) {
-
-      // matrix[0][0] and matrix[row_size - 1][col_size - 1] cells should already be set to true
-      // for a connected path to exist between them
+      // matrix[0][0] and matrix[row_size - 1][col_size - 1] cells should
+      // already be set to true for a connected path to exist between them
 
       if (!matrix[i][j]) {
-
         matrix[i][j] = true;
 
         if (is_matrix_path_connected(matrix, 0, 0, row_size, col_size))
@@ -145,7 +143,7 @@ size_t find_connected_paths_in_matrix(vector<vector<bool>>& matrix,
 
 string MatrixPath(string* str_arr, const size_t str_arr_size) {
   if (!str_arr || str_arr_size < 1)
-    return string{"not possible"};
+    return "not possible";
 
   vector<vector<bool>> matrix(str_arr_size, vector<bool>{});
 
@@ -170,14 +168,14 @@ string MatrixPath(string* str_arr, const size_t str_arr_size) {
         "leftmost (0,0) and/or rightmost (row_size - 1, col_size - 1) "
         "cells have false values!");
 
-  if (is_matrix_path_connected(matrix, 0u, 0u, row_size, col_size))
-    return string{"true"};
+  if (is_matrix_path_connected(matrix, 0, 0, row_size, col_size))
+    return "true";
 
   const size_t possible_connections_count{
       find_connected_paths_in_matrix(matrix, row_size, col_size)};
 
   if (!possible_connections_count)
-    return string{"not possible"};
+    return "not possible";
 
   return to_string(possible_connections_count);
 }
