@@ -2,7 +2,7 @@
 Coderbyte coding challenge: Third Greatest
 
 Using the C++ language, have the function ThirdGreatest(strArr) take the array
-of strings stored in strArr and return the third largest word within in. So for
+of strings stored in strArr and return the third largest word within it. So for
 example: if strArr is ["hello", "world", "before", "all"] your output should be
 world because "before" is 6 letters long, and "hello" and "world" are both 5,
 but the output should be world because it appeared as the last 5 letter word in

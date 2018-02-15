@@ -14,12 +14,39 @@ Input:  "Sup DUDE!!?"
 Output: "sUP dude!!?"
 */
 
+#include <cctype>
 #include <iostream>
 #include <string>
 
 using namespace std;
 
+string trim(const string& str) {
+  const size_t str_len{str.length()};
+
+  if (!str_len)
+    return string{};
+
+  size_t first{}, last{str_len - 1};
+
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
+
+  if (first > last)
+    return string{};
+
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
+}
+
 string swap_case(string str) {
+  str = trim(str);
+
   for (auto& ch : str) {
     if ((ch >= 'A') && (ch <= 'Z'))
       ch += ('a' - 'A');

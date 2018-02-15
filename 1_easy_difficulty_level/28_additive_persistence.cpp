@@ -18,13 +18,16 @@ Output: 2
 
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
 int AdditivePersistence(int num) {
+  num = abs(num);
+
   size_t iter{};
 
-  while (num > 9 || num < -9) {
+  while (num > 9) {
     iter++;
 
     const string num_str{to_string(num)};

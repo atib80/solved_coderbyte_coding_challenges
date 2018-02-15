@@ -63,10 +63,7 @@ string NumberAddition(string str) {
     const size_t end_digit{
         str.find_first_not_of("0123456789", start_digit + 1)};
 
-    if (string::npos == end_digit)
-    // if there's a number at the end of string 'str' then end_digit will 
-    // be assigned string::npos because str's last character is number's last digit
-    {
+    if (string::npos == end_digit) {
       sum += stoul(str.substr(start_digit));
 
       return to_string(sum);

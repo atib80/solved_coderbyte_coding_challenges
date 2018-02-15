@@ -19,6 +19,7 @@ Input:  "4","E","1","E","2","E","3","E"
 Output: "4,1,2,3"
 */
 
+#include <cctype>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -27,11 +28,36 @@ Output: "4,1,2,3"
 
 using namespace std;
 
+string trim(const string& str) {
+  const size_t str_len{str.length()};
+
+  if (!str_len)
+    return string{};
+
+  size_t first{}, last{str_len - 1};
+
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
+
+  if (first > last)
+    return string{};
+
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
+}
+
 string OffLineMinimum(vector<string> str_arr) {
   multiset<long> numbers{};
   vector<long> extracted_numbers{};
 
-  for (const auto& item : str_arr) {
+  for (auto& item : str_arr) {
+    item = trim(item);
 
     if ((item == "E") && (!numbers.empty())) {
       extracted_numbers.emplace_back(*begin(numbers));

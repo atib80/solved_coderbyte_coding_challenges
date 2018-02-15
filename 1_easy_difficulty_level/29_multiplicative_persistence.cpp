@@ -19,10 +19,14 @@ Output: 2
 
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
 int MultiplicativePersistence(int num) {
+  
+  num = abs(num);
+
   size_t iter{};
 
   while (num > 9) {
