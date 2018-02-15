@@ -102,28 +102,29 @@ vector<string> split(const string& source,
   return parts;
 }
 
+// input: "1:00pm-11:00am"
 string counting_minutes_i(string str) {
   str = trim(str);
 
   const vector<string> times_str{split(str, "-")};
 
-  if (2u != times_str.size())
-    return string{"Not possible!"};
+  if (2 != times_str.size())
+    return "Not possible!";
 
   const vector<string> start_times_str{split(times_str[0], ":")};
 
-  if (2u != start_times_str.size())
-    return string{"Not possible!"};
+  if (2 != start_times_str.size())
+    return "Not possible!";
 
   const vector<string> end_times_str{split(times_str[1], ":")};
 
-  if (2u != end_times_str.size())
-    return string{"Not possible!"};
+  if (2 != end_times_str.size())
+    return "Not possible!";
 
   const size_t am_pm_start_char{start_times_str[1].find_first_of("ap")};
 
   if (string::npos == am_pm_start_char)
-    return string{"Not possible!"};
+    return "Not possible!";
 
   const string start_time_am_pm_str{
       start_times_str[1].substr(am_pm_start_char, 2)};
@@ -136,7 +137,7 @@ string counting_minutes_i(string str) {
   const size_t am_pm_end_char{end_times_str[1].find_first_of("ap")};
 
   if (string::npos == am_pm_end_char)
-    return string{"Not possible!"};
+    return "Not possible!";
 
   const string end_time_am_pm_str{end_times_str[1].substr(am_pm_end_char, 2)};
 

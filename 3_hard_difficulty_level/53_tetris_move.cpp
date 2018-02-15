@@ -36,9 +36,9 @@ Input:  "O", "4", "3", "2", "3", "5", "1", "0", "1", "2", "4", "3", "4"
 Output: 0
 */
 
-#include <conio.h>
 #include <algorithm>
 #include <cctype>
+#include <conio.h>
 #include <iostream>
 #include <random>
 #include <string>

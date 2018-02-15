@@ -31,29 +31,29 @@ int MeanMode(vector<int> numbers) {
 
   const int mean = sum / numbers.size();
 
-  unordered_map<int, size_t> number_occurrences{};
+  unordered_map<int, size_t> number_frequency{};
 
   for (const int n : numbers)
-    number_occurrences[n]++;
+    number_frequency[n]++;
 
-  vector<pair<int, size_t>> number_freq{};
+  vector<pair<int, size_t>> number_frequency_sorted{};
 
-  for (const auto& no : number_occurrences)
-    number_freq.emplace_back(no);
+  for (const auto& nf : number_frequency)
+    number_frequency_sorted.emplace_back(nf);
 
-  sort(begin(number_freq), end(number_freq),
+  sort(begin(number_frequency_sorted), end(number_frequency_sorted),
        [](const pair<int, size_t>& l, const pair<int, size_t>& r) {
          return (l.second > r.second);
        });
 
-  if (mean == number_freq[0].first)
+  if (mean == number_frequency_sorted[0].first)
     return 1;
 
   return 0;
 }
 
 int main() {
-  // cout << MeanMode ( move(vector<int>{ gets(stdin) } ) );
+  // cout << MeanMode(move(vector<int>{gets(stdin)}));
   cout << MeanMode(move(vector<int>{5, 3, 3, 3, 1}))
        << '\n';                                          // expected output: 1
   cout << MeanMode(move(vector<int>{1, 2, 3})) << '\n';  // expected output: 0

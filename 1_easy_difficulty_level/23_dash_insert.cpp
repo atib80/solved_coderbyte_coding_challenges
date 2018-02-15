@@ -49,14 +49,14 @@ string DashInsert(string str) {
 
   const size_t str_len{str.length()};
 
-  if (str_len < 2u)
+  if (str_len < 2)
     return str;
 
   string result(1, str.front());
   result.reserve(2 * str_len);  // 2 * str_len - 1
   bool is_prev_odd{str[0] % 2 == 1};
 
-  for (size_t i{1u}; i < str_len; i++) {
+  for (size_t i{1}; i < str_len; i++) {
     if (is_prev_odd && (str[i] % 2 == 1)) {
       result.push_back('-');
       result.push_back(str[i]);

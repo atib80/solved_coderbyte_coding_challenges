@@ -1,5 +1,11 @@
 @rem Simple build script for compiling and building simple C++ source code files
 @echo off
 pushd build
-cl ..\%1 -nologo -W4 -Fetest -EHsc -O2 -Ot -Ox -Ob2 -Oy -Oi
+echo.
+echo Building %* using MS VC++ compiler...
+cl ..\%* -nologo -W4 -Fe%~n1 -EHsc -O2 -Ot -Ox -Ob2 -Oy -Oi
+echo.
+echo Running %~n1.exe...
+echo. 
+.\%~n1.exe
 popd
