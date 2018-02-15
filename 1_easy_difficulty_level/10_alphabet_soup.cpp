@@ -30,7 +30,7 @@ string AlphabetSoup(string str) {
 int main() { 
 
   // cout << AlphabetSoup(move(string{gets(stdin)}));
-  cout << AlphabetSoup(move(string{"hello"})) << '\n';    // expected output: ehllo
+  cout << AlphabetSoup(move(string{"hello"})) << '\n';     // expected output: ehllo
   cout << AlphabetSoup(move(string{"coderbyte"})) << '\n'; // expected output: bcdeeorty
   cout << AlphabetSoup(move(string{"hooplah"})) << '\n';   // expected output: ahhloop
   

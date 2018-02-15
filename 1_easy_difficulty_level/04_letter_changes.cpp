@@ -22,23 +22,27 @@ Output: "gvO Ujnft!"
 
 using namespace std;
 
-string trim(const string& str)
+string trim(const string& str) 
 {
+  const size_t str_len{str.length()};
+  
+  if (!str_len)
+    return string{};
+
   size_t begin_str{};
-  size_t end_str{str.size() - 1};
+  size_t end_str{str_len - 1};
 
-  if (0u == str.length()) return string{};
-
-  for (; begin_str <= end_str; ++begin_str)
-  {
-    if (!isspace(str[begin_str])) break;
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str]))
+      break;
   }
 
-  if (begin_str > end_str) return string{};
+  if (begin_str > end_str)
+    return string{};
 
-  for (; end_str > begin_str; --end_str)
-  {
-    if (!isspace(str[end_str])) break;
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str]))
+      break;
   }
 
   return str.substr(begin_str, end_str - begin_str + 1);
@@ -78,5 +82,6 @@ int main() {
   cout << LetterChanges(move(string{gets(stdin)}));
   // cout << LetterChanges(move(string{"hello*3"})) << '\n';    // expected output: "Ifmmp*3"
   // cout << LetterChanges(move(string{"fun times!"})) << '\n'; // expected output: "gvO Ujnft!"
+
   return 0;    
 }

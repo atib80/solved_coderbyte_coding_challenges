@@ -13,6 +13,7 @@ Input:  "I Love Code"
 Output: "edoC evoL I"
 */
 
+#include <cctype>
 #include <iostream>
 #include <string>
 #include <algorithm>
@@ -20,21 +21,52 @@ Output: "edoC evoL I"
 
 using namespace std;
 
+string trim(const string& str) 
+{
+  const size_t str_len{str.length()};
+  
+  if (!str_len)
+    return string{};
+
+  size_t begin_str{};
+  size_t end_str{str_len - 1};
+
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str]))
+      break;
+  }
+
+  if (begin_str > end_str)
+    return string{};
+
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str]))
+      break;
+  }
+
+  return str.substr(begin_str, end_str - begin_str + 1);
+}
+
 string FirstReverse(string str) {
+
+  str = trim(str);
 
   const size_t str_len { str.length() };
 
   if (str_len < 2u) return str;
 
-  for (size_t i{}; i != str_len / 2; i++) {
+  for (size_t i{}; i < str_len / 2; i++) {
   	swap(str[i], str[str_len - 1 - i]);
   }
 
-  // we can also make use of the handy std::reverse(BidirIt first, BidirIt last) template function from the <algorithm> header.
-  // reverse(begin(str), end(str));
-  
-  return str; 
-            
+  return str;            
+}
+
+string FirstReverse_v2(string str) {
+
+  reverse(begin(str), end(str));
+
+  return str;  
 }
 
 int main() { 

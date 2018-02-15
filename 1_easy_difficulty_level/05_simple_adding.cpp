@@ -35,5 +35,6 @@ int main() {
   cout << SimpleAdding(4) << '\n';   // expected output: 10
   cout << SimpleAdding(12) << '\n';  // expected output: 78
   cout << SimpleAdding(140) << '\n'; // expected output: 9870
+  
   return 0;    
 }

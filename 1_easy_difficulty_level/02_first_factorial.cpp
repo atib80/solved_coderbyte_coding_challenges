@@ -24,8 +24,6 @@ int64_t FirstFactorial(int64_t num) {
    
   if (num < 3LL) return num;
 
-  // return num * FirstFactorial(num - 1);
-
   int64_t result{num};
 
   while (num > 2) result *= --num;
@@ -34,18 +32,26 @@ int64_t FirstFactorial(int64_t num) {
 
 }
 
+int64_t FirstFactorial_v2(const int64_t num) {
+
+  if (num < 2LL) return 1LL;
+   
+  return num * FirstFactorial(num - 1);
+
+}
+
 int main() { 
 
   // cout << FirstFactorial(gets(stdin));
-  cout << FirstFactorial(0) << '\n';
-  cout << FirstFactorial(1) << '\n';
-  cout << FirstFactorial(2) << '\n';
-  cout << FirstFactorial(3) << '\n';
-  cout << FirstFactorial(4) << '\n';
-  cout << FirstFactorial(5) << '\n';
-  cout << FirstFactorial(6) << '\n';
-  cout << FirstFactorial(7) << '\n';
-  cout << FirstFactorial(8) << '\n';
+  cout << FirstFactorial_v2(0) << '\n';
+  cout << FirstFactorial_v2(1) << '\n';
+  cout << FirstFactorial_v2(2) << '\n';
+  cout << FirstFactorial_v2(3) << '\n';
+  cout << FirstFactorial_v2(4) << '\n';
+  cout << FirstFactorial_v2(5) << '\n';
+  cout << FirstFactorial_v2(6) << '\n';
+  cout << FirstFactorial_v2(7) << '\n';
+  cout << FirstFactorial_v2(8) << '\n';
   
   return 0;    
 }

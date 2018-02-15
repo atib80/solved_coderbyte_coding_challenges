@@ -21,10 +21,11 @@ Output: "love"
 
 using namespace std;
 
-string trim(const string& str) {
+string trim(const string& str) 
+{
   const size_t str_len{str.length()};
-
-  if (0u == str.length())
+  
+  if (!str_len)
     return string{};
 
   size_t begin_str{};
