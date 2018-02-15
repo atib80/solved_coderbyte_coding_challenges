@@ -42,12 +42,14 @@ string array_addition_1(const int* arr, const size_t arr_size) {
     int current_sum{};
 
     for (size_t i{}; i < numbers.size(); i++) {
-      if (current_sum + numbers[i] == max_number)
-        return "true";
-      if (no_negative_numbers && (current_sum + numbers[i] > max_number))
-        break;
       current_sum += numbers[i];
+
+      if (max_number == current_sum)
+        return "true";
+      if (no_negative_numbers && (current_sum > max_number))
+        break;
     }
+
   } while (next_permutation(begin(numbers), end(numbers)));
 
   return "false";
