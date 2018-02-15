@@ -109,7 +109,7 @@ string LetterCountI(string str) {
 
   const vector<string> words{split(str, " ")};
 
-  int current_max_rep_characters{1};
+  int max_rep_characters{1};
   string found_word{};
 
   for (const auto& word : words) {
@@ -122,13 +122,13 @@ string LetterCountI(string str) {
         rep_char_count += ch_freq;
     }
 
-    if (rep_char_count > current_max_rep_characters) {
-      current_max_rep_characters = rep_char_count;
+    if (rep_char_count > max_rep_characters) {
+      max_rep_characters = rep_char_count;
       found_word = word;
     }
   }
 
-  if (current_max_rep_characters > 1)
+  if (max_rep_characters > 1)
     return found_word;
 
   return "-1";

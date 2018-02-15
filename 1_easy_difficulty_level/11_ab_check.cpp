@@ -26,7 +26,7 @@ using namespace std;
 string trim(const string& str) {
   const size_t str_len{str.length()};
 
-  if (0u == str.length())
+  if (!str_len)
     return string{};
 
   size_t begin_str{};
@@ -87,7 +87,7 @@ string ABCheck_v1(string str) {
     }
   }
 
-  return string{"false"};
+  return "false";
 }
 
 string ABCheck_v2(string str) {
@@ -106,8 +106,8 @@ string ABCheck_v2(string str) {
     if (string::npos == next_char_pos)
       return "false";
 
-    if ((prev_char != str[next_char_pos]) && (next_char_pos - start == 4)) 
-      return "true";    
+    if ((prev_char != str[next_char_pos]) && (next_char_pos - start == 4))
+      return "true";
 
     start = next_char_pos;
   }

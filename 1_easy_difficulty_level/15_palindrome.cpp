@@ -77,7 +77,7 @@ string palindrome_v2(string str) {
 
   const size_t str_len{str.length()};
 
-  if (str_len < 2u)
+  if (str_len < 2)
     return "false";
 
   for (size_t i{}, j{str_len - 1}; i < j; i++, j--) {

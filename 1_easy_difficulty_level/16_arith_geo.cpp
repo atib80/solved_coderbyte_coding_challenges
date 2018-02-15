@@ -26,7 +26,7 @@ Output: "-1"
 using namespace std;
 
 string ArithGeo(const int* arr, const size_t arr_size) {
-  if (arr_size < 2u)
+  if (arr_size < 2)
     return "-1";
 
   const int diff{arr[1] - arr[0]};
@@ -35,7 +35,7 @@ string ArithGeo(const int* arr, const size_t arr_size) {
   bool is_arithmetic{true};
   bool is_geometric{true};
 
-  for (size_t i{1u}; (i < arr_size && (is_arithmetic || is_geometric)); i++) {
+  for (size_t i{1}; (i < arr_size && (is_arithmetic || is_geometric)); i++) {
     if (is_arithmetic && (diff != (arr[i] - arr[i - 1]))) {
       is_arithmetic = false;
     }

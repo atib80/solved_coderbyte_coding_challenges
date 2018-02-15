@@ -28,22 +28,23 @@ string trim(const string& str) {
   if (!str_len)
     return string{};
 
-  size_t first{}, last{str_len - 1};
+  size_t begin_str{};
+  size_t end_str{str_len - 1};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str]))
       break;
   }
 
-  if (first > last)
+  if (begin_str > end_str)
     return string{};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str]))
       break;
   }
 
-  return str.substr(first, last - first + 1);
+  return str.substr(begin_str, end_str - begin_str + 1);
 }
 
 vector<string> split(const string& source,
@@ -103,7 +104,7 @@ vector<string> split(const string& source,
 string word_count(string str) {
   str = trim(str);
 
-  const vector<string> words = split(str, " ");
+  const vector<string> words{split(str, " ")};
 
   return to_string(words.size());
 }

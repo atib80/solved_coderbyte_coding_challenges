@@ -24,18 +24,23 @@ Output: "true"
 
 using namespace std;
 
-bool find_sum_of_numbers_equal_max_number(const vector<int>& numbers,
-                                          const size_t start_index,
-                                          const int current_sum = 0) {
+bool find_sum_of_numbers_equal_max_number(
+    const vector<int>& numbers,
+    const size_t start_index,
+    const bool no_negative_numbers = false const int current_sum = 0) {
+
   if (numbers[0] == current_sum)
     return true;
 
-  if (start_index >= numbers.size())
+  if (no_negative_numbers && (current_sum > numbers[0]))
+    return false;
+
+  if (start_index == numbers.size())
     return false;
 
   for (size_t i{start_index}; i < numbers.size(); i++) {
-    if (find_sum_of_numbers_equal_max_number(numbers, i + 1,
-                                             current_sum + numbers[i]))
+    if (find_sum_of_numbers_equal_max_number(
+            numbers, i + 1, no_negative_numbers, current_sum + numbers[i]))
       return true;
   }
 
@@ -43,6 +48,7 @@ bool find_sum_of_numbers_equal_max_number(const vector<int>& numbers,
 }
 
 string array_addition_1(const int* arr, const size_t arr_size) {
+	
   if (arr_size < 2)
     return string{"false"};
 
@@ -51,7 +57,11 @@ string array_addition_1(const int* arr, const size_t arr_size) {
   sort(begin(numbers), end(numbers),
        [](const int lhs, const int rhs) { return (lhs > rhs); });
 
-  if (find_sum_of_numbers_equal_max_number(numbers, 1))
+  const bool no_negative_numbers{end(numbers) ==
+                                 find_if(begin(numbers), end(numbers),
+                                         [](const int& n) { return (n < 0); })};
+
+  if (find_sum_of_numbers_equal_max_number(numbers, 1, no_negative_numbers, 0))
     return "true";
 
   return "false";
