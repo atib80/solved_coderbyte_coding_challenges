@@ -55,6 +55,6 @@ int main() {
        << '\n';  // expected output: -1
   cout << ChangingSequence(move(vector<int>{5, 4, 3, 2, 10, 11}))
        << '\n';  // expected output: 3
-       
+
   return 0;
 }

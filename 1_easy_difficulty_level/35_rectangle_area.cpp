@@ -133,7 +133,7 @@ pair<int, int> parse_x_y_coordinate_pair(const string& str) {
 }
 
 string RectangleArea(vector<string> xy_coordinate_pairs) {
-  if (xy_coordinate_pairs.size() != 4u)
+  if (4 != xy_coordinate_pairs.size())
     return "Not possible!";
 
   vector<pair<int, int>> coordinates{};
@@ -150,7 +150,7 @@ string RectangleArea(vector<string> xy_coordinate_pairs) {
     y_coordinates.insert(xy_pair.second);
   }
 
-  if (1u == x_coordinates.size() || 1u == y_coordinates.size())
+  if (2 != x_coordinates.size() || 2 != y_coordinates.size())
     return "0";
 
   const auto first_x = begin(x_coordinates);

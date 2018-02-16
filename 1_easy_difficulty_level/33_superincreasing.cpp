@@ -25,29 +25,29 @@ Output: "true"
 using namespace std;
 
 string Superincreasing(vector<int> numbers) {
-	if (numbers.empty())
-		return "Not possible!";
+  if (numbers.empty())
+    return "Not possible!";
 
-	int prev_sum{ numbers[0] };
+  int prev_sum{numbers[0]};
 
-	for (size_t i{1}; i < numbers.size(); i++) {
-		if (numbers[i] <= prev_sum)
-			return "false";
+  for (size_t i{1}; i < numbers.size(); i++) {
+    if (numbers[i] <= prev_sum)
+      return "false";
 
-		prev_sum += numbers[i];
-	}
+    prev_sum += numbers[i];
+  }
 
-	return "true";
+  return "true";
 }
 
 int main() {
-	// cout << Superincreasing(move(vector<int>{gets(stdin)}));
-	cout << Superincreasing(move(vector<int>{1, 3, 6, 13, 54}))
-		<< '\n';  // expected output: "true"
-	cout << Superincreasing(move(vector<int>{1, 2, 3, 4}))
-		<< '\n';  // expected output: "false"
-	cout << Superincreasing(move(vector<int>{1, 2, 5, 10}))
-		<< '\n';  // expected output: "true"
+  // cout << Superincreasing(move(vector<int>{gets(stdin)}));
+  cout << Superincreasing(move(vector<int>{1, 3, 6, 13, 54}))
+       << '\n';  // expected output: "true"
+  cout << Superincreasing(move(vector<int>{1, 2, 3, 4}))
+       << '\n';  // expected output: "false"
+  cout << Superincreasing(move(vector<int>{1, 2, 5, 10}))
+       << '\n';  // expected output: "true"
 
-	return 0;
+  return 0;
 }
