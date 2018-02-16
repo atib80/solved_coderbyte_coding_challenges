@@ -62,14 +62,14 @@ bool find_correct_path(vector<vector<int>>& maze,
                        const size_t y,
                        string& path,
                        const size_t current_path_index) {
-  maze[x][y] = -1;
-
   if ((x == maze.size() - 1) && (y == maze[x].size() - 1) &&
       (current_path_index == path.length()))
     return true;
 
-  if (current_path_index >= path.length())
+  if (current_path_index == path.length())
     return false;
+
+  maze[x][y] = -1;
 
   if (('u' == path[current_path_index]) && (x > 0) && (-1 != maze[x - 1][y]) &&
       find_correct_path(maze, x - 1, y, path, current_path_index + 1))
@@ -158,5 +158,4 @@ int main() {
        << '\n';  // expected output: "rdrdruurdddldr"
 
   return 0;
-
 }

@@ -59,7 +59,7 @@ string convert_to_bin_string(int number) {
       bin_str.push_back('1');
     else
       bin_str.push_back('0');
-    number /= 2;
+    number >>= 1;
     i++;
   }
 
