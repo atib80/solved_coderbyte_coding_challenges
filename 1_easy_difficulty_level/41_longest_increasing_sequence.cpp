@@ -23,12 +23,15 @@ Output: 7
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 void find_longest_increasing_sequence_length(
     const int* arr,
     const size_t arr_size,
     const size_t pos,
     size_t& max_lis_length,
     const size_t current_lis_length = 1) {
+
   if (current_lis_length + arr_size - pos <= max_lis_length)
     return;
 
@@ -42,9 +45,8 @@ void find_longest_increasing_sequence_length(
     max_lis_length = current_lis_length;
 }
 
-using namespace std;
-
 size_t LongestIncreasingSequence_v1(const int* arr, const size_t arr_size) {
+
   size_t max_list_length{1};
 
   find_longest_increasing_sequence_length(arr, arr_size, 0, max_list_length);
