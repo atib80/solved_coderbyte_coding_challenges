@@ -21,7 +21,9 @@ Output: 7
 */
 
 #include <iostream>
+#include <stack>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
@@ -31,7 +33,6 @@ void find_longest_increasing_sequence_length(
     const size_t pos,
     size_t& max_lis_length,
     const size_t current_lis_length = 1) {
-
   if (current_lis_length + arr_size - pos <= max_lis_length)
     return;
 
@@ -46,7 +47,6 @@ void find_longest_increasing_sequence_length(
 }
 
 size_t LongestIncreasingSequence_v1(const int* arr, const size_t arr_size) {
-
   size_t max_list_length{1};
 
   find_longest_increasing_sequence_length(arr, arr_size, 0, max_list_length);
@@ -54,29 +54,103 @@ size_t LongestIncreasingSequence_v1(const int* arr, const size_t arr_size) {
   return max_list_length;
 }
 
+size_t LongestIncreasingSequence_v2(const int* arr, const size_t arr_size) {
+  size_t max_lis_length{1};
+
+  unordered_set<size_t> ignore_array_indices{};
+
+  bool repeat_search;
+
+  do {
+    repeat_search = false;
+
+    for (size_t i{}; i < arr_size - 1; i++) {
+      if (ignore_array_indices.count(arr[i]))
+        continue;
+
+      int prev_number{arr[i]};
+      size_t prev_number_index{i};
+      size_t current_lis_length{1};
+
+      stack<size_t> last_visited_indices{};
+
+      for (size_t j{i + 1}; j < arr_size; j++) {
+        if (!ignore_array_indices.count(j) && (arr[j] > prev_number)) {
+          current_lis_length++;
+          prev_number = arr[j];
+          prev_number_index = j;
+          if (prev_number_index < arr_size - 1) {
+            last_visited_indices.emplace(prev_number_index);
+          }
+        }
+      }
+
+      if (1 == current_lis_length)
+        return max_lis_length;
+
+      if (current_lis_length > max_lis_length)
+        max_lis_length = current_lis_length;
+
+      if (prev_number_index < arr_size - 1) {
+        ignore_array_indices.insert(prev_number_index);
+        repeat_search = true;
+        break;
+      }
+
+      unordered_set<size_t> visited_array_indices{};
+
+      while (!last_visited_indices.empty()) {
+        const size_t last_visited_index{last_visited_indices.top()};
+        visited_array_indices.insert(last_visited_index);
+        last_visited_indices.pop();
+
+        prev_number = arr[i];
+        current_lis_length = 1;
+
+        for (size_t j{i + 1}; j < arr_size; j++) {
+          if (!ignore_array_indices.count(j) &&
+              !visited_array_indices.count(j) && (arr[j] > prev_number)) {
+            current_lis_length++;
+            prev_number = arr[j];
+          }
+        }
+
+        if (current_lis_length > max_lis_length)
+          max_lis_length = current_lis_length;
+      }
+
+      if ((arr_size - 1 - i) <= max_lis_length)
+        break;
+    }
+  } while (repeat_search);
+
+  return max_lis_length;
+}
+
 int main() {
   // const int A[] = gets(stdin);
   // cout << LongestIncreasingSequence(A, sizeof(A)/sizeof(*A));
+
   const int B[] = {4, 3, 5, 1, 6};
-  cout << LongestIncreasingSequence_v1(B, sizeof(B) / sizeof(*B))
+  cout << LongestIncreasingSequence_v2(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 3
   const int C[] = {9, 9, 4, 2};
-  cout << LongestIncreasingSequence_v1(C, sizeof(C) / sizeof(*C))
+  cout << LongestIncreasingSequence_v2(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 1
   const int D[] = {10, 22, 9, 33, 21, 50, 41, 60, 22, 68, 90};
-  cout << LongestIncreasingSequence_v1(D, sizeof(D) / sizeof(*D))
+  cout << LongestIncreasingSequence_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 7
   const int E[] = {2, 4, 3, 5, 1, 7, 6, 9, 8};
-  cout << LongestIncreasingSequence_v1(E, sizeof(E) / sizeof(*E))
+  cout << LongestIncreasingSequence_v2(E, sizeof(E) / sizeof(*E))
        << '\n';  // expected output: 5
   const int F[] = {10, 22, 9, 33, 21, 50, 41, 60};
-  cout << LongestIncreasingSequence_v1(F, sizeof(F) / sizeof(*F))
+  cout << LongestIncreasingSequence_v2(F, sizeof(F) / sizeof(*F))
        << '\n';  // expected output: 5
   const int G[] = {10, 12, 4, 6, 100, 2, 56, 34, 79};
-  cout << LongestIncreasingSequence_v1(G, sizeof(G) / sizeof(*G))
+  cout << LongestIncreasingSequence_v2(G, sizeof(G) / sizeof(*G))
        << '\n';  // expected output: 4
   const int H[] = {10, 12, 4, 6, 100, 2, 56, 34, 79, 45, 33, 12, 45, 67, 89};
-  cout << LongestIncreasingSequence_v1(H, sizeof(H) / sizeof(*H))
+  cout << LongestIncreasingSequence_v2(H, sizeof(H) / sizeof(*H))
        << '\n';  // expected output: 6
 
   return 0;
