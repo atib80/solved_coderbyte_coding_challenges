@@ -156,7 +156,8 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
         prev_number = numbers[j].first;
         prev_number_index = numbers[j].second;
         current_lis_length++;
-      } else if (numbers[j].second > numbers[i].second) {
+      } else if ((numbers[j].first > numbers[i].first) &&
+                 (numbers[j].second > numbers[i].second)) {
         overlooked_indices.insert(numbers[j].second);
       }
     }
