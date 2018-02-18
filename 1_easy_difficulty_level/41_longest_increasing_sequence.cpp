@@ -145,7 +145,7 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
 
   set<size_t> overlooked_indices{};
 
-  for (size_t i{}; i < arr_size - 1; i++) {
+  for (size_t i{}; i < numbers.size() - 1; i++) {
     int prev_number{numbers[i].first};
     size_t prev_number_index{numbers[i].second};
     size_t current_lis_length{1};
@@ -203,7 +203,7 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
 
 int main() {
   // const int A[] = gets(stdin);
-  // cout << LongestIncreasingSequence(A, sizeof(A)/sizeof(*A));
+  // cout << LongestIncreasingSequence_v3(A, sizeof(A)/sizeof(*A));
 
   const int B[] = {4, 3, 5, 1, 6};
   cout << LongestIncreasingSequence_v3(B, sizeof(B) / sizeof(*B))
