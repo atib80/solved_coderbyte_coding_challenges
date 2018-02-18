@@ -88,18 +88,14 @@ string EvenPairs(string str) {
         return "true";
 
       return "false";
-
-    } else {
-      const string num_str{str.substr(start, last - start)};
-
-      if (check_if_num_str_consists_of_two_even_numbers(num_str))
-        return "true";
     }
+    const string num_str{str.substr(start, last - start)};
+
+    if (check_if_num_str_consists_of_two_even_numbers(num_str))
+      return "true";
 
     start = last;
   }
-
-  return "false";
 }
 
 int main() {

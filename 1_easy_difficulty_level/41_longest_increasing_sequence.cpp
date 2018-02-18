@@ -150,7 +150,7 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
     size_t prev_number_index{numbers[i].second};
     size_t current_lis_length{1};
 
-    for (size_t j{i + 1}; j < arr_size; j++) {
+    for (size_t j{i + 1}; j < numbers.size(); j++) {
       if ((numbers[j].first > prev_number) &&
           (numbers[j].second > prev_number_index)) {
         prev_number = numbers[j].first;

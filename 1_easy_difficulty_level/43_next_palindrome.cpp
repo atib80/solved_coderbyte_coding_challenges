@@ -16,6 +16,7 @@ Output: 181
 */
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -33,16 +34,17 @@ bool is_next_number_palindrome(const string& num_str) {
 }
 
 int NextPalindrome(int num) {
-  if ((num >= -10) && (num < 9))
-    return (num + 1);
+  num = abs(num);
+
+  if (num < 9)
+    return num + 1;
 
   string num_str{};
 
   do {
     num++;
 
-    num_str = to_string(abs(num));
-
+    num_str = to_string(num);
   } while (!is_next_number_palindrome(num_str));
 
   return num;
@@ -50,8 +52,9 @@ int NextPalindrome(int num) {
 
 int main() {
   // cout << NextPalindrome(gets(stdin));
-  cout << NextPalindrome(24) << '\n';   // 33
-  cout << NextPalindrome(2) << '\n';    // 3
-  cout << NextPalindrome(180) << '\n';  // 181
+  cout << NextPalindrome(24) << '\n';   // expected output: 33
+  cout << NextPalindrome(2) << '\n';    // expected output: 3
+  cout << NextPalindrome(180) << '\n';  // expected output: 181
+
   return 0;
 }
