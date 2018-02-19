@@ -21,7 +21,6 @@ Output: "01011"
 #include <cctype>
 #include <iostream>
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -49,7 +48,7 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
-string BitwiseOne(string* binary_numbers, const size_t str_arr_size) {
+string BitwiseOne_v1(string* binary_numbers, const size_t str_arr_size) {
   if (str_arr_size < 2)
     return "Not possible!";
 
@@ -69,17 +68,45 @@ string BitwiseOne(string* binary_numbers, const size_t str_arr_size) {
   return result;
 }
 
+string BitwiseOne_v2(const string* binary_numbers, const size_t str_arr_size) {
+  if (str_arr_size < 2)
+    return "Not possible!";
+
+  if (binary_numbers[0].length() != binary_numbers[1].length())
+    return "Not possible!";
+
+  int result{stoi(binary_numbers[0], nullptr, 2) |
+             stoi(binary_numbers[1], nullptr, 2)};
+
+  string result_str{};
+
+  while (result) {
+    if (result % 2 == 1)
+      result_str.insert(begin(result_str), '1');
+    else
+      result_str.insert(begin(result_str), '0');
+
+    result /= 2;
+  }
+
+  result_str.insert(begin(result_str),
+                    binary_numbers[0].length() - result_str.length(), '0');
+
+  return result_str;
+}
+
 int main() {
+
   // const string str_arr1[] = gets(stdin);
-  // cout << BitwiseOne(str_arr1, sizeof(str_arr1)/sizeof(*str_arr1));
+  // cout << BitwiseOne_v2(str_arr1, sizeof(str_arr1)/sizeof(*str_arr1));
   string str_arr2[] = {"1001", "0100"};
-  cout << BitwiseOne(str_arr2, sizeof(str_arr2) / sizeof(*str_arr2))
+  cout << BitwiseOne_v2(str_arr2, sizeof(str_arr2) / sizeof(*str_arr2))
        << '\n';  // expected output: "1101"
   string str_arr3[] = {"100", "000"};
-  cout << BitwiseOne(str_arr3, sizeof(str_arr3) / sizeof(*str_arr3))
+  cout << BitwiseOne_v2(str_arr3, sizeof(str_arr3) / sizeof(*str_arr3))
        << '\n';  // expected output: "100"
   string str_arr4[] = {"00011", "01010"};
-  cout << BitwiseOne(str_arr4, sizeof(str_arr4) / sizeof(*str_arr4))
+  cout << BitwiseOne_v2(str_arr4, sizeof(str_arr4) / sizeof(*str_arr4))
        << '\n';  // expected output: "01011"
 
   return 0;
