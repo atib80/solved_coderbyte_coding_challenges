@@ -131,18 +131,13 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
 
   unordered_map<int, size_t> numbers_freq{};
 
-  for (size_t i{1}; i < arr_size; i++) {
-    if (numbers_freq.find(arr[i]) == end(numbers_freq))
-      numbers_freq.insert(make_pair(arr[i], 1));
-    else
-      numbers_freq[arr[i]]++;
-  }
+  for (size_t i{1}; i < arr_size; i++)
+    numbers_freq[arr[i]]++;
 
   ostringstream oss{};
 
   for (size_t i{1}; i < arr_size; i++) {
-    if (numbers_freq.find(arr[i]) == end(numbers_freq) ||
-        !numbers_freq.find(arr[i])->second)
+    if (!numbers_freq.find(arr[i])->second)
       continue;
 
     numbers_freq[arr[i]]--;
@@ -169,6 +164,7 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
 }
 
 int main() {
+
   // const int A[] = gets(stdin);
   // cout << TwoSum_v3(A, sizeof(A)/sizeof(*A));
   const int b[] = {7, 3, 5, 2, -4, 8, 11};
