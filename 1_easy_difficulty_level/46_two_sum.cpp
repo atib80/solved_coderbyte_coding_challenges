@@ -22,9 +22,9 @@ Output: "6,1 4,3"
 
 #include <algorithm>
 #include <iostream>
-#include <set>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -58,6 +58,9 @@ int binary_search(const vector<int>& sorted,
                   int low,
                   int high,
                   const int search) {
+  if (sorted.empty() || low == high)
+    return -1;
+
   unordered_set<int> prev_indices{};
 
   while (low <= high) {
@@ -88,26 +91,24 @@ string TwoSum_v2(const int* arr, const size_t arr_size) {
 
   ostringstream oss{};
 
-  unordered_set<int> skip_numbers{};
-
   for (size_t i{1}; i < arr_size; i++) {
-    if (skip_numbers.find(arr[i]) != end(skip_numbers))
+    const int left_number_index{
+        binary_search(sorted_numbers, 0, sorted_numbers.size(), arr[i])};
+
+    if (-1 == left_number_index)
       continue;
 
-    skip_numbers.insert(arr[i]);
+    sorted_numbers.erase(begin(sorted_numbers) + left_number_index);
 
     const int search_value{target_num - arr[i]};
 
-    if (search_value == arr[i])
-      continue;
-
-    const int index{
+    const int right_number_index{
         binary_search(sorted_numbers, 0, sorted_numbers.size(), search_value)};
 
-    if (-1 == index)
+    if (-1 == right_number_index)
       continue;
 
-    skip_numbers.insert(search_value);
+    sorted_numbers.erase(begin(sorted_numbers) + right_number_index);
 
     oss << arr[i] << ',' << search_value << ' ';
   }
@@ -128,18 +129,31 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
 
   const int target_num{arr[0]};
 
-  set<int> sorted_numbers(arr + 1, arr + arr_size);
+  unordered_map<int, size_t> numbers_freq{};
+
+  for (size_t i{1}; i < arr_size; i++) {
+    if (numbers_freq.find(arr[i]) == end(numbers_freq))
+      numbers_freq.insert(make_pair(arr[i], 1));
+    else
+      numbers_freq[arr[i]]++;
+  }
 
   ostringstream oss{};
 
   for (size_t i{1}; i < arr_size; i++) {
-    const int search_value{target_num - arr[i]};
-
-    if (search_value == arr[i] || !sorted_numbers.count(search_value))
+    if (numbers_freq.find(arr[i]) == end(numbers_freq) ||
+        !numbers_freq.find(arr[i])->second)
       continue;
 
-    sorted_numbers.erase(arr[i]);
-    sorted_numbers.erase(search_value);
+    numbers_freq[arr[i]]--;
+
+    const int search_value{target_num - arr[i]};
+
+    if (numbers_freq.find(search_value) == end(numbers_freq) ||
+        !numbers_freq.find(search_value)->second)
+      continue;
+
+    numbers_freq[search_value]--;
 
     oss << arr[i] << ',' << search_value << ' ';
   }
