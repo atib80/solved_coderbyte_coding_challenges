@@ -26,7 +26,7 @@ using namespace std;
 
 string array_addition_1(const int* arr, const size_t arr_size) {
   if (arr_size < 2)
-    return string{"false"};
+    return "false";
 
   vector<int> numbers(arr, arr + arr_size);
 

@@ -27,8 +27,8 @@ using namespace std;
 bool find_sum_of_numbers_equal_max_number(
     const vector<int>& numbers,
     const size_t start_index,
-    const bool no_negative_numbers = false, const int current_sum = 0) {
-
+    const bool no_negative_numbers = false,
+    const int current_sum = 0) {
   if (numbers[0] == current_sum)
     return true;
 
@@ -48,7 +48,6 @@ bool find_sum_of_numbers_equal_max_number(
 }
 
 string array_addition_1(const int* arr, const size_t arr_size) {
-
   if (arr_size < 2)
     return string{"false"};
 
