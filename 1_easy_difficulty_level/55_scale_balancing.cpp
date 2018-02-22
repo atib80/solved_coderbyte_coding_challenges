@@ -124,7 +124,6 @@ string get_needed_weights_string(const size_t first_weight,
 
   if (first_weight < second_weight) {
     oss << first_weight << ',' << second_weight;
-
   } else {
     oss << second_weight << ',' << first_weight;
   }
@@ -191,23 +190,29 @@ string ScaleBalancing(string* str_arr, const size_t array_size) {
     return to_string(*found_needed_weight);
   }
 
-  int first_weight{};
+  auto last_weight_iter = end(available_weights_in_desc_order);
+  --last_weight_iter;
 
   for (auto start = begin(available_weights_in_desc_order);
-       start != end(available_weights_in_desc_order); ++start) {
-    if (*start > needed_extra_weight)
-      continue;
+       start != last_weight_iter; ++start) {
+    int first_weight{};
 
-    const int current_weight{*start};
+    for (auto next = start; next != end(available_weights_in_desc_order);
+         ++next) {
+      if (*next > needed_extra_weight)
+        continue;
 
-    if (!first_weight) {
-      first_weight = current_weight;
+      const int current_weight{*next};
 
-      continue;
-    }
+      if (!first_weight) {
+        first_weight = current_weight;
 
-    if (first_weight + current_weight == needed_extra_weight) {
-      return get_needed_weights_string(first_weight, current_weight);
+        continue;
+      }
+
+      if (first_weight + current_weight == needed_extra_weight) {
+        return get_needed_weights_string(first_weight, current_weight);
+      }
     }
   }
 
