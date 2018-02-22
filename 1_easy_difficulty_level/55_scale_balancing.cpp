@@ -118,8 +118,8 @@ vector<string> split(const string& source,
   return parts;
 }
 
-string get_needed_weights_string(const size_t first_weight,
-                                 const size_t second_weight) {
+string get_needed_weights_string(const int first_weight,
+                                 const int second_weight)* {
   ostringstream oss{};
 
   if (first_weight < second_weight) {
