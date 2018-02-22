@@ -1,5 +1,5 @@
 /*
-Coderbyte coding challenge: Correct Path v2
+Coderbyte coding challenge: Correct Path
 
 Using the C++ language, have the function CorrectPath(str) read the str
 parameter being passed, which will represent the movements made in a 5x5 grid of
@@ -26,6 +26,8 @@ Input:  "drdr??rrddd?"
 Output: "drdruurrdddd"
 */
 
+#include <algorithm>
+#include <array>
 #include <cctype>
 #include <iostream>
 #include <string>
@@ -33,117 +35,102 @@ Output: "drdruurrdddd"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (!str_len)
-    return string{};
-
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
-}
-
-bool find_correct_path(vector<vector<int>>& maze,
-                       const size_t x,
-                       const size_t y,
-                       string& path,
-                       const size_t current_path_index) {
-  if ((x == maze.size() - 1) && (y == maze[x].size() - 1) &&
-      (current_path_index == path.length()))
-    return true;
-
-  if (current_path_index == path.length())
-    return false;
-
-  maze[x][y] = -1;
-
-  if (('u' == path[current_path_index]) && (x > 0) && (-1 != maze[x - 1][y]) &&
-      find_correct_path(maze, x - 1, y, path, current_path_index + 1))
-    return true;
-
-  if (('d' == path[current_path_index]) && (x < maze.size() - 1) &&
-      (-1 != maze[x + 1][y]) &&
-      find_correct_path(maze, x + 1, y, path, current_path_index + 1))
-    return true;
-
-  if (('l' == path[current_path_index]) && (y > 0) && (-1 != maze[x][y - 1]) &&
-      find_correct_path(maze, x, y - 1, path, current_path_index + 1))
-    return true;
-
-  if (('r' == path[current_path_index]) && (y < maze[x].size() - 1) &&
-      (-1 != maze[x][y + 1]) &&
-      find_correct_path(maze, x, y + 1, path, current_path_index + 1))
-    return true;
-
-  if ('?' == path[current_path_index]) {
-    if ((x > 0) && (-1 != maze[x - 1][y])) {
-      path[current_path_index] = 'u';
-
-      if (find_correct_path(maze, x - 1, y, path, current_path_index + 1))
-        return true;
-
-      path[current_path_index] = '?';
-    }
-
-    if ((x < maze.size() - 1) && (-1 != maze[x + 1][y])) {
-      path[current_path_index] = 'd';
-
-      if (find_correct_path(maze, x + 1, y, path, current_path_index + 1))
-        return true;
-
-      path[current_path_index] = '?';
-    }
-
-    if ((y > 0) && (-1 != maze[x][y - 1])) {
-      path[current_path_index] = 'l';
-
-      if (find_correct_path(maze, x, y - 1, path, current_path_index + 1))
-        return true;
-
-      path[current_path_index] = '?';
-    }
-
-    if ((y < maze[x].size() - 1) && (-1 != maze[x][y + 1])) {
-      path[current_path_index] = 'r';
-
-      if (find_correct_path(maze, x, y + 1, path, current_path_index + 1))
-        return true;
-
-      path[current_path_index] = '?';
-    }
-  }
-
-  maze[x][y] = 0;
-
-  return false;
-}
-
 string CorrectPath(string str) {
-  str = trim(str);
+  const string unsolved_path = [&str]() {
+    string path{str};
 
-  vector<vector<int>> maze(5, vector<int>(5));
+    for (auto& ch : path)
+      ch = static_cast<char>(tolower(ch));
 
-  find_correct_path(maze, 0, 0, str, 0);
+    return path;
+  }();
 
-  return str;
+  size_t number_of_question_marks{};
+  vector<size_t> question_mark_indices{};
+
+  for (size_t i{}; i < unsolved_path.size(); i++) {
+    if ('?' == unsolved_path[i]) {
+      number_of_question_marks++;
+      question_mark_indices.emplace_back(i);
+    }
+  }
+
+  string potential_directions{string(number_of_question_marks, 'r') +
+                              string(number_of_question_marks, 'd') +
+                              string(number_of_question_marks, 'u') +
+                              string(number_of_question_marks, 'l')};
+
+  sort(begin(potential_directions), end(potential_directions));
+
+  do {
+    string current_path{unsolved_path};
+
+    for (size_t i{}; i < number_of_question_marks; i++) {
+      current_path[question_mark_indices[i]] = potential_directions[i];
+    }
+
+    array<array<bool, 5>, 5> maze{{}};
+
+    maze[0][0] = true;
+
+    bool is_wrong_path{};
+
+    size_t xi{}, yi{};
+
+    for (const char dir : current_path) {
+      switch (dir) {
+        case 'l':
+          if (0 == yi || maze[xi][yi - 1])
+            is_wrong_path = true;
+          else
+            yi--;
+
+          break;
+
+        case 'r':
+          if (4 == yi || maze[xi][yi + 1])
+            is_wrong_path = true;
+          else
+            yi++;
+
+          break;
+
+        case 'u':
+          if (0 == xi || maze[xi - 1][yi])
+            is_wrong_path = true;
+          else
+            xi--;
+
+          break;
+
+        case 'd':
+          if (4 == xi || maze[xi + 1][yi])
+            is_wrong_path = true;
+          else
+            xi++;
+
+          break;
+
+        default:
+          break;
+      }
+
+      if (is_wrong_path)
+        break;
+
+      maze[xi][yi] = true;
+    }
+
+    if (!is_wrong_path && (4 == xi) && (4 == yi))
+      return current_path;
+  } while (
+      next_permutation(begin(potential_directions), end(potential_directions)));
+
+  return "not possible";
 }
 
 int main() {
-  // cout << CorrectPath(move(string{gets(stdin)}));
+  // cout << CorrectPath(gets(stdin));
   cout << CorrectPath(move(string{"r?d?drdd"}))
        << '\n';  // expected output: "rrdrdrdd"
   cout << CorrectPath(move(string{"???rrurdr?"}))

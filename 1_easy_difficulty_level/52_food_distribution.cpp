@@ -36,6 +36,7 @@ Output: 4
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <utility>
 #include <vector>
@@ -52,10 +53,10 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
   for (size_t i{1}; i < arr_size; i++)
     hungry_levels.emplace_back(make_pair(i - 1, arr[i]));
 
-  sort(begin(hungry_levels), end(hungry_levels),
-       [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
-         return (l.second > r.second);
-       });
+  std::sort(begin(hungry_levels), end(hungry_levels),
+            [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
+              return (l.second > r.second);
+            });
 
   const int min_hungry_level{hungry_levels.back().second};
 
@@ -75,7 +76,10 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
   for (size_t i{1}; i < arr_size - 1; i++) {
     int s{abs(arr[i + 1] - arr[i])};
 
-    if ((s > 0) && (number_of_sandwiches > 0)) {
+    if (!number_of_sandwiches)
+      break;
+
+    if (s > 0) {
       if (s > number_of_sandwiches)
         s = number_of_sandwiches;
 
@@ -101,19 +105,16 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
 
   number_of_sandwiches = arr[0];
 
-  int average_hungry_level{};
-
-  for (const auto& h : hungry_levels_arr)
-    average_hungry_level += h;
-
-  average_hungry_level /= hungry_levels_arr.size();
+  const int average_hungry_level =
+      accumulate(begin(hungry_levels_arr), end(hungry_levels_arr), 0) /
+      hungry_levels_arr.size();
 
   int prev_level{};
 
   int s;
 
   for (size_t i{}; i < hungry_levels_arr.size(); i++) {
-    if (number_of_sandwiches < 1)
+    if (!number_of_sandwiches)
       break;
 
     if (hungry_levels_arr[i] > average_hungry_level) {
@@ -152,7 +153,7 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
   number_of_sandwiches = arr[0];
 
   for (size_t i{}; i < hungry_levels.size(); i++) {
-    if (number_of_sandwiches < 1)
+    if (!number_of_sandwiches)
       break;
 
     if (hungry_levels[i].second > average_hungry_level) {
@@ -178,7 +179,7 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
 
   size_t hl[3]{hungry_level_diff1, hungry_level_diff2, hungry_level_diff3};
 
-  sort(hl, hl + 3);
+  std::sort(hl, hl + 3);
 
   return *hl;
 }
@@ -210,5 +211,6 @@ int main() {
   int I[] = {7, 5, 4, 3, 4, 5, 2, 3, 1, 4, 5};
   cout << FoodDistribution(I, sizeof(I) / sizeof(*I))
        << '\n';  // expected output: 6
+
   return 0;
 }

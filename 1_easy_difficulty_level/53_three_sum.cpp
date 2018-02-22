@@ -43,6 +43,10 @@ string ThreeSum_v1(const int* arr, const size_t arr_size) {
 
   });
 
+  const bool no_negative_numbers{
+      end(numbers) ==
+      find_if(begin(numbers), end(numbers), [](const int n) { return n < 0; })};
+
   const size_t ns{numbers.size()};
 
   if (ns < 3)
@@ -55,6 +59,9 @@ string ThreeSum_v1(const int* arr, const size_t arr_size) {
 
         if (sum == current_sum)
           return "true";
+
+        if (no_negative_numbers && (current_sum < sum))
+          return "false";
       }
     }
   }

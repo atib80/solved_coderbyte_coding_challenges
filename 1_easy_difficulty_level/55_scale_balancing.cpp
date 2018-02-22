@@ -1,18 +1,24 @@
 /*
 Coderbyte coding challenge: Scale Balancing
 
-Using the C++ language, have the function ScaleBalancing(strArr) read strArr which will contain two elements, the first being the two positive integer weights 
-on a balance scale (left and right sides) and the second element being a list of available weights as positive integers. 
-Your goal is to determine if you can balance the scale by using the least amount of weights from the list, but using at most only 2 weights. 
-For example: if strArr is ["[5, 9]", "[1, 2, 6, 7]"] then this means there is a balance scale with a weight of 5 on the left side and 9 on the right side. 
-It is in fact possible to balance this scale by adding a 6 to the left side from the list of weights and adding a 2 to the right side. 
-Both scales will now equal 11 and they are perfectly balanced. 
-Your program should return a common separated string of the weights that were used from the list in ascending order, 
-so for this example your program should return the string 2,6
+Using the C++ language, have the function ScaleBalancing(strArr) read strArr
+which will contain two elements, the first being the two positive integer
+weights on a balance scale (left and right sides) and the second element being a
+list of available weights as positive integers. Your goal is to determine if you
+can balance the scale by using the least amount of weights from the list, but
+using at most only 2 weights. For example: if strArr is ["[5, 9]", "[1, 2, 6,
+7]"] then this means there is a balance scale with a weight of 5 on the left
+side and 9 on the right side. It is in fact possible to balance this scale by
+adding a 6 to the left side from the list of weights and adding a 2 to the right
+side. Both scales will now equal 11 and they are perfectly balanced. Your
+program should return a common separated string of the weights that were used
+from the list in ascending order, so for this example your program should return
+the string 2,6
 
-There will only ever be one unique solution and the list of available weights will not be empty. 
-It is also possible to add two weights to only one side of the scale to balance it. 
-If it is not possible to balance the scale then your program should return the string not possible.
+There will only ever be one unique solution and the list of available weights
+will not be empty. It is also possible to add two weights to only one side of
+the scale to balance it. If it is not possible to balance the scale then your
+program should return the string not possible.
 
 Sample test cases:
 
@@ -23,189 +29,223 @@ Input:  "[13, 4]", "[1, 2, 3, 6, 14]"
 Output: "3,6"
 */
 
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <set>
-#include <functional>
 #include <cctype>
+#include <functional>
+#include <iostream>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-string trim(const string& str)
-{
+string trim(const string& str) {
+  const size_t str_len{str.length()};
+
+  if (!str_len)
+    return string{};
+
   size_t begin_str{};
-  size_t end_str{str.size() - 1};
+  size_t end_str{str_len - 1};
 
-  if (0u == str.length()) return string{};
-
-  for (; begin_str <= end_str; ++begin_str)
-  {
-    if (!isspace(str[begin_str])) break;
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str]))
+      break;
   }
 
-  if (begin_str > end_str) return string{};
+  if (begin_str > end_str)
+    return string{};
 
-  for (; end_str > begin_str; --end_str)
-  {
-    if (!isspace(str[end_str])) break;
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str]))
+      break;
   }
 
   return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-vector<string> split(const string& source, const char* needle,
-                              size_t const max_count = string::npos)
-{
-	vector<string> parts{};			
+vector<string> split(const string& source,
+                     const char* needle,
+                     size_t const max_count = string::npos) {
+  vector<string> parts{};
 
-	string needle_st{needle};
+  string needle_st{needle};
 
-	const size_t source_len{source.length()};
-	const size_t needle_len{needle_st.length()};
+  const size_t source_len{source.length()};
 
-	if ((0u == source_len) || (0u == needle_len)) return parts;
+  const size_t needle_len{needle_st.size()};
 
-	size_t number_of_parts{}, prev{};
+  if (!source_len)
+    return parts;
 
-	while (true)
-	{
-		const size_t current { source.find(needle_st, prev) };
+  if (!needle_len) {
+    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    for (size_t i{}; i < upper_limit; i++)
+      parts.emplace_back(1, source[i]);
+    return parts;
+  }
 
-		if (string::npos == current) break;
+  size_t number_of_parts{}, prev{};
 
-		number_of_parts++;
+  while (true) {
+    const size_t current{source.find(needle_st, prev)};
 
-		if ((string::npos != max_count) && (parts.size() == max_count)) break;
+    if (string::npos == current)
+      break;
 
-		if ((current - prev) > 0) parts.emplace_back(source.substr(prev, current - prev));
+    number_of_parts++;
 
-		prev = current + needle_len;
+    if ((string::npos != max_count) && (parts.size() == max_count))
+      break;
 
-		if (prev >= source_len) break;
-	}
+    if ((current - prev) > 0)
+      parts.emplace_back(source.substr(prev, current - prev));
 
-	if (prev < source_len)
-	{
-		if (string::npos == max_count) parts.emplace_back(source.substr(prev));
+    prev = current + needle_len;
 
-		else if ((string::npos != max_count) && (parts.size() < max_count)) parts.emplace_back(source.substr(prev));
-	}
+    if (prev >= source_len)
+      break;
+  }
 
-	return parts;
+  if (prev < source_len) {
+    if (string::npos == max_count)
+      parts.emplace_back(source.substr(prev));
+
+    else if ((string::npos != max_count) && (parts.size() < max_count))
+      parts.emplace_back(source.substr(prev));
+  }
+
+  return parts;
 }
 
-string get_needed_weights_string(const size_t first_weight, const size_t second_weight) {
+string get_needed_weights_string(const size_t first_weight,
+                                 const size_t second_weight) {
+  ostringstream oss{};
 
-	ostringstream oss{};
+  if (first_weight < second_weight) {
+    oss << first_weight << ',' << second_weight;
 
-	if (first_weight < second_weight) {
+  } else {
+    oss << second_weight << ',' << first_weight;
+  }
 
-		oss << first_weight << ',' << second_weight;		
-
-	} else {
-
-		oss << second_weight << ',' << first_weight;
-
-	}	
-
-	return oss.str();
+  return oss.str();
 }
 
-string ScaleBalancing(string *str_arr, const size_t array_size) {
+pair<int, int> get_left_and_right_scale_weights(string str) {
+  str = trim(str);
+  str.erase(begin(str));
+  str.erase(--end(str));
 
-	if (array_size < 2u) return string { "not possible" };
+  auto left_right_scale_str = split(str, ",");
+  for (auto& str_part : left_right_scale_str)
+    str_part = trim(str_part);
+  if (2 != left_right_scale_str.size())
+    return make_pair(0, 0);
 
-	str_arr[0] = trim(str_arr[0]);
-	str_arr[0].erase(begin(str_arr[0]));
-	str_arr[0].erase(--end(str_arr[0]));
+  return make_pair(stoi(left_right_scale_str[0]),
+                   stoi(left_right_scale_str[1]));
+}
 
-	auto left_right_scale_str = split(str_arr[0], ",");	
-	for (auto& str : left_right_scale_str) str = trim(str);
-	if (2u != left_right_scale_str.size()) return string{"not possible"};
+multiset<int, greater<int>> get_available_weights_in_descending_order(
+    string str) {
+  str = trim(str);
+  str.erase(begin(str));
+  str.erase(--end(str));
 
-	const size_t left_scale = stoul(left_right_scale_str[0]);
-	const size_t right_scale = stoul(left_right_scale_str[1]);
-	if (left_scale == right_scale) return string{"scale already balanced"};
+  auto weights_str = split(str, ",");
+  for (auto& str_part : weights_str)
+    str_part = trim(str_part);
 
-	str_arr[1] = trim(str_arr[1]);
-	str_arr[1].erase(begin(str_arr[1]));
-	str_arr[1].erase(--end(str_arr[1]));
+  multiset<int, greater<int>> available_weights_in_desc_order{};
 
-	auto weights_str = split(str_arr[1], ",");
-	for (auto& str : weights_str) str = trim(str);
+  for (const auto& weight_str : weights_str)
+    available_weights_in_desc_order.insert(stoi(weight_str));
 
-	multiset<size_t, greater<size_t>> aw{};
-	for (const auto& weight_str : weights_str) aw.insert(stoul(weight_str));
+  return available_weights_in_desc_order;
+}
 
-	const size_t needed_extra_weight = left_scale > right_scale ? left_scale - right_scale : right_scale - left_scale;
+string ScaleBalancing(string* str_arr, const size_t array_size) {
+  if (array_size < 2)
+    return "not possible";
 
-	const auto found_needed_weight = aw.find(needed_extra_weight);
+  const pair<int, int> left_and_right_scale_weigths{
+      get_left_and_right_scale_weights(move(str_arr[0]))};
 
-	if (found_needed_weight != end(aw)) {
+  const int left_scale{left_and_right_scale_weigths.first};
+  const int right_scale{left_and_right_scale_weigths.second};
+  if (left_scale == right_scale)
+    return "Scale is already balanced.";
 
-		return to_string(*found_needed_weight);
-	}
+  const multiset<int, greater<int>> available_weights_in_desc_order{
+      get_available_weights_in_descending_order(move(str_arr[1]))};
 
-	size_t first_weight = 0u;
+  const int needed_extra_weight{left_scale > right_scale
+                                    ? left_scale - right_scale
+                                    : right_scale - left_scale};
 
-	for (auto start = begin(aw); start != end(aw); ++start) {
+  const auto found_needed_weight =
+      available_weights_in_desc_order.find(needed_extra_weight);
 
-		if (*start > needed_extra_weight) continue;
+  if (found_needed_weight != end(available_weights_in_desc_order)) {
+    return to_string(*found_needed_weight);
+  }
 
-		const size_t cw{ *start };
+  int first_weight{};
 
-		if (!first_weight) {
+  for (auto start = begin(available_weights_in_desc_order);
+       start != end(available_weights_in_desc_order); ++start) {
+    if (*start > needed_extra_weight)
+      continue;
 
-			first_weight = cw;
+    const int current_weight{*start};
 
-			continue;
-		}
+    if (!first_weight) {
+      first_weight = current_weight;
 
-		if ((first_weight + cw) == needed_extra_weight) {
+      continue;
+    }
 
-			return get_needed_weights_string(first_weight, cw);
+    if (first_weight + current_weight == needed_extra_weight) {
+      return get_needed_weights_string(first_weight, current_weight);
+    }
+  }
 
-		}
+  multiset<int> available_weights_in_asc_order(
+      begin(available_weights_in_desc_order),
+      end(available_weights_in_desc_order));
 
-	}
+  for (auto start1 = begin(available_weights_in_asc_order);
+       start1 != end(available_weights_in_asc_order); ++start1) {
+    for (auto start2 = begin(available_weights_in_asc_order);
+         start2 != end(available_weights_in_asc_order); ++start2) {
+      if (left_scale + *start1 == right_scale + *start2) {
+        return get_needed_weights_string(*start1, *start2);
+      }
 
-	multiset<size_t> aw_less(begin(aw), end(aw));
+      if (left_scale + *start2 == right_scale + *start1) {
+        return get_needed_weights_string(*start2, *start1);
+      }
+    }
+  }
 
-	for (auto start1 = begin(aw_less); start1 != end(aw_less); ++start1) {
-
-		for (auto start2 = begin(aw_less); start2 != end(aw_less); ++start2) {
-
-			if ((left_scale + *start1) == (right_scale + *start2)) {
-
-				return get_needed_weights_string(*start1, *start2);
-
-			}
-
-			if ((left_scale + *start2) == (right_scale + *start1)) {
-
-				return get_needed_weights_string(*start2, *start1);
-
-			}			
-
-		}
-
-	}
-
-	return string{ "not possible" };
+  return "not possible";
 }
 
 int main() {
+  // string a[] = gets(stdin);
+  string a[] = {"[3, 4]", "[1, 2, 7, 7]"};
+  cout << ScaleBalancing(a, sizeof(a) / sizeof(*a))
+       << '\n';  // expected output: "1"
+  string b[] = {"[13, 4]", "[1, 2, 3, 6, 14]"};
+  cout << ScaleBalancing(b, sizeof(b) / sizeof(*b))
+       << '\n';  // expected output: "3,6"
+  string c[] = {"[5, 9]", "[1, 2, 6, 7]"};
+  cout << ScaleBalancing(c, sizeof(c) / sizeof(*c))
+       << '\n';  // expected output: "2,6"
+  string d[] = {"[6, 2]", "[1, 10, 6, 5]"};
+  cout << ScaleBalancing(d, sizeof(d) / sizeof(*d))
+       << '\n';  // expected output: "1,5"
 
-	// string a[] = gets(stdin);
-	string a[] = { "[3, 4]", "[1, 2, 7, 7]" };
-	cout << ScaleBalancing(a, sizeof(a) / sizeof(*a)) << '\n';
-	string b[] = { "[13, 4]", "[1, 2, 3, 6, 14]" };
-	cout << ScaleBalancing(b, sizeof(b) / sizeof(*b)) << '\n';
-	string c[] = { "[5, 9]", "[1, 2, 6, 7]" };
-	cout << ScaleBalancing(c, sizeof(c) / sizeof(*c)) << '\n';
-	string d[] = { "[6, 2]", "[1, 10, 6, 5]" };
-	cout << ScaleBalancing(d, sizeof(d) / sizeof(*d)) << '\n';
-	return 0;
+  return 0;
 }
