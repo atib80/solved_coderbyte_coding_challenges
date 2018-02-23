@@ -21,33 +21,36 @@ Output: "false"
 */
 
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
 string trim(const string& str) {
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+  const size_t str_len{str.length()};
 
-  if (0u == str.length())
+  if (!str_len)
     return string{};
 
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
+  size_t first{}, last{str_len - 1};
+
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
       break;
   }
 
-  if (begin_str > end_str)
+  if (first > last)
     return string{};
 
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
       break;
   }
 
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return str.substr(first, last - first + 1);
 }
 
 vector<string> split(const string& source,
@@ -58,10 +61,18 @@ vector<string> split(const string& source,
   string needle_st{needle};
 
   const size_t source_len{source.length()};
-  const size_t needle_len{needle_st.length()};
 
-  if ((0u == source_len) || (0u == needle_len))
+  const size_t needle_len{needle_st.size()};
+
+  if (!source_len)
     return parts;
+
+  if (!needle_len) {
+    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    for (size_t i{}; i < upper_limit; i++)
+      parts.emplace_back(1, source[i]);
+    return parts;
+  }
 
   size_t number_of_parts{}, prev{};
 
@@ -102,31 +113,35 @@ string ThreeNumbers(string str) {
   const vector<string> words{split(str, " ")};
 
   for (const auto& word : words) {
-    const size_t word_len{word.length()};
-
-    if (word_len <= 3u)
+    if (word.length() < 4)
       return "false";
 
-    string w{word};
+    const auto digit_count = count_if(begin(word), end(word),
+                                      [](const int ch) { return isdigit(ch); });
 
-    sort(begin(w), end(w));
-
-    if ((w[2] < '0') || (w[2] > '9') || ((w[3] >= '0') && (w[3] <= '9')))
+    if (3 != digit_count)
       return "false";
 
-    if ((w[0] == w[1]) || (w[0] == w[2]) || (w[1] == w[2]))
-      return "false";
+    const size_t first_digit_pos{word.find_first_of("0123456789")};
 
+    const size_t last_digit_pos{word.find_last_of("0123456789")};
+
+    unordered_set<char> unique_digits{};
     vector<size_t> digit_positions{};
 
-    for (size_t i{}; i < word_len; i++) {
-      if (word[i] < '0' || word[i] > '9')
-        continue;
-
-      digit_positions.emplace_back(i);
+    for (size_t i{first_digit_pos}; i <= last_digit_pos; i++) {
+      if (isdigit(word[i])) {
+        unique_digits.insert(word[i]);
+        digit_positions.emplace_back(i);
+      }
     }
 
-    if (2u == (digit_positions[2] - digit_positions[0]))
+    if (3 != unique_digits.size())
+      return "false";
+
+    if ((digit_positions[1] - digit_positions[0] == 1) &&
+        (digit_positions[2] - digit_positions[1] == 1) &&
+        (digit_positions[2] - digit_positions[0] == 2))
       return "false";
   }
 

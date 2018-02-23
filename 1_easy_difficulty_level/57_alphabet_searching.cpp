@@ -111,10 +111,10 @@ string AlphabetSearching_v1(string str) {
   unordered_set<char> found_characters{};
 
   for (char& ch : str) {
-    if (isalpha(ch)) {
-      ch = static_cast<char>(tolower(ch));
+    ch = static_cast<char>(tolower(ch));
+    if (ch >= 'a' && ch <= 'z') {
       found_characters.insert(ch);
-      if (found_characters.size() > 25)
+      if (26 == found_characters.size())
         return "true";
     }
   }
@@ -146,13 +146,23 @@ string AlphabetSearching_v2(string str) {
   return "true";
 }
 
+string AlphabetSearching_v3(string str) {
+  str = trim(str);
+  sort(begin(str), end(str));
+  const size_t first_char_pos{str.find_first_of("abcdefghijklmnopqrstuvwxyz")};
+  const size_t last_char_pos{str.find_last_of("abcdefghijklmnopqrstuvwxyz")};
+  unordered_set<char> unique_characters(begin(str) + first_char_pos,
+                                        begin(str) + last_char_pos + 1);
+  return (26 == unique_characters.size() ? "true" : "false");
+}
+
 int main() {
-  // cout << AlphabetSearching_v1(move(string{gets(stdin)}));
-  cout << AlphabetSearching_v1(move(string{"zacxyjbbkfgtbhdaielqrm45pnsowtuv"}))
+  // cout << AlphabetSearching_v3(move(string{gets(stdin)}));
+  cout << AlphabetSearching_v3(move(string{"zacxyjbbkfgtbhdaielqrm45pnsowtuv"}))
        << '\n';  // "true"
-  cout << AlphabetSearching_v1(move(string{"abcdefghijklmnopqrstuvwxyyyy"}))
+  cout << AlphabetSearching_v3(move(string{"abcdefghijklmnopqrstuvwxyyyy"}))
        << '\n';  // "false"
-  cout << AlphabetSearching_v1(move(string{"abc123456kmo"}))
+  cout << AlphabetSearching_v3(move(string{"abc123456kmo"}))
        << '\n';  // "false"
 
   return 0;
