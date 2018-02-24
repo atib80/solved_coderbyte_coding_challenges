@@ -110,22 +110,15 @@ size_t find_distance_to_closest_enemy_position(
     const pair<size_t, size_t>& one_pos,
     const vector<pair<size_t, size_t>>& two_pos,
     const size_t row_count,
-    const size_t col_count) {
-  vector<size_t> distances{};
+    const size_t column_count) {
+  set<size_t> distances{};
 
   for (const auto& enemy_pos : two_pos) {
-    distances.emplace_back(find_closest_distance_to_enemy(
-        one_pos, enemy_pos, row_count, col_count));
+    distances.insert(find_closest_distance_to_enemy(one_pos, enemy_pos,
+                                                    row_count, column_count));
   }
 
-  size_t current_min_steps{distances[0]};
-
-  for (size_t i{1u}; i < distances.size(); i++) {
-    if (distances[i] < current_min_steps)
-      current_min_steps = distances[i];
-  }
-
-  return current_min_steps;
+  return *begin(distances);
 }
 
 string closest_enemy_ii(string* str_array, const size_t str_array_size) {
@@ -135,7 +128,7 @@ string closest_enemy_ii(string* str_array, const size_t str_array_size) {
 
   for (size_t i{}; i < str_array_size; i++) {
     str_array[i] = trim(str_array[i]);
-    for (size_t j{}; j != str_array[i].length(); j++) {
+    for (size_t j{}; j < str_array[i].length(); j++) {
       if ('2' == str_array[i][j]) {
         enemy_positions.emplace_back(make_pair(i, j));
         found_twos = true;
