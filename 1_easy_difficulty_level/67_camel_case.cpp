@@ -57,11 +57,12 @@ string convert_to_camel_case(string str, const locale& loc = locale{}) {
 
   size_t si{};
 
-  while (!isalpha(str[si])) si++;
+  while (!isalpha(str[si]))
+    si++;
 
-  final_str.push_back(static_cast<char>(tolower(str[si]), loc));
+  final_str.push_back(static_cast<char>(tolower(str[si], loc)));
 
-  bool is_new_word{false};
+  bool is_new_word{};
 
   for (size_t i{si + 1}; i < str.length(); i++) {
     if (!isalnum(str[i])) {
