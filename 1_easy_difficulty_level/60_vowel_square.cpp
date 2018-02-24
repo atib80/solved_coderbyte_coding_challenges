@@ -84,11 +84,7 @@ string VowelSquare(string* str_arr, const size_t row_size) {
         first_to_last_vowel_pos == first_vowel_pos)
       continue;
 
-    first_to_last_vowel_pos =
-        min(prev_line.find_last_of("aeiou", first_to_last_vowel_pos - 1),
-            next_line.find_last_of("aeiou", first_to_last_vowel_pos - 1));
-
-    for (size_t j{first_vowel_pos}; j <= first_to_last_vowel_pos; j++) {
+    for (size_t j{first_vowel_pos}; j < first_to_last_vowel_pos; j++) {
       if ((vowels.find(prev_line[j]) != end(vowels)) &&
           (vowels.find(prev_line[j + 1]) != end(vowels)) &&
           (vowels.find(next_line[j]) != end(vowels)) &&
