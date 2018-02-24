@@ -1,10 +1,14 @@
 /*
 Coderbyte coding challenge: String Merge
 
-Using the C++ language, have the function StringMerge(str) read the str parameter being passed which will contain a large string of alphanumeric characters 
-with a single asterisk character splitting the string evenly into two separate strings. Your goal is to return a new string by pairing up the characters 
-in the corresponding locations in both strings. For example: if str is "abc1*kyoo" then your program should return the string akbyco1o 
-because a pairs with k, b pairs with y, etc. The string will always split evenly with the asterisk in the center.
+Using the C++ language, have the function StringMerge(str) read the str
+parameter being passed which will contain a large string of alphanumeric
+characters with a single asterisk character splitting the string evenly into two
+separate strings. Your goal is to return a new string by pairing up the
+characters in the corresponding locations in both strings. For example: if str
+is "abc1*kyoo" then your program should return the string akbyco1o because a
+pairs with k, b pairs with y, etc. The string will always split evenly with the
+asterisk in the center.
 
 Sample test cases:
 
@@ -15,66 +19,95 @@ Input:  "123hg*aaabb"
 Output: "1a2a3ahbgb"
 */
 
-#include <iostream>
-#include <string>
 #include <cctype>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-	if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
+  size_t first{}, last{str_len - 1};
 
-	if (begin_str > end_str) return string{};
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
 
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
+  if (first > last)
+    return string{};
 
-	return str.substr(begin_str, end_str - begin_str + 1);
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
 }
 
-string StringMerge(string str) {
+string StringMerge_v1(string str) {
+  str = trim(str);
 
-	str = trim(str);
+  const size_t str_len{str.length()};
 
-	if (str.length() < 3u) return string{"Not possible!"};	
+  if (str_len < 3)
+    return "not possible";
 
-	const size_t delim_pos { str.find('*', 1u) };
+  const size_t delim_pos{str.find('*', 1)};
 
-	if (string::npos == delim_pos) return string{"Not possile!"};
+  if (string::npos == delim_pos)
+    return "not possible";
 
-	if (str.substr(0, delim_pos).length() != str.substr(delim_pos + 1u).length()) return string{"Not possile!"};
+  if (2 * delim_pos != str_len - 1)
+    return "not possible";
 
-	const size_t str_half_len { str.substr(0, delim_pos).length() };
+  string result{};
+  result.reserve(str_len - 1);
 
-	string result{};
-	result.resize(2 * str_half_len);
+  for (size_t i{}, j{delim_pos + 1}; i != delim_pos; i++, j++) {
+    result.push_back(str[i]);
+    result.push_back(str[j]);
+  }
 
-	for (size_t i{}, j{delim_pos + 1}; i != str_half_len; i++, j++) {
-		result[2 * i] = str[i];
-		result[2 * i + 1] = str[j];
-	}
- 
-  	return result; 
-            
+  return result;
 }
 
-int main() { 
-  
-  // cout << StringMerge(move(string{gets(stdin)}));
-  cout << StringMerge(move(string{"abc1*kyoo"})) << '\n';   // expected output: "akbyco1o"
-  cout << StringMerge(move(string{"aaa*bbb"})) << '\n';     // expected output: "ababab"
-  cout << StringMerge(move(string{"123hg*aaabb"})) << '\n'; // expected output: "1a2a3ahbgb"
+string StringMerge_v2(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  if (str_len < 3)
+    return "not possible";
+
+  const size_t delim_pos{str.find('*', 1)};
+
+  if (string::npos == delim_pos)
+    return "not possible";
+
+  if (2 * delim_pos != str_len - 1)
+    return "not possible";
+
+  ostringstream oss{};
+
+  for (size_t i{}, j{delim_pos + 1}; i != delim_pos; i++, j++)
+    oss << str[i] << str[j];
+
+  return oss.str();
+}
+
+int main() {
+  // cout << StringMerge_v1(move(string{gets(stdin)}));
+  cout << StringMerge_v1(move(string{"abc1*kyoo"}))
+       << '\n';  // expected output: "akbyco1o"
+  cout << StringMerge_v1(move(string{"aaa*bbb"}))
+       << '\n';  // expected output: "ababab"
+  cout << StringMerge_v1(move(string{"123hg*aaabb"}))
+       << '\n';  // expected output: "1a2a3ahbgb"
   return 0;
-    
 }
