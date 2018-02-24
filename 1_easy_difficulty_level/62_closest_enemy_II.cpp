@@ -68,8 +68,8 @@ size_t abs_diff(const size_t x, const size_t y) {
 
 size_t find_closest_distance_to_enemy(const pair<size_t, size_t>& one_pos,
                                       const pair<size_t, size_t>& enemy_pos,
-                                      const size_t row_size,
-                                      const size_t column_size) {
+                                      const size_t row_count,
+                                      const size_t column_count) {
   set<size_t> distances{};
 
   const size_t one_x{one_pos.first};
@@ -83,22 +83,24 @@ size_t find_closest_distance_to_enemy(const pair<size_t, size_t>& one_pos,
   distances.insert(enemy_x_one_x_direct_distance +
                    enemy_y_one_y_direct_distance);
 
-  size_t row_distance, column_distance;
+  size_t row_distance_opposite_dir, column_distance_opposite_dir;
 
   if (one_x < enemy_x) {
-    row_distance = one_x + row_size - enemy_x;
-    distances.insert(row_distance + enemy_y_one_y_direct_distance);
+    row_distance_opposite_dir = one_x + row_count - enemy_x;
+    distances.insert(row_distance_opposite_dir + enemy_y_one_y_direct_distance);
   } else if (one_x > enemy_x) {
-    row_distance = row_size - one_x + enemy_x;
-    distances.insert(row_distance + enemy_y_one_y_direct_distance);
+    row_distance_opposite_dir = row_count - one_x + enemy_x;
+    distances.insert(row_distance_opposite_dir + enemy_y_one_y_direct_distance);
   }
 
   if (one_y < enemy_y) {
-    column_distance = one_y + column_size - enemy_y;
-    distances.insert(column_distance + enemy_x_one_x_direct_distance);
+    column_distance_opposite_dir = one_y + column_count - enemy_y;
+    distances.insert(column_distance_opposite_dir +
+                     enemy_x_one_x_direct_distance);
   } else if (one_y > enemy_y) {
-    column_distance = column_size - one_y + enemy_y;
-    distances.insert(column_distance + enemy_x_one_x_direct_distance);
+    column_distance_opposite_dir = column_count - one_y + enemy_y;
+    distances.insert(column_distance_opposite_dir +
+                     enemy_x_one_x_direct_distance);
   }
 
   return *begin(distances);
