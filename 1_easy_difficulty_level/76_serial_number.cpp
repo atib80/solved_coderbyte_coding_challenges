@@ -1,15 +1,19 @@
 /*
 Coderbyte coding challenge: Serial Number
 
-Using the C++ language, have the function SerialNumber(str) take the str parameter being passed and determine
-if it is a valid serial number with the following constraints:
+Using the C++ language, have the function SerialNumber(str) take the str
+parameter being passed and determine if it is a valid serial number with the
+following constraints:
 
-1. It needs to contain three sets each with three digits (1 through 9) separated by a period.
+1. It needs to contain three sets each with three digits (1 through 9) separated
+by a period.
 2. The first set of digits must add up to an even number.
 3. The second set of digits must add up to an odd number.
-4. The last digit in each set must be larger than the two previous digits in the same set.
+4. The last digit in each set must be larger than the two previous digits in the
+same set.
 
-If all the above constraints are met within the string, the your program should return the string true, otherwise your program should return the string false. 
+If all the above constraints are met within the string, the your program should
+return the string true, otherwise your program should return the string false.
 For example: if str is "224.315.218" then your program should return "true".
 
 Sample test cases:
@@ -21,113 +25,134 @@ Input:  "114.568.112"
 Output: "true"
 */
 
+#include <cctype>
 #include <iostream>
-#include <cctype>
 #include <string>
-#include <cctype>
 #include <vector>
 
 using namespace std;
 
-string trim(const string& str)
-{
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-  if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-  for (; begin_str <= end_str; ++begin_str)
-  {
-    if (!isspace(str[begin_str])) break;
+  size_t first{}, last{str_len - 1};
+
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
   }
 
-  if (begin_str > end_str) return string{};
+  if (first > last)
+    return string{};
 
-  for (; end_str > begin_str; --end_str)
-  {
-    if (!isspace(str[end_str])) break;
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
   }
 
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return str.substr(first, last - first + 1);
 }
 
-vector<string> split(const string& source, const char* needle,
-                              size_t const max_count = string::npos)
-{
-	vector<string> parts{};			
+vector<string> split(const string& source,
+                     const char* needle,
+                     size_t const max_count = string::npos) {
+  vector<string> parts{};
 
-	string needle_st{needle};
+  string needle_st{needle};
 
-	const size_t source_len{source.length()};
-	const size_t needle_len{needle_st.length()};
+  const size_t source_len{source.length()};
 
-	if ((0u == source_len) || (0u == needle_len)) return parts;
+  const size_t needle_len{needle_st.size()};
 
-	size_t number_of_parts{}, prev{};
+  if (!source_len)
+    return parts;
 
-	while (true)
-	{
-		const size_t current { source.find(needle_st, prev) };
+  if (!needle_len) {
+    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    for (size_t i{}; i < upper_limit; i++)
+      parts.emplace_back(1, source[i]);
+    return parts;
+  }
 
-		if (string::npos == current) break;
+  size_t number_of_parts{}, prev{};
 
-		number_of_parts++;
+  while (true) {
+    const size_t current{source.find(needle_st, prev)};
 
-		if ((string::npos != max_count) && (parts.size() == max_count)) break;
+    if (string::npos == current)
+      break;
 
-		if ((current - prev) > 0) parts.emplace_back(source.substr(prev, current - prev));
+    number_of_parts++;
 
-		prev = current + needle_len;
+    if ((string::npos != max_count) && (parts.size() == max_count))
+      break;
 
-		if (prev >= source_len) break;
-	}
+    if ((current - prev) > 0)
+      parts.emplace_back(source.substr(prev, current - prev));
 
-	if (prev < source_len)
-	{
-		if (string::npos == max_count) parts.emplace_back(source.substr(prev));
+    prev = current + needle_len;
 
-		else if ((string::npos != max_count) && (parts.size() < max_count)) parts.emplace_back(source.substr(prev));
-	}
+    if (prev >= source_len)
+      break;
+  }
 
-	return parts;
+  if (prev < source_len) {
+    if (string::npos == max_count)
+      parts.emplace_back(source.substr(prev));
+
+    else if ((string::npos != max_count) && (parts.size() < max_count))
+      parts.emplace_back(source.substr(prev));
+  }
+
+  return parts;
 }
 
-string SerialNumber(string str) { 
-
+string SerialNumber(string str) {
   str = trim(str);
 
-  vector<string> parts = split(str, ".");
+  vector<string> parts{split(str, ".")};
+
+  if (parts.size() != 3)
+    return "false";
 
   for (const auto& part : parts) {
-  	
-  	if (part.length() < 3u) return string{"false"};
+    if (part.length() < 3)
+      return "false";
 
-  	if ((part[2] < part[1]) || (part[2] < part[0])) return string{"false"};
-
+    if (part[2] < part[0] || part[2] < part[1])
+      return "false";
   }
 
   int number_value{};
 
-  for (const char ch : parts[0]) number_value += static_cast<int>(ch - '0');
+  for (const char ch : parts[0])
+    number_value += static_cast<int>(ch - '0');
 
-  if (number_value % 2 == 1) return string{"false"};
+  if (number_value % 2 == 1)
+    return "false";
 
-  number_value = 0;
+  number_value;
 
-  for (const char ch : parts[1]) number_value += static_cast<int>(ch - '0');
+  for (const char ch : parts[1])
+    number_value += static_cast<int>(ch - '0');
 
-  if (number_value % 2 == 0) return string{"false"};
- 
-  return string{"true"}; 
-            
+  if (number_value % 2 == 0)
+    return "false";
+
+  return "true";
 }
 
-int main() { 
-  
+int main() {
   // cout << SerialNumber(move(string{gets(stdin)}));
-  cout << SerialNumber(move(string{"224.315.218"})) << '\n'; // expected output: "true"
-  cout << SerialNumber(move(string{"11.124.667"})) << '\n';  // expected output: "false"
-  cout << SerialNumber(move(string{"114.568.112"})) << '\n'; // expected output: "true"
+  cout << SerialNumber(move(string{"224.315.218"}))
+       << '\n';  // expected output: "true"
+  cout << SerialNumber(move(string{"11.124.667"}))
+       << '\n';  // expected output: "false"
+  cout << SerialNumber(move(string{"114.568.112"}))
+       << '\n';  // expected output: "true"
 
-  return 0;    
-} 
+  return 0;
+}
