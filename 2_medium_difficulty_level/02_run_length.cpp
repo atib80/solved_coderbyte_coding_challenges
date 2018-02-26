@@ -96,7 +96,7 @@ string run_length_v2(string str) {
   ostringstream oss{};
   size_t start_pos{}, end_pos{1};
 
-  while (string::npos != end_pos) {
+  while (true) {
     end_pos = str.find_first_not_of(str[start_pos], end_pos);
 
     if (string::npos == end_pos) {

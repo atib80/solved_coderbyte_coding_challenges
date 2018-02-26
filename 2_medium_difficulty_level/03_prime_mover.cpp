@@ -15,16 +15,17 @@ Output: 541
 */
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <string>
 
 using namespace std;
 
 bool is_prime_number(const int64_t n) {
-  const int64_t upper_limit = static_cast<int>(sqrt(n)) + 1;
+  if (n % 2 == 0 || n % 3 == 0 || n % 5 == 0)
+    return false;
 
-   if (num % 2 == 0 || num % 3 == 0 || num % 5 == 0)
-    return "false";
+  const int64_t upper_limit = static_cast<int>(sqrt(n)) + 1;
 
   for (int64_t i{7}; i < upper_limit; i += 2) {
     if (n % i == 0)
@@ -34,7 +35,9 @@ bool is_prime_number(const int64_t n) {
   return true;
 }
 
-int PrimeMover(const int num) {
+int PrimeMover(int num) {
+  num = abs(num);
+
   if (num == 1)
     return 2;
   if (num == 2)
