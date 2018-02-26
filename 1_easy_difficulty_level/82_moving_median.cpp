@@ -63,33 +63,31 @@ string MovingMedian_v1(vector<long> numbers) {
 string MovingMedian_v2(vector<long> numbers) {
   const size_t numbers_size{numbers.size()};
 
-  const size_t window_size{static_cast<size_t>(numbers[0])};
+  const size_t max_window_size{static_cast<size_t>(numbers[0])};
 
-  size_t current_window_size{1};
+  size_t cws{1};
 
   ostringstream oss{};
 
   for (size_t i{1}; i < numbers_size; i++) {
     vector<long> window{};
 
-    for (size_t j{i + 1 - current_window_size}; j < i + 1; j++) {
+    for (size_t j{i + 1 - cws}; j < i + 1; j++) {
       window.emplace_back(numbers[j]);
     }
 
-    if (current_window_size < window_size)
-      current_window_size++;
-
     sort(begin(window), end(window));
 
-    const size_t ws{window.size()};
-
-    if (ws % 2 == 1)
-      oss << window[ws / 2];
+    if (cws % 2 == 1)
+      oss << window[cws / 2];
     else
-      oss << (window[ws / 2 - 1] + window[ws / 2]) / 2;
+      oss << (window[cws / 2 - 1] + window[cws / 2]) / 2;
 
     if (i < numbers_size - 1)
       oss << ',';
+
+    if (cws < max_window_size)
+      cws++;
   }
 
   return oss.str();
