@@ -42,6 +42,9 @@ int64_t PrimeMover(int64_t num) {
   static unordered_map<int64_t, int64_t> precalculated_prime_numbers{
       {1, 2}, {2, 3}, {3, 5}, {4, 7}, {5, 11}};
 
+  if (precalculated_prime_numbers.find(num) != end(precalculated_prime_numbers))
+    return precalculated_prime_numbers.find(num)->second;
+
   int n{6};
 
   int current_prime_number{11};
@@ -69,6 +72,11 @@ int64_t PrimeMover(int64_t num) {
 
 int main() {
   // cout << PrimeMover(gets(stdin));
+  cout << PrimeMover(1) << '\n';    // expected output: 2
+  cout << PrimeMover(2) << '\n';    // expected output: 3
+  cout << PrimeMover(3) << '\n';    // expected output: 5
+  cout << PrimeMover(4) << '\n';    // expected output: 7
+  cout << PrimeMover(5) << '\n';    // expected output: 11
   cout << PrimeMover(16) << '\n';   // expected output: 53
   cout << PrimeMover(9) << '\n';    // expected output: 23
   cout << PrimeMover(100) << '\n';  // expected output: 541
