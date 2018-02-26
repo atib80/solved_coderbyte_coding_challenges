@@ -18,6 +18,7 @@ Output: 541
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -35,19 +36,11 @@ bool is_prime_number(const int64_t n) {
   return true;
 }
 
-int PrimeMover(int num) {
+int64_t PrimeMover(int64_t num) {
   num = abs(num);
 
-  if (num == 1)
-    return 2;
-  if (num == 2)
-    return 3;
-  if (num == 3)
-    return 5;
-  if (num == 4)
-    return 7;
-  if (num == 5)
-    return 11;
+  static unordered_map<int64_t, int64_t> precalculated_prime_numbers{
+      {1, 2}, {2, 3}, {3, 5}, {4, 7}, {5, 11}};
 
   int n{6};
 
