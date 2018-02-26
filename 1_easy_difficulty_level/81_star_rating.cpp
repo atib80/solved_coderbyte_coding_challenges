@@ -59,11 +59,11 @@ string StarRating(string str) {
   const float rating{stof(str)};
 
   int whole_part{static_cast<int>(rating)};
+  int decimal_part{static_cast<int>(round((rating - whole_part) * 100))};
 
-  bool is_half_star_rating{
-      ((rating - whole_part >= 0.25f) && (rating - whole_part < 0.75f))};
+  bool is_half_star_rating{((decimal_part >= 25) && (decimal_part < 75))};
 
-  if (rating - whole_part >= 0.75f)
+  if (decimal_part >= 75)
     whole_part++;
 
   ostringstream oss{};
