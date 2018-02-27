@@ -18,21 +18,26 @@ Output: 18
 
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
-int Division(constint* arr, const size_t arr_size) {
-  if (arr_size < 2u)
-    return -1;
+int gcf(const int num1, const int num2) {
+  const int min_number{min(num1, num2)};
 
-  const int min_number{min(arr[0], arr[1])};
-
-  for (int i{min_number}; i >= 1; i--) {
-    if ((arr[0] % i == 0) && (arr[1] % i == 0))
-      return i;
+  for (int gcf{min_number}; gcf > 1; gcf--) {
+    if ((num1 % gcf == 0) && (num2 % gcf == 0))
+      return gcf;
   }
 
   return 1;
+}
+
+int Division(const int* arr, const size_t arr_size) {
+  if (arr_size < 2)
+    return -1;
+
+  return gcf(arr[0], arr[1]);
 }
 
 int main() {
@@ -44,6 +49,10 @@ int main() {
   cout << Division(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: 1
   const int D[] = {12, 28};
   cout << Division(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: 4
+  const int E[] = {7, 3};
+  cout << Division(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output: 1
+  const int F[] = {36, 54};
+  cout << Division(F, sizeof(F) / sizeof(*F)) << '\n';  // expected output: 18
 
   return 0;
 }

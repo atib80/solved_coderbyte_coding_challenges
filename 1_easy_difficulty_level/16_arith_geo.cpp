@@ -29,11 +29,14 @@ string ArithGeo(const int* arr, const size_t arr_size) {
   if (arr_size < 2)
     return "-1";
 
-  const int diff{arr[1] - arr[0]};
-  const int factor{arr[1] / arr[0]};
-
   bool is_arithmetic{true};
   bool is_geometric{true};
+
+  const int diff{arr[1] - arr[0]};
+  int factor{1};
+
+  if (!arr[0] || !arr[1]) is_geometric = false;
+  else factor = arr[1] / arr[0];  
 
   for (size_t i{1}; (i < arr_size && (is_arithmetic || is_geometric)); i++) {
     if (is_arithmetic && (diff != (arr[i] - arr[i - 1]))) {

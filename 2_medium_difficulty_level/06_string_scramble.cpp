@@ -1,9 +1,11 @@
 /*
 Coderbyte coding challenge: String Scramble
 
-Using the C++ language, have the function StringScramble(str1,str2) take both parameters being passed and return the string true if a portion of str1 characters 
-can be rearranged to match str2, otherwise return the string false. For example: if str1 is "rkqodlw" and str2 is "world" the output should return true. 
-Punctuation and symbols will not be entered with the parameters.
+Using the C++ language, have the function StringScramble(str1,str2) take both
+parameters being passed and return the string true if a portion of str1
+characters can be rearranged to match str2, otherwise return the string false.
+For example: if str1 is "rkqodlw" and str2 is "world" the output should return
+true. Punctuation and symbols will not be entered with the parameters.
 
 Sample test cases:
 
@@ -14,81 +16,95 @@ Input:  "h3llko" & str2 = "hello"
 Output: "false"
 */
 
-#include <iostream>
-#include <string>
-#include <map>
+#include <algorithm>
 #include <cctype>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <unordered_map>
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-	if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
+  size_t first{}, last{str_len - 1};
 
-	if (begin_str > end_str) return string{};
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
 
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
+  if (first > last)
+    return string{};
 
-	return str.substr(begin_str, end_str - begin_str + 1);
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
 }
 
-string StringScramble(string str1, string str2) {
-
+string StringScramble_v1(string str1, string str2) {
   str1 = trim(str1);
   str2 = trim(str2);
 
-  if (str1.length() < str2.length()) return "false";
+  sort(begin(str1), end(str1));
+  sort(begin(str2), end(str2));
 
-  map<char, size_t> str1_char_count{};
-  map<char, size_t> str2_char_count{};
+  string intersection{};
 
-  for (const char c : str1) {
+  set_intersection(begin(str1), end(str1), begin(str2), end(str2),
+                   back_inserter(intersection));
 
-  	if (str1_char_count.find(c) != end(str1_char_count)) str1_char_count[c]++;
+  if (intersection.length() == str2.length())
+    return "true";
 
-  	else str1_char_count[c] = 1u;
-
-  }
-
-  for (const char c : str2) {
-
-  	if (str2_char_count.find(c) != end(str2_char_count)) str2_char_count[c]++;
-
-  	else str2_char_count[c] = 1u;
-  	
-  }
-
-  for (const auto& ch_count : str2_char_count) {
-
-  	if (str1_char_count.find(ch_count.first) == end(str1_char_count)) return "false";
-
-  	if (str1_char_count[ch_count.first] < ch_count.second) return "false";
-
-  }
-  
-  return "true";            
+  return "false";
 }
 
-int main() { 
+string StringScramble_v2(string str1, string str2) {
+  str1 = trim(str1);
+  str2 = trim(str2);
 
-  // cout << StringScramble(gets(stdin));
-  cout << StringScramble("rkqodlw", "world") << '\n';         // expected output: "true"
-  cout << StringScramble("cdore", "coder") << '\n';           // expected output: "true"
-  cout << StringScramble("h3llko", "hello") << '\n';          // expected output: "false"
-  cout << StringScramble("abcgggdfe", "abcdef") << '\n';      // expected output: "true"
-  cout << StringScramble("aqwe", "qa") << '\n';   		        // expected output: "true"
-  cout << StringScramble("yelowrqwedlk", "yellowred") << '\n';// expected output: "true"
+  unordered_map<char, size_t> str1_char_count{};
+  unordered_map<char, size_t> str2_char_count{};
 
-  return 0;    
+  for (const char c : str1)
+    str1_char_count[c]++;
+  for (const char c : str2)
+    str2_char_count[c]++;
+
+  for (const auto& ch_count : str2_char_count) {
+    if (str1_char_count.find(ch_count.first) == end(str1_char_count))
+      return "false";
+
+    if (str1_char_count[ch_count.first] < ch_count.second)
+      return "false";
+  }
+
+  return "true";
+}
+
+int main() {
+  // cout << StringScramble_v1(gets(stdin));
+  cout << StringScramble_v1(move(string{"rkqodlw"}), move(string{"world"}))
+       << '\n';  // expected output: "true"
+  cout << StringScramble_v1(move(string{"cdore"}), move(string{"coder"}))
+       << '\n';  // expected output: "true"
+  cout << StringScramble_v1(move(string{"h3llko"}), move(string{"hello"}))
+       << '\n';  // expected output: "false"
+  cout << StringScramble_v1(move(string{"abcgggdfe"}), move(string{"abcdef"}))
+       << '\n';  // expected output: "true"
+  cout << StringScramble_v1(move(string{"aqwe"}), move(string{"qa"}))
+       << '\n';  // expected output: "true"
+  cout << StringScramble_v1(move(string{"yelowrqwedlk"}),
+                            move(string{"yellowred"}))
+       << '\n';  // expected output: "true"
+
+  return 0;
 }
