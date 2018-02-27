@@ -72,9 +72,9 @@ string FirstReverse_v2(string str) {
 int main() { 
   
   // cout << FirstReverse(gets(stdin));
-  cout << FirstReverse(move(string{"Apple juice"})) << '\n';
-  cout << FirstReverse(move(string{"Racercar"})) << '\n';
-  cout << FirstReverse(move(string{"never odd or even"})) << '\n';
+  cout << FirstReverse(move(string{"Hello World and Coders"})) << '\n'; // expected output: "sredoC dna dlroW olleH" 
+  cout << FirstReverse(move(string{"coderbyte"})) << '\n';              // expected output: "etybredoc"
+  cout << FirstReverse(move(string{"I Love Code"})) << '\n';            // expected output: "edoC evoL I"
 
   return 0;
 
