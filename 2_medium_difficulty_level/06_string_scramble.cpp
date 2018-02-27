@@ -90,19 +90,38 @@ string StringScramble_v2(string str1, string str2) {
   return "true";
 }
 
+string StringScramble_v3(string str1, string str2) {
+  str1 = trim(str1);
+  str2 = trim(str2);
+
+  unordered_map<char, size_t> str1_char_freq{};
+
+  for (const char c : str1)
+    str1_char_freq[c]++;
+
+  for (const char c : str2) {
+    if (str1_char_freq.find(c) == end(str1_char_freq) || !str1_char_freq[c])
+      return "false";
+
+    str1_char_freq[c]--;
+  }
+
+  return "true";
+}
+
 int main() {
-  // cout << StringScramble_v1(gets(stdin));
-  cout << StringScramble_v1(move(string{"rkqodlw"}), move(string{"world"}))
+  // cout << StringScramble_v3(gets(stdin));
+  cout << StringScramble_v3(move(string{"rkqodlw"}), move(string{"world"}))
        << '\n';  // expected output: "true"
-  cout << StringScramble_v1(move(string{"cdore"}), move(string{"coder"}))
+  cout << StringScramble_v3(move(string{"cdore"}), move(string{"coder"}))
        << '\n';  // expected output: "true"
-  cout << StringScramble_v1(move(string{"h3llko"}), move(string{"hello"}))
+  cout << StringScramble_v3(move(string{"h3llko"}), move(string{"hello"}))
        << '\n';  // expected output: "false"
-  cout << StringScramble_v1(move(string{"abcgggdfe"}), move(string{"abcdef"}))
+  cout << StringScramble_v3(move(string{"abcgggdfe"}), move(string{"abcdef"}))
        << '\n';  // expected output: "true"
-  cout << StringScramble_v1(move(string{"aqwe"}), move(string{"qa"}))
+  cout << StringScramble_v3(move(string{"aqwe"}), move(string{"qa"}))
        << '\n';  // expected output: "true"
-  cout << StringScramble_v1(move(string{"yelowrqwedlk"}),
+  cout << StringScramble_v3(move(string{"yelowrqwedlk"}),
                             move(string{"yellowred"}))
        << '\n';  // expected output: "true"
 
