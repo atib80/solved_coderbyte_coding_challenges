@@ -35,12 +35,12 @@ string ArrayAddition_v1(const int* arr, const size_t arr_size) {
 
   const int maximum{numbers[0]};
 
-  int current_sum{};
-
   auto negative_pos = find_if(begin(numbers), end(numbers),
                               [](const int& n) { return (n < 0); });
 
   for (size_t i{1}; i < numbers.size(); i++) {
+    int current_sum{};
+
     for (size_t j{i}; j < numbers.size(); j++) {
       current_sum += numbers[j];
 
@@ -66,8 +66,6 @@ string ArrayAddition_v1(const int* arr, const size_t arr_size) {
         }
       }
     }
-
-    current_sum = 0;
   }
 
   return "false";
