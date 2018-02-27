@@ -1,9 +1,12 @@
 /*
 Coderbyte coding challenge: Letter Count
 
-Using the C++ language, have the function LetterCount(str) take the str parameter being passed and return the first word with the greatest number of repeated letters. 
-For example: "Today, is the greatest day ever!" should return greatest because it has 2 e's (and 2 t's) and it comes before ever which also has 2 e's. 
-If there are no words with repeating letters return -1. Words will be separated by spaces.
+Using the C++ language, have the function LetterCount(str) take the str
+parameter being passed and return the first word with the greatest number of
+repeated letters. For example: "Today, is the greatest day ever!" should return
+greatest because it has 2 e's (and 2 t's) and it comes before ever which also
+has 2 e's. If there are no words with repeating letters return -1. Words will be
+separated by spaces.
 
 Sample test cases:
 
@@ -14,117 +17,187 @@ Input:  "No words"
 Output: "-1"
 */
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <string>
-#include <cctype>
-#include <vector>
+#include <unordered_set>
 #include <utility>
-#include <algorithm>
+#include <vector>
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-	if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
+  size_t first{}, last{str_len - 1};
 
-	if (begin_str > end_str) return string{};
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
 
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
+  if (first > last)
+    return string{};
 
-	return str.substr(begin_str, end_str - begin_str + 1);
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
 }
 
-vector<string> split(const string& source, const char* needle,
-                              size_t const max_count = string::npos)
-{
-	vector<string> parts{};			
+vector<string> split(const string& source,
+                     const char* needle,
+                     size_t const max_count = string::npos) {
+  vector<string> parts{};
 
-	string needle_st{needle};
+  string needle_st{needle};
 
-	const size_t source_len{source.length()};
-	const size_t needle_len{needle_st.length()};
+  const size_t source_len{source.length()};
 
-	if ((0u == source_len) || (0u == needle_len)) return parts;
+  const size_t needle_len{needle_st.size()};
 
-	size_t number_of_parts{}, prev{};
+  if (!source_len)
+    return parts;
 
-	while (true)
-	{
-		const size_t current { source.find(needle_st, prev) };
+  if (!needle_len) {
+    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    for (size_t i{}; i < upper_limit; i++)
+      parts.emplace_back(1, source[i]);
+    return parts;
+  }
 
-		if (string::npos == current) break;
+  size_t number_of_parts{}, prev{};
 
-		number_of_parts++;
+  while (true) {
+    const size_t current{source.find(needle_st, prev)};
 
-		if ((string::npos != max_count) && (parts.size() == max_count)) break;
+    if (string::npos == current)
+      break;
 
-		if ((current - prev) > 0) parts.emplace_back(source.substr(prev, current - prev));
+    number_of_parts++;
 
-		prev = current + needle_len;
+    if ((string::npos != max_count) && (parts.size() == max_count))
+      break;
 
-		if (prev >= source_len) break;
-	}
+    if ((current - prev) > 0)
+      parts.emplace_back(source.substr(prev, current - prev));
 
-	if (prev < source_len)
-	{
-		if (string::npos == max_count) parts.emplace_back(source.substr(prev));
+    prev = current + needle_len;
 
-		else if ((string::npos != max_count) && (parts.size() < max_count)) parts.emplace_back(source.substr(prev));
-	}
+    if (prev >= source_len)
+      break;
+  }
 
-	return parts;
+  if (prev < source_len) {
+    if (string::npos == max_count)
+      parts.emplace_back(source.substr(prev));
+
+    else if ((string::npos != max_count) && (parts.size() < max_count))
+      parts.emplace_back(source.substr(prev));
+  }
+
+  return parts;
 }
 
-string LetterCount(string str) { 
+string LetterCount_v1(string str) {
+  str = trim(str);
 
-	str = trim(str);
+  const size_t str_len{str.length()};
 
-	vector<string> words = split(str, " ");
+  size_t start{};
+  size_t count_of_max_repeated_letters{1};
+  string word{};
 
-	vector<pair<string, size_t>> word_char_freq{};
+  while (start < str_len) {
+    start = str.find_first_not_of(' ', start);
 
-	for (const auto& word : words) {
+    if (string::npos == start)
+      break;
 
-		size_t rep_char_count{};
+    size_t last{str.find_first_of(' ', start + 1)};
 
-		for (const char ch : word) {
+    if (string::npos == last)
+      last = str_len;
 
-			const size_t ch_freq = count(begin(word), end(word), ch);
+    unordered_set<char> visited_chars{};
+    size_t rep_char_count{};
 
-			if (ch_freq > 1) rep_char_count += ch_freq;
-		}
+    for (size_t i{start}; i < last; i++) {
+      if (visited_chars.count(str[i]))
+        continue;
 
-		word_char_freq.emplace_back(make_pair(word, rep_char_count));
-	}
+      visited_chars.insert(str[i]);
 
-	stable_sort(begin(word_char_freq), end(word_char_freq), [](const pair<string, size_t>& lhs, const pair<string, size_t>& rhs) {
+      const auto ch_freq = count(begin(str) + start, begin(str) + last, str[i]);
 
-		return (lhs.second > rhs.second);
+      if (ch_freq > 1)
+        rep_char_count += ch_freq;
+    }
 
-	});
+    if (rep_char_count > count_of_max_repeated_letters) {
+      count_of_max_repeated_letters = rep_char_count;
+      word = str.substr(start, last - start);
+    }
 
-	if (word_char_freq[0].second > 1u) return word_char_freq[0].first;
+    start = last + 1;
+  }
 
-  	return string{"-1"};
+  if (count_of_max_repeated_letters > 1)
+    return word;
+
+  return "-1";
 }
 
-int main() { 
-  
-  // cout << LetterCount(move(string{gets(stdin)}));
-  cout << LetterCount(move(string{"Today, is the greatest day ever!"})) << '\n'; // expected output: "greatest"
-  cout << LetterCount(move(string{"Hello apple pie"})) << '\n'; 			     // expected output: "Hello"
-  cout << LetterCount(move(string{"No words"})) << '\n';						 // expected output: "-1"
-  
+string LetterCount_v2(string str) {
+  str = trim(str);
+
+  const vector<string> words{split(str, " ")};
+
+  size_t count_of_max_repeated_letters{1};
+  string found_word{};
+
+  for (const auto& word : words) {
+    unordered_set<char> visited_chars{};
+    size_t rep_char_count{};
+
+    for (const char ch : word) {
+      if (visited_chars.count(ch))
+        continue;
+
+      visited_chars.insert(ch);
+
+      const auto ch_freq = count(begin(word), end(word), ch);
+
+      if (ch_freq > 1)
+        rep_char_count += ch_freq;
+    }
+
+    if (rep_char_count > count_of_max_repeated_letters) {
+      count_of_max_repeated_letters = rep_char_count;
+      found_word = word;
+    }
+  }
+
+  if (count_of_max_repeated_letters > 1)
+    return found_word;
+
+  return "-1";
+}
+
+int main() {
+  // cout << LetterCount_v2(move(string{gets(stdin)}));
+  cout << LetterCount_v2(move(string{"Today, is the greatest day ever!"}))
+       << '\n';  // expected output: "greatest"
+  cout << LetterCount_v2(move(string{"Hello apple pie"}))
+       << '\n';  // expected output: "Hello"
+  cout << LetterCount_v2(move(string{"No words"}))
+       << '\n';  // expected output: "-1"
+
   return 0;
 }
