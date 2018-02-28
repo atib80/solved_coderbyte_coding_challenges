@@ -30,12 +30,12 @@ Output: "false"
 using namespace std;
 
 string trim(const string& str) {
-  const size_t str_len{str.length()};
+  const size_t str_len{ str.length() };
 
   if (!str_len)
     return string{};
 
-  size_t first{}, last{str_len - 1};
+  size_t first{}, last{ str_len - 1 };
 
   for (; first <= last; ++first) {
     if (!isspace(str[first]))
@@ -54,21 +54,21 @@ string trim(const string& str) {
 }
 
 vector<string> split(const string& source,
-                     const char* needle,
-                     size_t const max_count = string::npos) {
+  const char* needle,
+  size_t const max_count = string::npos) {
   vector<string> parts{};
 
-  string needle_st{needle};
+  string needle_st{ needle };
 
-  const size_t source_len{source.length()};
+  const size_t source_len{ source.length() };
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{ needle_st.size() };
 
   if (!source_len)
     return parts;
 
   if (!needle_len) {
-    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    const size_t upper_limit{ max_count < source_len ? max_count : source_len };
     for (size_t i{}; i < upper_limit; i++)
       parts.emplace_back(1, source[i]);
     return parts;
@@ -77,7 +77,7 @@ vector<string> split(const string& source,
   size_t number_of_parts{}, prev{};
 
   while (true) {
-    const size_t current{source.find(needle_st, prev)};
+    const size_t current{ source.find(needle_st, prev) };
 
     if (string::npos == current)
       break;
@@ -110,38 +110,39 @@ vector<string> split(const string& source,
 string ThreeNumbers(string str) {
   str = trim(str);
 
-  const vector<string> words{split(str, " ")};
+  const vector<string> words{ split(str, " ") };
 
   for (const auto& word : words) {
     if (word.length() < 4)
       return "false";
 
     const auto digit_count = count_if(begin(word), end(word),
-                                      [](const int ch) { return isdigit(ch); });
+      [](const int ch) { return isdigit(ch); });
 
     if (3 != digit_count)
       return "false";
 
-    const size_t first_digit_pos{word.find_first_of("0123456789")};
+    const size_t first_digit_pos { word.find_first_of("0123456789") };
 
-    const size_t last_digit_pos{word.find_last_of("0123456789")};
+    const size_t last_digit_pos{ word.find_last_of("0123456789") };
 
     unordered_set<char> unique_digits{};
     vector<size_t> digit_positions{};
 
-    for (size_t i{first_digit_pos}; i <= last_digit_pos; i++) {
+    for (size_t i{ first_digit_pos }; i <= last_digit_pos; i++) {
       if (isdigit(word[i])) {
         unique_digits.insert(word[i]);
         digit_positions.emplace_back(i);
       }
     }
 
+    // checks whether there are 3 unique digits in every word
     if (3 != unique_digits.size())
       return "false";
 
     if ((digit_positions[1] - digit_positions[0] == 1) &&
-        (digit_positions[2] - digit_positions[1] == 1) &&
-        (digit_positions[2] - digit_positions[0] == 2))
+      (digit_positions[2] - digit_positions[1] == 1) &&
+      (digit_positions[2] - digit_positions[0] == 2))
       return "false";
   }
 
@@ -150,13 +151,13 @@ string ThreeNumbers(string str) {
 
 int main() {
   // cout << ThreeNumbers(move(string{gets(stdin)}));
-  cout << ThreeNumbers(move(string{"2hell6o3 wor6l7d2"}))
-       << '\n';  // expected output: "true"
-  cout << ThreeNumbers(move(string{"hell268o w6or2l4d"}))
-       << '\n';  // expected output: "false"
-  cout << ThreeNumbers(move(string{"2a3b5 w1o2rl3d g1gg92"}))
-       << '\n';  // expected output: "true"
-  cout << ThreeNumbers(move(string{"21aa3a ggg4g4g6ggg"}))
-       << '\n';  // expected output: "false"
+  cout << ThreeNumbers(move(string{ "2hell6o3 wor6l7d2" }))
+    << '\n';  // expected output: "true"
+  cout << ThreeNumbers(move(string{ "hell268o w6or2l4d" }))
+    << '\n';  // expected output: "false"
+  cout << ThreeNumbers(move(string{ "2a3b5 w1o2rl3d g1gg92" }))
+    << '\n';  // expected output: "true"
+  cout << ThreeNumbers(move(string{ "21aa3a ggg4g4g6ggg" }))
+    << '\n';  // expected output: "false"
   return 0;
 }
