@@ -1,10 +1,12 @@
 /*
 Coderbyte coding challenge: Caesar Cipher
 
-Using the C++ language, have the function CaesarCipher(str,num) take the str parameter and perform a Caesar Cipher shift on it 
-using the num parameter as the shifting number. A Caesar Cipher works by shifting each letter in the string N places down in the alphabet 
-(in this case N will be num). Punctuation, spaces, and capitalization should remain intact. For example if the string is "Caesar Cipher" 
-and num is 2 the output should be "Ecguct Ekrjgt".
+Using the C++ language, have the function CaesarCipher(str,num) take the str
+parameter and perform a Caesar Cipher shift on it using the num parameter as the
+shifting number. A Caesar Cipher works by shifting each letter in the string N
+places down in the alphabet (in this case N will be num). Punctuation, spaces,
+and capitalization should remain intact. For example if the string is "Caesar
+Cipher" and num is 2 the output should be "Ecguct Ekrjgt".
 
 Sample test cases:
 
@@ -15,82 +17,76 @@ Input:  "abc" & num = 0
 Output: "abc"
 */
 
+#include <cctype>
 #include <iostream>
 #include <string>
-#include <cctype>
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-	if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
+  size_t first{}, last{str_len - 1};
 
-	if (begin_str > end_str) return string{};
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
+  }
 
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
+  if (first > last)
+    return string{};
 
-	return str.substr(begin_str, end_str - begin_str + 1);
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
+
+  return str.substr(first, last - first + 1);
 }
 
 string CaesarCipher(string str, size_t num) {
+  str = trim(str);
 
-	str = trim(str);
-	
-	if (str.empty()) return str;
+  if (str.empty())
+    return str;
 
-	string encoded_str{str};
+  num %= 26;
 
-	num %= 26;
+  for (auto& ch : str) {
+    if (isalpha(ch)) {
+      if (islower(ch)) {
+        if (ch + num > 122) {
+          const size_t diff = num - (122 - ch) - 1;
+          ch = static_cast<char>(97 + diff);
+        } else {
+          ch = static_cast<char>(ch + num);
+        }
 
-	for (auto& ch : encoded_str) {		
-		
-		if (isalpha(ch)) {
+      } else {
+        if (ch + num > 90) {
+          const size_t diff = num - (90 - ch) - 1;
+          ch = static_cast<char>(65 + diff);
+        } else {
+          ch = static_cast<char>(ch + num);
+        }
+      }
+    }
+  }
 
-			if (islower(ch)) {
-
-				if ((static_cast<size_t>(ch) + num) > 122) {
-					const size_t diff = num - (122 - static_cast<size_t>(ch)) - 1;
-					ch = static_cast<char>(97 + diff);
-				} else {
-					ch = static_cast<char>(static_cast<size_t>(ch) + num);
-				}			
-
-			} else {
-
-				if ((static_cast<size_t>(ch) + num) > 90) {
-					const size_t diff = num - (90 - static_cast<int>(ch)) - 1;
-					ch = static_cast<char>(65 + diff);
-				} else {
-					ch = static_cast<char>(static_cast<size_t>(ch) + num);
-				}	
-
-			} 
-		
-		}
-	} 
-
-  	return encoded_str;             
+  return str;
 }
 
-int main() { 
-  
+int main() {
   // cout << CaesarCipher(gets(stdin));
-  cout << CaesarCipher("Caesar Cipher", 2) << '\n'; // expected output: "Ecguct Ekrjgt"
-  cout << CaesarCipher("Hello", 4) << '\n';         // expected output: "Lipps"
-  cout << CaesarCipher("abc", 0) << '\n';           // expected output: "abc"
-  cout << CaesarCipher("coderBYTE", 2) << '\n';     // expected output: "eqfgtDAVG"
-  cout << CaesarCipher("dogs", 8) << '\n';          // expected output: "lwoa"
-  cout << CaesarCipher("byte", 13) << '\n';         // expected output: "olgr"
+  cout << CaesarCipher("Caesar Cipher", 2)
+       << '\n';                              // expected output: "Ecguct Ekrjgt"
+  cout << CaesarCipher("Hello", 4) << '\n';  // expected output: "Lipps"
+  cout << CaesarCipher("abc", 0) << '\n';    // expected output: "abc"
+  cout << CaesarCipher("coderBYTE", 2) << '\n';  // expected output: "eqfgtDAVG"
+  cout << CaesarCipher("dogs", 8) << '\n';       // expected output: "lwoa"
+  cout << CaesarCipher("byte", 13) << '\n';      // expected output: "olgr"
   return 0;
 }

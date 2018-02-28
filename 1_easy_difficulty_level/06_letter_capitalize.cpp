@@ -1,8 +1,9 @@
 /*
 Coderbyte coding challenge: Letter Capitalize
 
-Using the C++ language, have the function LetterCapitalize(str) take the str parameter being passed and capitalize the first letter of each word. 
-Words will be separated by only one space.
+Using the C++ language, have the function LetterCapitalize(str) take the str
+parameter being passed and capitalize the first letter of each word. Words will
+be separated by only one space.
 
 Sample test cases:
 
@@ -13,64 +14,63 @@ Input:  "i ran there"
 Output: "I Ran There"
 */
 
+#include <cctype>
 #include <iostream>
 #include <string>
-#include <cctype>
 
 using namespace std;
 
-string trim(const string& str)
-{  
+string trim(const string& str) {
   const size_t str_len{str.length()};
 
-  if (!str_len) return string{};
+  if (!str_len)
+    return string{};
 
   size_t begin_str{};
-  size_t end_str{str_len - 1};  
+  size_t end_str{str_len - 1};
 
-  for (; begin_str <= end_str; ++begin_str)
-  {
-    if (!isspace(str[begin_str])) break;
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str]))
+      break;
   }
 
-  if (begin_str > end_str) return string{};
+  if (begin_str > end_str)
+    return string{};
 
-  for (; end_str > begin_str; --end_str)
-  {
-    if (!isspace(str[end_str])) break;
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str]))
+      break;
   }
 
   return str.substr(begin_str, end_str - begin_str + 1);
 }
 
 string LetterCapitalize(string str) {
+  str = trim(str);
 
-    str = trim(str);
-    
-    bool is_space_char{true};
-    
-    for (auto& ch : str) {
-        
-        if (ch == ' ') {
-            is_space_char = true;
-            continue;
-        }
-        
-        if (is_space_char) {
-            ch = static_cast<char>(toupper(ch));
-            is_space_char = false;
-        }
+  bool is_space_char{true};
+
+  for (auto& ch : str) {
+    if (ch == ' ') {
+      is_space_char = true;
+      continue;
     }
- 
-  return str; 
-            
+
+    if (is_space_char) {
+      ch = static_cast<char>(toupper(ch));
+      is_space_char = false;
+    }
+  }
+
+  return str;
 }
 
 int main() {
-
   // cout << LetterCapitalize(move(string{gets(stdin)}));
-  cout << LetterCapitalize(move(string{"hello world"})) << '\n'; // expected output: "Hello World"
-  cout << LetterCapitalize(move(string{"i ran there"})) << '\n'; // expected output: "I Ran There"
+  cout << LetterCapitalize(move(string{"hello world"}))
+       << '\n';  // expected output: "Hello World"
+  cout << LetterCapitalize(move(string{"i ran there"}))
+       << '\n';  // expected output: "I Ran There"
 
-  return 0;    
+  return 0;
 }

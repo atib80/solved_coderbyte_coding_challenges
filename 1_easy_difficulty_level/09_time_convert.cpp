@@ -21,10 +21,9 @@
 using namespace std;
 
 string TimeConvert(const size_t minutes) {
-
-  if (minutes < 60) 
+  if (minutes < 60)
     return string{"0:"} + to_string(minutes);
-  
+
   return to_string(minutes / 60) + string{":"} + to_string(minutes % 60);
 }
 

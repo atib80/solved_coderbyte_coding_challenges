@@ -1,9 +1,11 @@
 /*
 Coderbyte coding challenge: Letter Changes
 
-Using the C++ language, have the function LetterChanges(str) take the str parameter being passed and modify it using the following algorithm. 
-Replace every letter in the string with the letter following it in the alphabet (ie. c becomes d, z becomes a). 
-Then capitalize every vowel in this new string (a, e, i, o, u) and finally return this modified string.
+Using the C++ language, have the function LetterChanges(str) take the str
+parameter being passed and modify it using the following algorithm. Replace
+every letter in the string with the letter following it in the alphabet (ie. c
+becomes d, z becomes a). Then capitalize every vowel in this new string (a, e,
+i, o, u) and finally return this modified string.
 
 Sample test cases:
 
@@ -14,18 +16,17 @@ Input:  "fun times!"
 Output: "gvO Ujnft!"
 */
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <string>
-#include <cctype>
 #include <unordered_set>
-#include <algorithm>
 
 using namespace std;
 
-string trim(const string& str) 
-{
+string trim(const string& str) {
   const size_t str_len{str.length()};
-  
+
   if (!str_len)
     return string{};
 
@@ -49,39 +50,37 @@ string trim(const string& str)
 }
 
 string LetterChanges(string str) {
-
   str = trim(str);
 
   const unordered_set<char> vowels{'a', 'e', 'i', 'o', 'u'};
-  
+
   for (auto& ch : str) {
-      if (((ch >= 'a') && (ch < 'z')) || ((ch >= 'A') && (ch < 'Z'))) { 
-          ch += 1;
-      }
-      else if (ch == 'z') { 
-          ch = 'a';
-      }
-      else if (ch == 'Z') { 
-          ch = 'A';
-      }
+    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z')) {
+      ch += 1;
+    } else if (ch == 'z') {
+      ch = 'a';
+    } else if (ch == 'Z') {
+      ch = 'A';
+    }
   }
-  
+
   string final_str{str};
-  
+
   transform(begin(str), end(str), begin(final_str), [&](const char ch) {
-      if (vowels.find(ch) != end(vowels)) return static_cast<char>(toupper(ch));
-      return ch;
+    if (vowels.find(ch) != end(vowels))
+      return static_cast<char>(toupper(ch));
+    return ch;
   });
-   
-  return final_str; 
-            
+
+  return final_str;
 }
 
-int main() { 
-  
-  cout << LetterChanges(move(string{gets(stdin)}));
-  // cout << LetterChanges(move(string{"hello*3"})) << '\n';    // expected output: "Ifmmp*3"
-  // cout << LetterChanges(move(string{"fun times!"})) << '\n'; // expected output: "gvO Ujnft!"
+int main() {
+  // cout << LetterChanges(move(string{gets(stdin)}));
+  cout << LetterChanges(move(string{"hello*3"}))
+       << '\n';  // expected output: "Ifmmp*3"
+  cout << LetterChanges(move(string{"fun times!"}))
+       << '\n';  // expected output: "gvO Ujnft!"
 
-  return 0;    
+  return 0;
 }
