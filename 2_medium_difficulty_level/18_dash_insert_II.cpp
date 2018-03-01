@@ -46,56 +46,78 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
-string DashInsertII(string str) {
+string DashInsertII_v1(string str) {
   str = trim(str);
-
-  ostringstream oss{};
 
   const size_t str_len{str.length()};
 
-  if (str_len < 2u)
+  if (str_len < 2)
     return str;
 
-  oss << str[0];
-
+  string result(1, str[0]);
   size_t digit{static_cast<size_t>(str[0] - '0')};
+  bool is_prev_digit_zero{digit == 0};
+  bool is_prev_odd{digit % 2 == 1};
 
-  bool is_prev_digit_zero{digit == 0 ? true : false};
-
-  bool is_prev_odd{digit % 2 == 1 ? true : false};
-
-  for (size_t i{1u}; i < str_len; i++) {
+  for (size_t i{1}; i < str_len; i++) {
     digit = static_cast<size_t>(str[i] - '0');
 
     if (!is_prev_digit_zero && digit) {
-      if (is_prev_odd && (digit % 2 == 1)) {
-        oss << '-' << str[i];
-
-      } else if (!is_prev_odd && (digit % 2 == 0)) {
-        oss << '*' << str[i];
-
-      } else {
-        oss << str[i];
-      }
-
-    } else {
-      oss << str[i];
+      if (is_prev_odd && (digit % 2 == 1))
+        result.push_back('-');
+      else if (!is_prev_odd && (digit % 2 == 0))
+        result.push_back('*');
     }
 
-    is_prev_digit_zero = digit == 0 ? true : false;
-    is_prev_odd = digit % 2 == 1 ? true : false;
+    result.push_back(str[i]);
+    is_prev_digit_zero = digit == 0;
+    is_prev_odd = digit % 2 == 1;
   }
 
-  return trim(oss.str());
+  return result;
+}
+
+string DashInsertII_v2(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  if (str_len < 2)
+    return str;
+
+  ostringstream oss{};
+  oss << str[0];
+
+  size_t digit{static_cast<size_t>(str[0] - '0')};
+  bool is_prev_digit_zero{digit == 0};
+  bool is_prev_odd{digit % 2 == 1};
+
+  for (size_t i{1}; i < str_len; i++) {
+    digit = static_cast<size_t>(str[i] - '0');
+
+    if (!is_prev_digit_zero && digit) {
+      if (is_prev_odd && (digit % 2 == 1))
+        oss << '-';
+      else if (!is_prev_odd && (digit % 2 == 0))
+        oss << '*';
+    }
+
+    oss << str[i];
+
+    is_prev_digit_zero = digit == 0;
+    is_prev_odd = digit % 2 == 1;
+  }
+
+  return oss.str();
 }
 
 int main() {
-  // cout << DashInsertII(move(string{gets(stdin)}));
-  cout << DashInsertII(move(string{"4546793"}))
+  // cout << DashInsertII_v2(move(string{gets(stdin)}));
+  cout << DashInsertII_v2(move(string{"4546793"}))
        << '\n';  // expected output: "454*67-9-3"
-  cout << DashInsertII(move(string{"99946"}))
+  cout << DashInsertII_v2(move(string{"99946"}))
        << '\n';  // expected output: "9-9-94*6"
-  cout << DashInsertII(move(string{"56647304"}))
+  cout << DashInsertII_v2(move(string{"56647304"}))
        << '\n';  // expected output: "56*6*47-304"
 
   return 0;
