@@ -101,7 +101,36 @@ vector<string> split(const string& source,
   return parts;
 }
 
-string word_count(string str) {
+string word_count_v1(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  size_t word_count{};
+  size_t start{};
+
+  while (start < str_len) {
+    start = str.find_first_not_of(" \t\n\v\f", start);
+
+    if (string::npos == start)
+      break;
+
+    size_t last{str.find_first_of(" \t\n\v\f", start + 1)};
+
+    if (string::npos == last) {
+      word_count++;
+      break;
+    }
+
+    word_count++;
+
+    start = last + 1;
+  }
+
+  return to_string(word_count);
+}
+
+string word_count_v2(string str) {
   str = trim(str);
 
   const vector<string> words{split(str, " ")};
@@ -110,19 +139,21 @@ string word_count(string str) {
 }
 
 int main() {
-  // cout << word_count(move(string{gets(stdin)}));
-  cout << word_count(move(string{"Never eat shredded wheat or cake"}))
+  // cout << word_count_v1(move(string{gets(stdin)}));
+  cout << word_count_v1(move(string{"Never eat shredded wheat or cake"}))
        << '\n';  // expected output: 6
-  cout << word_count(move(string{"Hello World"}))
+  cout << word_count_v1(move(string{"Hello World"}))
        << '\n';  // expected output: 2
-  cout << word_count(move(string{"one 22 three"}))
-       << '\n';                                           // expected output: 3
-  cout << word_count(move(string{"Coderbyte"})) << '\n';  // expected output: 1
-  cout << word_count(move(string{"h333llLo"})) << '\n';   // expected output: 1
-  cout << word_count(move(string{"Yo0"})) << '\n';        // expected output: 1
-  cout << word_count(move(string{"commacomma!"}))
-       << '\n';                                    // expected output: 1
-  cout << word_count(move(string{"aq"})) << '\n';  // expected output: 1
+  cout << word_count_v1(move(string{"one 22 three"}))
+       << '\n';  // expected output: 3
+  cout << word_count_v1(move(string{"Coderbyte"}))
+       << '\n';  // expected output: 1
+  cout << word_count_v1(move(string{"h333llLo"}))
+       << '\n';                                        // expected output: 1
+  cout << word_count_v1(move(string{"Yo0"})) << '\n';  // expected output: 1
+  cout << word_count_v1(move(string{"commacomma!"}))
+       << '\n';                                       // expected output: 1
+  cout << word_count_v1(move(string{"aq"})) << '\n';  // expected output: 1
 
   return 0;
 }

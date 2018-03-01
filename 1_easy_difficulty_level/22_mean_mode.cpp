@@ -24,7 +24,42 @@ Output: 1
 
 using namespace std;
 
-int MeanMode(vector<int> numbers) {
+int MeanMode_v1(vector<int> numbers) {
+  if (numbers.size() < 2)
+    return -1;
+
+  const int sum{accumulate(begin(numbers), end(numbers), 0)};
+
+  const int mean = sum / numbers.size();
+
+  unordered_map<int, size_t> number_frequency{};
+
+  for (const int n : numbers)
+    number_frequency[n]++;
+
+  auto start = begin(number_frequency);
+  int max_freq_number{start->first};
+  size_t max_freq{start->second};
+  ++start;
+
+  while (start != end(number_frequency)) {
+    if (start->second > max_freq) {
+      max_freq_number = start->first;
+      max_freq = start->second;
+    }
+    ++start;
+  }
+
+  if (mean == max_freq_number)
+    return 1;
+
+  return 0;
+}
+
+int MeanMode_v2(vector<int> numbers) {
+  if (numbers.size() < 2)
+    return -1;
+
   sort(begin(numbers), end(numbers));
 
   const int sum{accumulate(begin(numbers), end(numbers), 0)};
@@ -53,16 +88,17 @@ int MeanMode(vector<int> numbers) {
 }
 
 int main() {
-  // cout << MeanMode(move(vector<int>{gets(stdin)}));
-  cout << MeanMode(move(vector<int>{5, 3, 3, 3, 1}))
-       << '\n';                                          // expected output: 1
-  cout << MeanMode(move(vector<int>{1, 2, 3})) << '\n';  // expected output: 0
-  cout << MeanMode(move(vector<int>{4, 4, 4, 6, 2}))
-       << '\n';                                         // expected output: 1
-  cout << MeanMode(move(vector<int>{10, 10})) << '\n';  // expected output: 1
-  cout << MeanMode(move(vector<int>{1, 1, 1, 1, 1}))
+  // cout << MeanMode_v1(move(vector<int>{gets(stdin)}));
+  cout << MeanMode_v1(move(vector<int>{5, 3, 3, 3, 1}))
        << '\n';  // expected output: 1
-  cout << MeanMode(move(vector<int>{10, 10, 10, 10, 10, 10, 10, 20, 9, 1}))
+  cout << MeanMode_v1(move(vector<int>{1, 2, 3}))
+       << '\n';  // expected output: 0
+  cout << MeanMode_v1(move(vector<int>{4, 4, 4, 6, 2}))
+       << '\n';                                            // expected output: 1
+  cout << MeanMode_v1(move(vector<int>{10, 10})) << '\n';  // expected output: 1
+  cout << MeanMode_v1(move(vector<int>{1, 1, 1, 1, 1}))
+       << '\n';  // expected output: 1
+  cout << MeanMode_v1(move(vector<int>{10, 10, 10, 10, 10, 10, 10, 20, 9, 1}))
        << '\n';  // expected output: 1
 
   return 0;

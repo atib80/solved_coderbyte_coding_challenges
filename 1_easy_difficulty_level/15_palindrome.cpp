@@ -80,9 +80,24 @@ string palindrome_v2(string str) {
   if (str_len < 2)
     return "false";
 
-  for (size_t i{}, j{str_len - 1}; i < j; i++, j--) {
+  size_t i{}, j{str_len - 1};
+
+  while (i < j) {
+    if (!isalpha(str[i])) {
+      i++;
+      continue;
+    }
+
+    if (!isalnum(str[j])) {
+      j--;
+      continue;
+    }
+
     if (str[i] != str[j])
       return "false";
+
+    i++;
+    j--;
   }
 
   return "true";
