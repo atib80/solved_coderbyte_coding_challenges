@@ -29,7 +29,7 @@ using namespace std;
 
 string ThirdGreatest(vector<string> words) {
   if (words.size() < 3)
-    return "Not possible!";
+    return "not possible";
 
   stable_sort(begin(words), end(words), [](const string& lw, const string& rw) {
     return (lw.length() > rw.length());
