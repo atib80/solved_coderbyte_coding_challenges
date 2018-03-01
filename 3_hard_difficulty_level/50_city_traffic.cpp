@@ -148,7 +148,7 @@ struct node {
 int find_max_traffic_for_graph_node(const map<int, node>& graph,
                                     const int node_id,
                                     unordered_set<int>& visited_nodes) {
-  if (0 == graph.count(node_id))
+  if (graph.find(node_id) == end(graph))
     return 0;
 
   int max_traffic{node_id};
@@ -157,7 +157,7 @@ int find_max_traffic_for_graph_node(const map<int, node>& graph,
       graph.find(node_id)->second.neighbors};
 
   for (const int next_neighbor_node_id : current_node_neighbors) {
-    if (visited_nodes.count(next_neighbor_node_id))
+    if (visited_nodes.find(next_neighbor_node_id) != end(visited_nodes))
       continue;
 
     visited_nodes.insert(next_neighbor_node_id);
@@ -233,7 +233,6 @@ string CityTraffic(string* str_arr, const size_t str_arr_size) {
 }
 
 int main() {
-	
   // string A[] = gets(stdin);
   // cout << CityTraffic(A, sizeof(A)/sizeof(*A));
   string B[] = {"1:[5]",   "4:[5]",    "3:[5]",  "5:[1,4,3,2]", "2:[5,15,7]",
