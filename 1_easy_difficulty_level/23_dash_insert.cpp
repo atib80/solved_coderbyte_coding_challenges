@@ -16,6 +16,7 @@ Output: 567-30
 
 #include <cctype>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -44,7 +45,7 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
-string DashInsert(string str) {
+string DashInsert_v1(string str) {
   str = trim(str);
 
   const size_t str_len{str.length()};
@@ -53,7 +54,6 @@ string DashInsert(string str) {
     return str;
 
   string result(1, str.front());
-  result.reserve(2 * str_len);  // 2 * str_len - 1
   bool is_prev_odd{str[0] % 2 == 1};
 
   for (size_t i{1}; i < str_len; i++) {
@@ -68,6 +68,32 @@ string DashInsert(string str) {
   }
 
   return result;
+}
+
+string DashInsert_v2(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  if (str_len < 2)
+    return str;
+
+  ostringstream oss{};
+  oss << str[0];
+
+  bool is_prev_odd{str[0] % 2 == 1};
+
+  for (size_t i{1}; i < str_len; i++) {
+    if (is_prev_odd && (str[i] % 2 == 1)) { 
+      oss << '-' << str[i];
+      continue;
+    }
+    
+    oss << str[i];
+    is_prev_odd = str[i] % 2 == 1;
+  }
+
+  return oss.str();
 }
 
 int main() {
