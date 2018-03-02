@@ -1,12 +1,16 @@
 /*
 Coderbyte coding challenge: Number Search
 
-Using the C++ language, have the function NumberSearch(str) take the str parameter, search for all the numbers in the string, add them together, 
-then return that final number divided by the total amount of letters in the string. For example: if str is "Hello6 9World 2, Nic8e D7ay!" the output should be 2. 
-First if you add up all the numbers, 6 + 9 + 2 + 8 + 7 you get 32. Then there are 17 letters in the string. 32 / 17 = 1.882, 
-and the final answer should be rounded to the nearest whole number, so the answer is 2. 
-Only single digit numbers separated by characters will be used throughout the whole string (So this won't ever be the case: hello44444 world). 
-Each string will also have at least one letter.
+Using the C++ language, have the function NumberSearch(str) take the str
+parameter, search for all the numbers in the string, add them together, then
+return that final number divided by the total amount of letters in the string.
+For example: if str is "Hello6 9World 2, Nic8e D7ay!" the output should be 2.
+First if you add up all the numbers, 6 + 9 + 2 + 8 + 7 you get 32. Then there
+are 17 letters in the string. 32 / 17 = 1.882, and the final answer should be
+rounded to the nearest whole number, so the answer is 2. Only single digit
+numbers separated by characters will be used throughout the whole string (So
+this won't ever be the case: hello44444 world). Each string will also have at
+least one letter.
 
 Sample test cases:
 
@@ -17,58 +21,97 @@ Input:  "One Number*1*"
 Output: 0
 */
 
-#include <iostream>
-#include <string>
+#include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <iostream>
+#include <string>
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-	if (0u == str.length()) return string{};
+  if (!str_len)
+    return string{};
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
+  size_t first{}, last{str_len - 1};
 
-	if (begin_str > end_str) return string{};
-
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
-
-	return str.substr(begin_str, end_str - begin_str + 1);
-}
-
-string NumberSearch(string str) {
-
-  str = trim(str);
-  
-  size_t sum{};
-  size_t letter_count{};
-
-  for (const char c : str) {
-  	if (isdigit(c)) sum += static_cast<size_t>(c - '0');
-  	else if (isalpha(c)) letter_count++;
+  for (; first <= last; ++first) {
+    if (!isspace(str[first]))
+      break;
   }
 
-  if (!letter_count || !sum) return "0";
+  if (first > last)
+    return string{};
 
-  return to_string(static_cast<long>(round(static_cast<float>(sum)/static_cast<float>(letter_count))));
+  for (; last > first; --last) {
+    if (!isspace(str[last]))
+      break;
+  }
 
+  return str.substr(first, last - first + 1);
 }
 
-int main() { 
-  
-  // cout << NumberSearch(move(string{gets(stdin)}));
-  cout << NumberSearch(move(string{"Hello6 9World 2, Nic8e D7ay!"})) << '\n'; // expected output: 2
-  cout << NumberSearch(move(string{"H3ello9-9"})) << '\n'; 					          // expected output: 4
-  cout << NumberSearch(move(string{"One Number*1*"})) << '\n'; 				        // expected output: 0
-  return 0;    
+string NumberSearch_v1(string str) {
+  str = trim(str);
+
+  int sum{};
+  int letter_count{};
+
+  for (const char ch : str) {
+    if (isdigit(ch))
+      sum += ch - '0';
+    else if (isalpha(ch))
+      letter_count++;
+  }
+
+  if (!sum) {
+    if (!letter_count)
+      return "NaN";
+    return "0";
+  }
+
+  if (!letter_count)
+    return "Infinity";
+
+  return to_string(
+      static_cast<long>(round(static_cast<float>(sum) / letter_count)));
+}
+
+string NumberSearch_v2(string str) {
+  str = trim(str);
+
+  int sum{};
+  int letter_count{};
+
+  for_each(begin(str), end(str), [&](const char ch) {
+    if (isdigit(ch))
+      sum += ch - '0';
+    else if (isalpha(ch))
+      letter_count++;
+  });
+
+  if (!sum) {
+    if (!letter_count)
+      return "NaN";
+    return "0";
+  }
+
+  if (!letter_count)
+    return "Infinity";
+
+  return to_string(
+      static_cast<long>(round(static_cast<float>(sum) / letter_count)));
+}
+
+int main() {
+  // cout << NumberSearch_v2(move(string{gets(stdin)}));
+  cout << NumberSearch_v2(move(string{"Hello6 9World 2, Nic8e D7ay!"}))
+       << '\n';  // expected output: 2
+  cout << NumberSearch_v2(move(string{"H3ello9-9"}))
+       << '\n';  // expected output: 4
+  cout << NumberSearch_v2(move(string{"One Number*1*"}))
+       << '\n';  // expected output: 0
+  return 0;
 }
