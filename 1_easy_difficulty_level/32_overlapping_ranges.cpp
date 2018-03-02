@@ -30,7 +30,7 @@ using namespace std;
 
 string OverlappingRanges(vector<int> v) {
   if (v.size() < 5)
-    return string{"Not possible! Please give me at least 5 whole numbers."};
+    return "Please give me at least 5 whole numbers.";
 
   const int A1{v[0]};
   const int B1{v[1]};
@@ -40,13 +40,13 @@ string OverlappingRanges(vector<int> v) {
 
   const int x{v[4]};
 
-  if ((A1 <= A2) && (B1 >= B2) && ((B2 - A2 + 1) >= x))
+  if ((A1 <= A2) && (B1 >= B2) && (B2 - A2 + 1 >= x))
     return "true";
 
-  if ((A1 <= A2) && (B1 <= B2) && (B1 >= A2) && ((B1 - A2 + 1) >= x))
+  if ((A1 <= A2) && (B1 <= B2) && (B1 >= A2) && (B1 - A2 + 1 >= x))
     return "true";
 
-  if ((A1 >= A2) && (B1 >= B2) && (A1 <= B2) && ((B2 - A1 + 1) >= x))
+  if ((A1 >= A2) && (B1 >= B2) && (A1 <= B2) && (B2 - A1 + 1 >= x))
     return "true";
 
   return "false";

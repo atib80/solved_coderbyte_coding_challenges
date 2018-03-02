@@ -61,8 +61,8 @@ string HammingDistance(const string* str_arr, const size_t str_arr_size) {
   const size_t str1_len{str_arr[0].length()};
   const size_t str2_len{str_arr[1].length()};
 
-  const size_t diff_len{
-      ((str1_len < str2_len) ? (str2_len - str1_len) : (str1_len - str2_len))};
+  const size_t diff_len{str1_len < str2_len ? str2_len - str1_len
+                                            : str1_len - str2_len};
 
   for (size_t i{}; i < min(str1_len, str2_len); i++) {
     if (str1[i] != str2[i])

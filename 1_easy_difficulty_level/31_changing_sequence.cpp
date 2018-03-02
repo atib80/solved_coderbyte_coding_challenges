@@ -27,16 +27,19 @@ Output: 3
 using namespace std;
 
 int ChangingSequence(vector<int> numbers) {
-  size_t si{1u};
+  if (numbers.size() < 3)
+    return -1;
 
-  for (; si != numbers.size(); si++) {
+  size_t si{1};
+
+  for (; si < numbers.size(); si++) {
     if (numbers[0] != numbers[si])
       break;
   }
 
   const bool ascending_order{numbers[0] < numbers[si]};
 
-  for (size_t i{si}; i != numbers.size(); i++) {
+  for (size_t i{si}; i < numbers.size(); i++) {
     if (ascending_order && (numbers[i - 1] > numbers[i]))
       return (i - 1);
 
