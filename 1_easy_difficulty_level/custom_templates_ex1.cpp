@@ -7,9 +7,9 @@
 #include <unordered_map>
 #include <vector>
 
-// experimental version of a custom binary search algorithm written using an
-// unordered_map container for quick lookup of lower and upper bound iterator
-// values and only 1 if comparison
+// experimental version of a custom binary search algorithm implemented using
+// 1 unordered_map container for quick lookup of lower and upper bound iterator
+// values and 1 if comparison
 
 template <typename RandomIter, typename T>
 bool bsearch(RandomIter first, RandomIter last, const T& value) {
@@ -18,8 +18,7 @@ bool bsearch(RandomIter first, RandomIter last, const T& value) {
   while (next_iterators[-1] <= next_iterators[1]) {
     RandomIter current{next_iterators[-1]};
 
-    typename std::iterator_traits<RandomIter>::difference_type curr_dist{
-        std::distance(next_iterators[-1], next_iterators[1])};
+    const auto curr_dist = std::distance(next_iterators[-1], next_iterators[1]);
 
     std::advance(current, curr_dist / 2);
 
