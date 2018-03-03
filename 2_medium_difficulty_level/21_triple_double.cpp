@@ -62,14 +62,14 @@ int TripleDouble_v2(int64_t num1, int64_t num2) {
 }
 
 int TripleDouble_v3(int64_t num1, int64_t num2) {
-  unordered_set<int> found_digits{};
+  unordered_set<int64_t> found_digits{};
 
   size_t digit_count{1};
-  int prev_digit{num1 % 10};
+  int64_t prev_digit{num1 % 10};
   num1 /= 10;
 
   while (num1) {
-    const int current_digit{num1 % 10};
+    const int64_t current_digit{num1 % 10};
     num1 /= 10;
 
     if ((-1 != prev_digit) && (current_digit == prev_digit)) {
@@ -95,7 +95,7 @@ int TripleDouble_v3(int64_t num1, int64_t num2) {
   } while (!found_digits.count(prev_digit));
 
   while (num2) {
-    const int current_digit{num2 % 10};
+    const int64_t current_digit{num2 % 10};
     num2 /= 10;
 
     if (!found_digits.count(current_digit)) {

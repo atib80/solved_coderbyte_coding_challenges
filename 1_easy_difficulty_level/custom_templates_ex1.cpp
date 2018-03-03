@@ -1,27 +1,34 @@
+#include <conio.h>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <iterator>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
+
+// experimental version of a custom binary search algorithm written using an
+// unordered_map container for quick lookup of lower and upper bound iterator
+// values and only 1 if comparison
 
 template <typename RandomIter, typename T>
 bool bsearch(RandomIter first, RandomIter last, const T& value) {
   std::unordered_map<int, RandomIter> next_iterators{{-1, first}, {1, last}};
 
-  while (next_iterators[-1] < next_iterators[1]) {
-    const auto d = std::distance(next_iterators[-1], next_iterators[1]);
-
+  while (next_iterators[-1] <= next_iterators[1]) {
     RandomIter current{next_iterators[-1]};
 
-    std::advance(current, max(1, d / 2));
+    typename std::iterator_traits<RandomIter>::difference_type curr_dist{
+        std::distance(next_iterators[-1], next_iterators[1])};
 
-    const T result{*current - value};
+    std::advance(current, curr_dist / 2);
 
-    if (0 == result)
+    if (value == *current)
       return true;
 
-    next_iterators[result / std::abs(result)] = current;
+    const int index = (*current - value) / std::abs(*current - value);
+
+    next_iterators[index] = current - index;
   }
 
   return false;
@@ -54,6 +61,33 @@ bool next_permutation(BidirIt first, BidirIt last) {
   }
 }
 
+template <class BidirIt>
+bool prev_permutation(BidirIt first, BidirIt last) {
+  if (first == last)
+    return false;
+  BidirIt i = last;
+  if (first == --i)
+    return false;
+
+  while (1) {
+    BidirIt i1, i2;
+
+    i1 = i;
+    if (*i1 < *--i) {
+      i2 = last;
+      while (!(*--i2 < *i))
+        ;
+      std::iter_swap(i, i2);
+      std::reverse(i1, last);
+      return true;
+    }
+    if (i == first) {
+      std::reverse(first, last);
+      return false;
+    }
+  }
+}
+
 using namespace std;
 
 int main() {
@@ -61,8 +95,8 @@ int main() {
 
   sort(begin(numbers), end(numbers));
 
-  if (bsearch(begin(numbers), end(numbers), 10))
-    cout << "Found value 10!";
+  if (bsearch(begin(numbers), end(numbers), 53))
+    cout << "Found target!";
   else
     cout << "No dice!";
 
