@@ -51,9 +51,9 @@ Input:  "1:[5]", "2:[5,18]", "3:[5,12]", "4:[5]", "5:[1,2,3,4]", "18:[2]",
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -145,7 +145,7 @@ struct node {
   vector<int> neighbors;
 };
 
-int find_max_traffic_for_graph_node(const unordered_map<int, node>& graph,
+int find_max_traffic_for_graph_node(const map<int, node>& graph,
                                     const int node_id,
                                     unordered_set<int>& visited_nodes) {
   if (graph.find(node_id) == end(graph))
@@ -171,10 +171,10 @@ int find_max_traffic_for_graph_node(const unordered_map<int, node>& graph,
   return max_traffic;
 }
 
-unordered_map<int, node> create_city_graph_from_input_string_array(
+map<int, node> create_city_graph_from_input_string_array(
     string* str_arr,
     const size_t str_arr_size) {
-  unordered_map<int, node> city_graph{};
+  map<int, node> city_graph{};
 
   for (size_t i{}; i < str_arr_size; i++) {
     str_arr[i] = trim(str_arr[i]);
@@ -194,9 +194,8 @@ unordered_map<int, node> create_city_graph_from_input_string_array(
 }
 
 string find_maximum_traffic_for_all_city_nodes(
-    const unordered_map<int, node>& city_graph) {
+    const map<int, node>& city_graph) {
   unordered_set<int> visited_nodes{};
-  vector<pair<int, int>> city_nodes_max_traffic{};
   ostringstream oss{};
 
   for (const auto& current_node : city_graph) {
@@ -217,29 +216,18 @@ string find_maximum_traffic_for_all_city_nodes(
       visited_nodes.erase(neighbor_node_id);
     }
 
-    city_nodes_max_traffic.emplace_back(
-        make_pair(current_node.first, max_traffic_for_current_node));
+    oss << current_node.first << ':' << max_traffic_for_current_node << ',';
 
     visited_nodes.erase(current_node.first);
   }
 
-  sort(begin(city_nodes_max_traffic), end(city_nodes_max_traffic),
-       [](const pair<int, int>& lp, const pair<int, int>& rp) {
-         return lp.first < rp.first;
-       });
-
-  for (size_t i{}; i < city_nodes_max_traffic.size() - 1; i++)
-    oss << city_nodes_max_traffic[i].first << ':'
-        << city_nodes_max_traffic[i].second << ',';
-
-  oss << city_nodes_max_traffic.back().first << ':'
-      << city_nodes_max_traffic.back().second;
-
-  return oss.str();
+  string output{oss.str()};
+  output.erase(output.length() - 1, 1);
+  return output;
 }
 
 string CityTraffic(string* str_arr, const size_t str_arr_size) {
-  const unordered_map<int, node> city_graph{
+  const map<int, node> city_graph{
       create_city_graph_from_input_string_array(str_arr, str_arr_size)};
 
   return find_maximum_traffic_for_all_city_nodes(city_graph);
