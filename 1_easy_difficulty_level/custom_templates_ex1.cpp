@@ -7,27 +7,33 @@
 #include <unordered_map>
 #include <vector>
 
-// experimental version of a custom binary search algorithm implemented using
-// 1 unordered_map container for quick lookup of lower and upper bound iterator
-// values and 1 if comparison
-
 template <typename RandomIter, typename T>
 bool bsearch(RandomIter first, RandomIter last, const T& value) {
-  std::unordered_map<int, RandomIter> next_iterators{{-1, first}, {1, last}};
+  std::unordered_map<bool, RandomIter> next_iterators{{true, first},
+                                                      {false, last}};
 
-  while (next_iterators[-1] <= next_iterators[1]) {
-    RandomIter current{next_iterators[-1]};
+  // T delta_diff{};
+  // if (std::is_floating_point<T>::value) delta_diff = static_cast<T>(0.00001);
 
-    const auto curr_dist = std::distance(next_iterators[-1], next_iterators[1]);
+  while (next_iterators[true] <= next_iterators[false]) {
+    RandomIter current{next_iterators[true]};
+
+    const auto curr_dist =
+        std::distance(next_iterators[true], next_iterators[false]);
 
     std::advance(current, curr_dist / 2);
 
-    if (value == *current)
+    const T diff{*current - value};
+
+    // if (abs(diff) <= delta_diff)
+    // return true;
+
+    if (0 == diff)
       return true;
 
-    const int index = (*current - value) / std::abs(*current - value);
+    const bool index{signbit(static_cast<double>(diff))};
 
-    next_iterators[index] = current - index;
+    next_iterators[index] = current - (index ? -1 : 1);
   }
 
   return false;
@@ -94,10 +100,54 @@ int main() {
 
   sort(begin(numbers), end(numbers));
 
-  if (bsearch(begin(numbers), end(numbers), 53))
-    cout << "Found target!";
+  int target{1};
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
   else
-    cout << "No dice!";
+    cout << "Target number (" << target << ") could not be found!\n";
+
+  target = 15;
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
+  else
+    cout << "Target number (" << target << ") could not be found!\n";
+
+  target = 17;
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
+  else
+    cout << "Target number (" << target << ") could not be found!\n";
+
+  target = 23;
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
+  else
+    cout << "Target number (" << target << ") could not be found!\n";
+
+  target = 26;
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
+  else
+    cout << "Target number (" << target << ") could not be found!\n";
+
+  target = 52;
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
+  else
+    cout << "Target number (" << target << ") could not be found!\n";
+
+  target = 53;
+
+  if (bsearch(begin(numbers), end(numbers), target))
+    cout << "Found target number: " << target << '\n';
+  else
+    cout << "Target number (" << target << ") could not be found!\n";
 
   return 0;
 }
