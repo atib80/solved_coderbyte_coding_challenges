@@ -25,7 +25,99 @@ Output: 2
 
 using namespace std;
 
-size_t CoinDeterminer(const size_t money) {
+size_t CoinDeterminer_v1(const size_t money) {
+  if (!money)
+    return 0;
+
+  const vector<size_t> coins{11, 9, 7, 5, 1};
+
+  for (const auto coin : coins) {
+    if (money % coin == 0)
+      return money / coin;
+
+    if (coin < money)
+      break;
+  }
+
+  size_t min_number_of_needed_coins{string::npos};
+
+  for (size_t i{}; i < coins.size(); i++) {
+    size_t amount{money}, coins_count{};
+    bool skip_iteration{false};
+
+    for (size_t j{i}; j < coins.size(); j++) {
+      if (coins[j] > amount)
+        continue;
+
+      const size_t factor{amount / coins[j]};
+
+      if (coins_count + factor >= min_number_of_needed_coins) {
+        skip_iteration = true;
+        break;
+      }
+
+      coins_count += factor;
+
+      amount %= coins[j];
+
+      if (!amount)
+        break;
+    }
+
+    if (!skip_iteration && (coins_count < min_number_of_needed_coins))
+      min_number_of_needed_coins = coins_count;
+  }
+
+  return min_number_of_needed_coins;
+}
+
+void find_minimum_number_of_coins_for_specified_money_amount(
+    const vector<size_t>& coins,
+    const size_t index,
+    const size_t target_amount,
+    size_t& min_number_of_coins,
+    const size_t current_number_of_coins = 0) {
+  if (!target_amount && (current_number_of_coins < min_number_of_coins)) {
+    min_number_of_coins = current_number_of_coins;
+    return;
+  }
+
+  if (current_number_of_coins >= min_number_of_coins)
+    return;
+
+  for (size_t i{index}; i < coins.size(); i++) {
+    if (coins[i] > target_amount)
+      continue;
+
+    find_minimum_number_of_coins_for_specified_money_amount(
+        coins, i + 1, target_amount % coins[i], min_number_of_coins,
+        current_number_of_coins + target_amount / coins[i]);
+  }
+}
+
+size_t CoinDeterminer_v2(const size_t money) {
+  if (!money)
+    return 0;
+
+  const vector<size_t> coins{11, 9, 7, 5, 1};
+
+  for (const auto coin : coins) {
+    if (money % coin == 0)
+      return money / coin;
+
+    if (coin < money)
+      break;
+  }
+
+  size_t min_number_of_needed_coins{string::npos};
+
+  find_minimum_number_of_coins_for_specified_money_amount(
+      coins, 0, money, min_number_of_needed_coins, 0);
+
+  return min_number_of_needed_coins;
+}
+
+size_t CoinDeterminer_v3(const size_t money) {
   if (!money)
     return 0;
 
@@ -62,7 +154,9 @@ size_t CoinDeterminer(const size_t money) {
 
     coins_count += factor;
 
-    amount -= factor * coins[i];
+    // amount -= factor * coins[i];
+
+    amount %= coins[i];
 
     if (!amount) {
       if (coins_count < min_number_of_needed_coins)
@@ -82,117 +176,28 @@ size_t CoinDeterminer(const size_t money) {
   return min_number_of_needed_coins;
 }
 
-size_t CoinDeterminer_v2(const size_t money) {
-  if (!money)
-    return 0;
-
-  const vector<size_t> coins{11, 9, 7, 5, 1};
-
-  for (const auto coin : coins) {
-    if (money % coin == 0)
-      return money / coin;
-
-    if (coin < money)
-      break;
-  }
-
-  size_t min_number_of_needed_coins{string::npos};
-
-  for (size_t i{}; i < coins.size(); i++) {
-    size_t amount{money}, coins_count{};
-
-    bool skip_iteration{false};
-
-    for (size_t j{i}; j < coins.size(); j++) {
-      if (coins[j] > amount)
-        continue;
-
-      const size_t factor{amount / coins[j]};
-
-      if ((string::npos != min_number_of_needed_coins) &&
-          ((coins_count + factor) >= min_number_of_needed_coins)) {
-        skip_iteration = true;
-        break;
-      }
-
-      coins_count += factor;
-
-      amount %= coins[j];
-
-      if (!amount)
-        break;
-    }
-
-    if (!skip_iteration && (coins_count < min_number_of_needed_coins))
-      min_number_of_needed_coins = coins_count;
-  }
-
-  return min_number_of_needed_coins;
-}
-
-void find_minimum_number_of_coins_for_specified_money_amount(
-    const vector<size_t>& coins,
-    const size_t index,
-    const size_t target_amount,
-    size_t& min_number_of_coins,
-    const size_t current_number_of_coins = 0) {
-  
-  if (!target_amount && (current_number_of_coins < min_number_of_coins)) {
-    min_number_of_coins = current_number_of_coins;
-    return;
-  }
-
-  if (current_number_of_coins >= min_number_of_coins)
-    return;
-
-  if (index == coins.size())
-    return;
-
-  for (size_t i{index}; i < coins.size(); i++) {
-    if (coins[i] > target_amount)
-      continue;
-
-    find_minimum_number_of_coins_for_specified_money_amount(
-        coins, i + 1, target_amount % coins[i], min_number_of_coins,
-        current_number_of_coins + target_amount / coins[i]);
-  }
-}
-
-size_t CoinDeterminer_v3(const size_t money) {
-  if (!money)
-    return 0;
-
-  const vector<size_t> coins{11, 9, 7, 5, 1};
-
-  for (const auto coin : coins) {
-    if (money % coin == 0)
-      return money / coin;
-
-    if (coin < money)
-      break;
-  }
-
-  size_t min_number_of_needed_coins{string::npos};
-
-  find_minimum_number_of_coins_for_specified_money_amount(
-      coins, 0, money, min_number_of_needed_coins, 0);
-
-  return min_number_of_needed_coins;
-}
-
 int main() {
-  // cout << CoinDeterminer(gets(stdin));
-  cout << CoinDeterminer(16) << '\n';  // expected output: 2
-  cout << CoinDeterminer(25) << '\n';  // expected output: 3
-  cout << CoinDeterminer(6) << '\n';   // expected output: 2
+  // cout << CoinDeterminer_v1(gets(stdin));
+  cout << "CoinDeterminer_v1(16) returns: " << CoinDeterminer_v1(16)
+       << '\n';  // expected output: 2
+  cout << "CoinDeterminer_v1(25) returns: " << CoinDeterminer_v1(25)
+       << '\n';  // expected output: 3
+  cout << "CoinDeterminer_v1(6)  returns: " << CoinDeterminer_v1(6)
+       << '\n';  // expected output: 2
   cout << "-----------------------------\n";
-  cout << CoinDeterminer_v2(16) << '\n';  // expected output: 2
-  cout << CoinDeterminer_v2(25) << '\n';  // expected output: 3
-  cout << CoinDeterminer_v2(6) << '\n';   // expected output: 2
+  cout << "CoinDeterminer_v2(16) returns: " << CoinDeterminer_v2(16)
+       << '\n';  // expected output: 2
+  cout << "CoinDeterminer_v2(25) returns: " << CoinDeterminer_v2(25)
+       << '\n';  // expected output: 3
+  cout << "CoinDeterminer_v2(6)  returns: " << CoinDeterminer_v2(6)
+       << '\n';  // expected output: 2
   cout << "-----------------------------\n";
-  cout << CoinDeterminer_v3(16) << '\n';  // expected output: 2
-  cout << CoinDeterminer_v3(25) << '\n';  // expected output: 3
-  cout << CoinDeterminer_v3(6) << '\n';   // expected output: 2
+  cout << "CoinDeterminer_v3(16) returns: " << CoinDeterminer_v3(16)
+       << '\n';  // expected output: 2
+  cout << "CoinDeterminer_v3(25) returns: " << CoinDeterminer_v3(25)
+       << '\n';  // expected output: 3
+  cout << "CoinDeterminer_v3(6)  returns: " << CoinDeterminer_v3(6)
+       << '\n';  // expected output: 2
 
   return 0;
 }
