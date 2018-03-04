@@ -39,6 +39,9 @@ size_t CoinDeterminer_v1(const size_t money) {
       break;
   }
 
+  // string::npos is usually equivalent to 2^32 - 1 or 2^64 - 1
+  // (the largest positive value a 32-bit or 64-bit unsigned integral type
+  // (uint32_t or uint64_t) can hold)
   size_t min_number_of_needed_coins{string::npos};
 
   for (size_t i{}; i < coins.size(); i++) {
