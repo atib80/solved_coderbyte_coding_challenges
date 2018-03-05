@@ -33,7 +33,7 @@ bool is_next_number_palindrome(const string& num_str) {
   return false;
 }
 
-int NextPalindrome(int num) {
+int NextPalindrome_v1(int num) {
   num = abs(num);
 
   if (num < 9)
@@ -50,11 +50,35 @@ int NextPalindrome(int num) {
   return num;
 }
 
+int NextPalindrome_v2(int num) {
+  num = abs(num);
+
+  if (num < 9)
+    return num + 1;
+
+  do {
+    num++;
+
+    int original_num{num};
+    int palindromic_num{};
+
+    while (original_num) {
+      palindromic_num *= 10;
+      palindromic_num += original_num % 10;
+      original_num /= 10;
+    }
+
+    if (num == palindromic_num)
+      return num;
+
+  } while (true);
+}
+
 int main() {
-  // cout << NextPalindrome(gets(stdin));
-  cout << NextPalindrome(24) << '\n';   // expected output: 33
-  cout << NextPalindrome(2) << '\n';    // expected output: 3
-  cout << NextPalindrome(180) << '\n';  // expected output: 181
+  // cout << NextPalindrome_v2(gets(stdin));
+  cout << NextPalindrome_v2(24) << '\n';   // expected output: 33
+  cout << NextPalindrome_v2(2) << '\n';    // expected output: 3
+  cout << NextPalindrome_v2(180) << '\n';  // expected output: 181
 
   return 0;
 }

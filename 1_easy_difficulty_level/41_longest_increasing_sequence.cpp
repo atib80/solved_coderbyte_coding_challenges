@@ -172,7 +172,7 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
       const size_t si{*begin(overlooked_indices)};
       overlooked_indices.erase(begin(overlooked_indices));
 
-      if ((arr_size - si + 1) <= max_lis_length) {
+      if (arr_size - si + 1 <= max_lis_length) {
         overlooked_indices.clear();
         break;
       }
@@ -194,7 +194,7 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
         max_lis_length = current_lis_length;
     }
 
-    if ((arr_size - 1 - i) <= max_lis_length)
+    if (arr_size - 1 - i <= max_lis_length)
       break;
   }
 
