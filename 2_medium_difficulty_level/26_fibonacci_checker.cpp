@@ -23,14 +23,14 @@ Output: "no"
 using namespace std;
 
 uint64_t fibonacci(const uint64_t num) {
-  if (num < 2ULL)
+  if (num < 2)
     return num;
 
-  return (fibonacci(num - 1ULL) + fibonacci(num - 2ULL));
+  return (fibonacci(num - 1) + fibonacci(num - 2));
 }
 
 string FibonacciChecker(const uint64_t num) {
-  if (num == 0ULL || num == 1ULL)
+  if (num < 2)
     return "yes";
 
   uint64_t a{}, b{1};

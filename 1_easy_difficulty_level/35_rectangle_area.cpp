@@ -18,6 +18,7 @@ Input:  "(0 0)","(1 0)","(1 1)","(0 1)"
 Output: 1
 */
 
+#include <algorithm>
 #include <cctype>
 #include <functional>
 #include <iostream>
@@ -28,16 +29,18 @@ Output: 1
 
 using namespace std;
 
-void trim(const string& input) {
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-    string output{input};
-    output.erase(begin(output), find_if(begin(output), end(output), [](const char ch) {
-        return !isspace(ch);
-    }));
+  output.erase(find_if(rbegin(output), rend(output),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-    output.erase(find_if(rbegin(output), rend(output), [](const char ch) {
-        return !isspace(ch);
-    }).base(), end(output));
+  return output;
 }
 
 vector<string> split(const string& source,
