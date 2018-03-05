@@ -28,28 +28,16 @@ Output: 1
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+void trim(const string& input) {
 
-  if (!str_len)
-    return string{};
+    string output{input};
+    output.erase(begin(output), find_if(begin(output), end(output), [](const char ch) {
+        return !isspace(ch);
+    }));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+    output.erase(find_if(rbegin(output), rend(output), [](const char ch) {
+        return !isspace(ch);
+    }).base(), end(output));
 }
 
 vector<string> split(const string& source,

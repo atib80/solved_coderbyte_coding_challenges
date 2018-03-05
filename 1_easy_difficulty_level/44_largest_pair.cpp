@@ -23,12 +23,12 @@ Output: 63
 
 using namespace std;
 
-int LargestPair_v1(int num) {
+int64_t LargestPair_v1(int64_t num) {
   num = abs(num);
 
   string num_str{to_string(num)};
 
-  set<int, greater<int>> two_digit_numbers{};
+  set<int64_t, greater<int64_t>> two_digit_numbers{};
 
   for (size_t i{}; i < num_str.length() - 1; i++) {
     two_digit_numbers.insert(stoi(num_str.substr(i, 2)));
@@ -37,12 +37,12 @@ int LargestPair_v1(int num) {
   return (*begin(two_digit_numbers));
 }
 
-int LargestPair_v2(int num) {
+int64_t LargestPair_v2(int64_t num) {
   num = abs(num);
-  int current_max_num{};
+  int64_t current_max_num{};
 
   while (num >= 10) {
-    int current_num{num % 10};
+    int64_t current_num{num % 10};
     num /= 10;
     current_num += (num % 10) * 10;
     if (current_num > current_max_num)
@@ -52,14 +52,14 @@ int LargestPair_v2(int num) {
   return current_max_num;
 }
 
-int LargestPair_v3(int num) {
+int64_t LargestPair_v3(int64_t num) {
   num = abs(num);
   string num_str{to_string(num)};
-  int current_max_num{};
+  int64_t current_max_num{};
 
   for (size_t i{}; i < num_str.length() - 1; i++) {
-    const int current_num{static_cast<int>(num_str[i] - '0') * 10 +
-                          static_cast<int>(num_str[i + 1] - '0')};
+    const int64_t current_num{static_cast<int64_t>(num_str[i] - '0') * 10 +
+                              static_cast<int64_t>(num_str[i + 1] - '0')};
     if (current_num > current_max_num)
       current_max_num = current_num;
   }
@@ -68,10 +68,11 @@ int LargestPair_v3(int num) {
 }
 
 int main() {
-  // cout << LargestPair_v1(gets(stdin));
-  cout << LargestPair_v3(4759472) << '\n';    // expected output: 94
-  cout << LargestPair_v3(453857) << '\n';     // expected output: 85
-  cout << LargestPair_v3(363223311) << '\n';  // expected output: 63
+  // cout << LargestPair_v2(gets(stdin));
+  cout << LargestPair_v2(4759472) << '\n';     // expected output: 94
+  cout << LargestPair_v2(453857) << '\n';      // expected output: 85
+  cout << LargestPair_v2(363223311) << '\n';   // expected output: 63
+  cout << LargestPair_v2(5673536634) << '\n';  // expected output: 73
 
   return 0;
 }
