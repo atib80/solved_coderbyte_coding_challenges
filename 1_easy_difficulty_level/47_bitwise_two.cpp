@@ -24,7 +24,7 @@ Output: "10100"
 using namespace std;
 
 string BitwiseTwo_v1(const string* binary_numbers, const size_t str_arr_size) {
-  if (str_arr_size < 2)
+  if (!binary_numbers || str_arr_size < 2)
     return "Not possible!";
 
   if (binary_numbers[0].length() != binary_numbers[1].length())
@@ -41,7 +41,7 @@ string BitwiseTwo_v1(const string* binary_numbers, const size_t str_arr_size) {
 }
 
 string BitwiseTwo_v2(const string* binary_numbers, const size_t str_arr_size) {
-  if (str_arr_size < 2)
+  if (!binary_numbers || str_arr_size < 2)
     return "Not possible!";
 
   if (binary_numbers[0].length() != binary_numbers[1].length())
@@ -50,19 +50,17 @@ string BitwiseTwo_v2(const string* binary_numbers, const size_t str_arr_size) {
   int result{stoi(binary_numbers[0], nullptr, 2) &
              stoi(binary_numbers[1], nullptr, 2)};
 
-  string result_str{};
+  size_t index{binary_numbers[0].length()};
+  string result_str(index, '0');
+  index--;
 
   while (result) {
     if (result % 2 == 1)
-      result_str.insert(begin(result_str), '1');
-    else
-      result_str.insert(begin(result_str), '0');
+      result_str[index] = '1';
 
     result /= 2;
+    index--;
   }
-
-  result_str.insert(begin(result_str),
-                    binary_numbers[0].length() - result_str.length(), '0');
 
   return result_str;
 }

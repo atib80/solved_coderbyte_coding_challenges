@@ -25,31 +25,59 @@ Output: 3
 
 using namespace std;
 
-size_t ProductDigits(const size_t num) {
+size_t get_number_length(size_t number) {
+  size_t len{};
+
+  while (number) {
+    number /= 10;
+    len++;
+  }
+
+  return len;
+}
+
+size_t ProductDigits_v1(const size_t num) {
   string result{"1" + to_string(num)};
-  size_t current_min_len{result.length()};
+  size_t min_len{result.length()};
 
   for (size_t i{2}; i < static_cast<size_t>(sqrt(num)) + 1; i++) {
     const size_t factor{num / i};
 
     if (num == i * factor) {
       result = to_string(i) + to_string(factor);
-      if (result.length() < current_min_len)
-        current_min_len = result.length();
+      if (result.length() < min_len)
+        min_len = result.length();
     }
   }
 
-  return current_min_len;
+  return min_len;
+}
+
+size_t ProductDigits_v2(const size_t num) {
+  size_t min_len{1 + get_number_length(num)};
+
+  for (size_t i{2}; i < static_cast<size_t>(sqrt(num)) + 1; i++) {
+    const size_t factor{num / i};
+
+    if (num == i * factor) {
+      const size_t current_len{get_number_length(i) +
+                               get_number_length(factor)};
+      if (current_len < min_len)
+        min_len = current_len;
+    }
+  }
+
+  return min_len;
 }
 
 int main() {
-  // cout << ProductDigits(gets(stdin));
-  cout << ProductDigits(24) << '\n';  // expected output: 2
-  cout << ProductDigits(90) << '\n';  // expected output: 3
-  cout << ProductDigits(6) << '\n';   // expected output: 2
-  cout << ProductDigits(23) << '\n';  // expected output: 3
-  cout << ProductDigits(1) << '\n';   // expected output: 2
-  cout << ProductDigits(79) << '\n';  // expected output: 3
+  // cout << ProductDigits_v2(gets(stdin));
+  cout << ProductDigits_v2(24) << '\n';  // expected output: 2
+  cout << ProductDigits_v2(90) << '\n';  // expected output: 3
+  cout << ProductDigits_v2(6) << '\n';   // expected output: 2
+  cout << ProductDigits_v2(23) << '\n';  // expected output: 3
+  cout << ProductDigits_v2(1) << '\n';   // expected output: 2
+  cout << ProductDigits_v2(79) << '\n';  // expected output: 3
 
   return 0;
 }

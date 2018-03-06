@@ -28,7 +28,10 @@ Output: "k"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <queue>
+#include <stack>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
@@ -63,11 +66,33 @@ bool is_palindrome(const string& str) {
   return str == reversed_str;
 }
 
-string PalindromeCreator(string str) {
+bool is_palindrome(const string& str, unordered_set<size_t> ignore_indices) {
+  stack<char> s{};
+  queue<char> q{};
+
+  for (size_t i{}; i != str.length(); i++) {
+    if (ignore_indices.count(i))
+      continue;
+
+    s.emplace(str[i]);
+    q.emplace(str[i]);
+  }
+
+  while (!s.empty() && !q.empty()) {
+    if (s.top() != q.front())
+      return false;
+    s.pop();
+    q.pop();
+  }
+
+  return true;
+}
+
+string PalindromeCreator_v1(string str) {
   str = trim(str);
 
   if (is_palindrome(str))
-    return string{"palindrome"};
+    return "palindrome";
 
   const size_t str_len{str.length()};
 
@@ -104,11 +129,39 @@ string PalindromeCreator(string str) {
   return "not possible";
 }
 
+string PalindromeCreator_v2(string str) {
+  str = trim(str);
+
+  if (is_palindrome(str))
+    return "palindrome";
+
+  const size_t str_len{str.length()};
+
+  for (size_t i{}; i < str_len; i++) {
+    if (is_palindrome(str, move(unordered_set<size_t>{i})))
+      return string(1, str[i]);
+  }
+
+  if (str_len < 5)
+    return "not possible";  // if str's length is less than 5 then we
+                            // can only remove 1 character from it at a time
+
+  for (size_t i{}; i < str_len - 1; i++) {
+    for (size_t j{i + 1}; j < str_len; j++) {
+      if (is_palindrome(str, move(unordered_set<size_t>{i, j})))
+        return string({str[i], str[j]});
+    }
+  }
+
+  return "not possible";
+}
+
 int main() {
-  // cout << PalindromeCreator(move(string{gets(stdin)}));
-  cout << PalindromeCreator(move(string{"abjchba"})) << '\n';  // "jc"
-  cout << PalindromeCreator(move(string{"mmop"})) << '\n';     // "not possible"
-  cout << PalindromeCreator(move(string{"kjjjhjjj"})) << '\n';      // "k"
-  cout << PalindromeCreator(move(string{"vhhgghhgghhk"})) << '\n';  // "vk"
+  // cout << PalindromeCreator_v2(move(string{gets(stdin)}));
+  cout << PalindromeCreator_v2(move(string{"abjchba"})) << '\n';  // "jc"
+  cout << PalindromeCreator_v2(move(string{"mmop"})) << '\n';  // "not possible"
+  cout << PalindromeCreator_v2(move(string{"kjjjhjjj"})) << '\n';      // "k"
+  cout << PalindromeCreator_v2(move(string{"vhhgghhgghhk"})) << '\n';  // "vk"
+
   return 0;
 }
