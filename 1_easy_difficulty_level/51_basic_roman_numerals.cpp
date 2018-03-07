@@ -68,7 +68,7 @@ string BasicRomanNumerals(string str) {
       {"I", 1},    {"IV", 4},  {"IX", 9},  {"XL", 40}, {"XC", 90}};
 
   for (size_t i{}; i < str_len; i++) {
-    const size_t len{i < str_len - 1 ? 2u : 1u};
+    const size_t len = i < str_len - 1 ? 2 : 1;
 
     string key{str.substr(i, len)};
 
@@ -78,7 +78,7 @@ string BasicRomanNumerals(string str) {
       continue;
     }
 
-    key.erase(1, 1);
+    key.erase(--end(key));
 
     if (rn.find(key) != end(rn)) {
       number += rn.find(key)->second;  // number += (*rn.find(key)).second;

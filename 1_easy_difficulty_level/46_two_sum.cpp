@@ -59,9 +59,8 @@ size_t bsearch(ForwardIt first, ForwardIt last, const T& value) {
       typename std::iterator_traits<ForwardIt>::difference_type;
   const ForwardIt start{first};
   first = lower_bound(first, last, value);
-  return (!(first == last) && !(value < *first))
-             ? static_cast<difference_type>(first - start)
-             : string::npos;
+  return (!(first == last) && (value == *first)) ? std::distance(start, first)
+                                                 : string::npos;
 }
 
 string TwoSum_v2(const int* arr, const size_t arr_size) {

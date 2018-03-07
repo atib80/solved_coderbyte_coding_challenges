@@ -13,9 +13,8 @@ size_t bsearch(ForwardIt first, ForwardIt last, const T& value) {
       typename std::iterator_traits<ForwardIt>::difference_type;
   const ForwardIt start{first};
   first = std::lower_bound(first, last, value);
-  return (!(first == last) && !(value < *first))
-             ? static_cast<difference_type>(first - start)
-             : std::string::npos;
+  return (!(first == last) && (value == *first)) ? std::distance(start, first)
+                                                 : string::npos;
 }
 
 template <class BidirIt>
