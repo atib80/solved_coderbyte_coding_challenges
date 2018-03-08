@@ -43,13 +43,152 @@ Output: 4
 
 using namespace std;
 
-size_t FoodDistribution(int* arr, const size_t arr_size) {
+size_t
+get_final_minimized_hunger_diff_level_by_balancing_hunger_diff_levels_between_each_pair_of_neighbors(
+    const int* arr,
+    const size_t arr_size) {
   int number_of_sandwiches{arr[0]};
-  vector<int> hungry_levels_arr(arr + 1, arr + arr_size);
+  vector<int> hungry_levels(arr + 1, arr + arr_size);
+
+  bool is_first_pair{true};
+
+  for (size_t i{}; i < hungry_levels.size() - 1; i++) {
+    int diff_level_between_neighbors{
+        abs(hungry_levels[i + 1] - hungry_levels[i])};
+
+    if (!number_of_sandwiches)
+      break;
+
+    if (diff_level_between_neighbors > 0) {
+      if (diff_level_between_neighbors > number_of_sandwiches)
+        diff_level_between_neighbors = number_of_sandwiches;
+
+      if (is_first_pair && (hungry_levels[i] > hungry_levels[i + 1])) {
+        is_first_pair = false;
+        hungry_levels[i] -= diff_level_between_neighbors;
+        number_of_sandwiches -= diff_level_between_neighbors;
+
+      } else if (hungry_levels[i + 1] > hungry_levels[i]) {
+        hungry_levels[i + 1] -= diff_level_between_neighbors;
+        number_of_sandwiches -= diff_level_between_neighbors;
+      }
+    }
+  }
+
+  size_t hungry_level_diff{};
+
+  for (size_t i{1}; i < hungry_levels.size() - 1; i++) {
+    hungry_level_diff += abs(hungry_levels[i + 1] - hungry_levels[i]);
+  }
+
+  return hungry_level_diff;
+}
+
+size_t
+get_final_minimized_diff_level_by_balancing_diff_levels_using_average_hunger_level(
+    const int* arr,
+    const size_t arr_size) {
+  int number_of_sandwiches{arr[0]};
+  vector<int> hungry_levels(arr + 1, arr + arr_size);
+
+  const int average_hungry_level =
+      accumulate(begin(hungry_levels), end(hungry_levels), 0) /
+      hungry_levels.size();
+
+  int prev_level{};
+
+  for (size_t i{}; i < hungry_levels.size(); i++) {
+    if (!number_of_sandwiches)
+      break;
+
+    if (hungry_levels[i] > average_hungry_level) {
+      const int diff_level_between_neighbors{hungry_levels[i] -
+                                             average_hungry_level};
+
+      if (diff_level_between_neighbors > number_of_sandwiches) {
+        hungry_levels[i] -= number_of_sandwiches;
+        break;
+      }
+
+      hungry_levels[i] -= diff_level_between_neighbors;
+      number_of_sandwiches -= diff_level_between_neighbors;
+
+    } else if (hungry_levels[i] > prev_level) {
+      const int diff_level_between_neighbors{hungry_levels[i] - prev_level};
+
+      if (diff_level_between_neighbors > number_of_sandwiches) {
+        hungry_levels[i] -= number_of_sandwiches;
+        break;
+      }
+
+      hungry_levels[i] -= diff_level_between_neighbors;
+      number_of_sandwiches -= diff_level_between_neighbors;
+    }
+
+    prev_level = hungry_levels[i];
+  }
+
+  size_t hungry_level_diff{};
+
+  for (size_t i{}; i < hungry_levels.size() - 1; i++) {
+    hungry_level_diff += abs(hungry_levels[i + 1] - hungry_levels[i]);
+  }
+
+  return hungry_level_diff;
+}
+
+size_t
+get_final_minimized_difference_level_by_balancing_sorted_hunger_diff_levels(
+    const int* arr,
+    const size_t arr_size) {
+  int number_of_sandwiches{arr[0]};
 
   vector<pair<size_t, int>> hungry_levels{};
-  vector<int> hungry_levels_sorted(arr + 1, arr + arr_size);
+  vector<int> hungry_levels_arr(arr + 1, arr + arr_size);
 
+  for (size_t i{1}; i < arr_size; i++)
+    hungry_levels.emplace_back(make_pair(i - 1, arr[i]));
+
+  sort(begin(hungry_levels), end(hungry_levels),
+       [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
+         return l.second > r.second;
+       });
+
+  const int average_hungry_level =
+      accumulate(begin(hungry_levels_arr), end(hungry_levels_arr), 0) /
+      hungry_levels_arr.size();
+
+  for (size_t i{}; i < hungry_levels.size(); i++) {
+    if (!number_of_sandwiches)
+      break;
+
+    if (hungry_levels[i].second > average_hungry_level) {
+      const int diff_level_between_neighbors{hungry_levels[i].second -
+                                             average_hungry_level};
+
+      if (diff_level_between_neighbors > number_of_sandwiches) {
+        hungry_levels_arr[hungry_levels[i].first] -= number_of_sandwiches;
+        break;
+      }
+
+      hungry_levels_arr[hungry_levels[i].first] -= diff_level_between_neighbors;
+
+      number_of_sandwiches -= diff_level_between_neighbors;
+    }
+  }
+
+  size_t hungry_level_diff{};
+
+  for (size_t i{}; i < hungry_levels_arr.size() - 1; i++) {
+    hungry_level_diff += abs(hungry_levels_arr[i + 1] - hungry_levels_arr[i]);
+  }
+
+  return hungry_level_diff;
+}
+
+size_t find_final_minimized_hunger_difference_level(const int* arr,
+                                                    const size_t arr_size) {
+  vector<pair<size_t, int>> hungry_levels{};
   for (size_t i{1}; i < arr_size; i++)
     hungry_levels.emplace_back(make_pair(i - 1, arr[i]));
 
@@ -68,123 +207,24 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
     needed_number_of_sandwitches += h.second - min_hungry_level;
   }
 
-  if (number_of_sandwiches >= needed_number_of_sandwitches)
+  if (arr[0] >= needed_number_of_sandwitches)
     return 0;
 
-  int diff_level_between_neighbors;
+  vector<size_t> final_hunger_diff_levels{
+      get_final_minimized_hunger_diff_level_by_balancing_hunger_diff_levels_between_each_pair_of_neighbors(
+          arr, arr_size),
+      get_final_minimized_diff_level_by_balancing_diff_levels_using_average_hunger_level(
+          arr, arr_size),
+      get_final_minimized_difference_level_by_balancing_sorted_hunger_diff_levels(
+          arr, arr_size)};
 
-  bool is_first_pair{true};
+  sort(begin(final_hunger_diff_levels), end(final_hunger_diff_levels));
 
-  for (size_t i{1}; i < arr_size - 1; i++) {
-    diff_level_between_neighbors = abs(arr[i + 1] - arr[i]);
+  return *begin(final_hunger_diff_levels);
+}
 
-    if (!number_of_sandwiches)
-      break;
-
-    if (diff_level_between_neighbors > 0) {
-      if (diff_level_between_neighbors > number_of_sandwiches)
-        diff_level_between_neighbors = number_of_sandwiches;
-
-      if (is_first_pair && (arr[i] > arr[i + 1])) {
-        is_first_pair = false;
-
-        arr[i] -= diff_level_between_neighbors;
-
-        number_of_sandwiches -= diff_level_between_neighbors;
-      } else if (arr[i + 1] > arr[i]) {
-        arr[i + 1] -= diff_level_between_neighbors;
-
-        number_of_sandwiches -= diff_level_between_neighbors;
-      }
-    }
-  }
-
-  size_t hungry_level_diff1{};
-
-  for (size_t i{1}; i < arr_size - 1; i++) {
-    hungry_level_diff1 += abs(arr[i + 1] - arr[i]);
-  }
-
-  number_of_sandwiches = arr[0];
-
-  const int average_hungry_level =
-      accumulate(begin(hungry_levels_arr), end(hungry_levels_arr), 0) /
-      hungry_levels_arr.size();
-
-  int prev_level{};
-
-  for (size_t i{}; i < hungry_levels_arr.size(); i++) {
-    if (!number_of_sandwiches)
-      break;
-
-    if (hungry_levels_arr[i] > average_hungry_level) {
-      diff_level_between_neighbors =
-          hungry_levels_arr[i] - average_hungry_level;
-
-      if (diff_level_between_neighbors > number_of_sandwiches) {
-        hungry_levels_arr[i] -= number_of_sandwiches;
-        break;
-      }
-
-      hungry_levels_arr[i] -= diff_level_between_neighbors;
-
-      number_of_sandwiches -= diff_level_between_neighbors;
-    } else if (hungry_levels_arr[i] > prev_level) {
-      diff_level_between_neighbors = hungry_levels_arr[i] - prev_level;
-
-      if (diff_level_between_neighbors > number_of_sandwiches) {
-        hungry_levels_arr[i] -= number_of_sandwiches;
-        break;
-      }
-
-      hungry_levels_arr[i] -= diff_level_between_neighbors;
-
-      number_of_sandwiches -= diff_level_between_neighbors;
-    }
-
-    prev_level = hungry_levels_arr[i];
-  }
-
-  size_t hungry_level_diff2{};
-
-  for (size_t i{}; i < hungry_levels_arr.size() - 1; i++) {
-    hungry_level_diff2 += abs(hungry_levels_arr[i + 1] - hungry_levels_arr[i]);
-  }
-
-  number_of_sandwiches = arr[0];
-
-  for (size_t i{}; i < hungry_levels.size(); i++) {
-    if (!number_of_sandwiches)
-      break;
-
-    if (hungry_levels[i].second > average_hungry_level) {
-      diff_level_between_neighbors =
-          hungry_levels[i].second - average_hungry_level;
-
-      if (diff_level_between_neighbors > number_of_sandwiches) {
-        hungry_levels_sorted[hungry_levels[i].first] -= number_of_sandwiches;
-        break;
-      }
-
-      hungry_levels_sorted[hungry_levels[i].first] -=
-          diff_level_between_neighbors;
-
-      number_of_sandwiches -= diff_level_between_neighbors;
-    }
-  }
-
-  size_t hungry_level_diff3{};
-
-  for (size_t i{}; i < hungry_levels_sorted.size() - 1; i++) {
-    hungry_level_diff3 +=
-        abs(hungry_levels_sorted[i + 1] - hungry_levels_sorted[i]);
-  }
-
-  size_t hl[3]{hungry_level_diff1, hungry_level_diff2, hungry_level_diff3};
-
-  sort(hl, hl + 3);
-
-  return *hl;
+size_t FoodDistribution(int* arr, const size_t arr_size) {
+  return find_final_minimized_hunger_difference_level(arr, arr_size);
 }
 
 int main() {
