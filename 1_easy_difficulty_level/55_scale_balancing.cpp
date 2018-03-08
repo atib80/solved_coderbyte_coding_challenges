@@ -29,6 +29,7 @@ Input:  "[13, 4]", "[1, 2, 3, 6, 14]"
 Output: "3,6"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <functional>
 #include <iostream>
@@ -39,29 +40,18 @@ Output: "3,6"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(rbegin(output), rend(output),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return string{};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return output;
 }
 
 vector<string> split(const string& source,
@@ -73,7 +63,7 @@ vector<string> split(const string& source,
 
   const size_t source_len{source.length()};
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{needle_st.length()};
 
   if (!source_len)
     return parts;
@@ -98,7 +88,7 @@ vector<string> split(const string& source,
     if ((string::npos != max_count) && (parts.size() == max_count))
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;

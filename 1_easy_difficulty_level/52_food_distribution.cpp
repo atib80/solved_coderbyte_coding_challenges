@@ -53,10 +53,10 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
   for (size_t i{1}; i < arr_size; i++)
     hungry_levels.emplace_back(make_pair(i - 1, arr[i]));
 
-  std::sort(begin(hungry_levels), end(hungry_levels),
-            [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
-              return (l.second > r.second);
-            });
+  sort(begin(hungry_levels), end(hungry_levels),
+       [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
+         return l.second > r.second;
+       });
 
   const int min_hungry_level{hungry_levels.back().second};
 
@@ -65,34 +65,36 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
   for (const auto& h : hungry_levels) {
     if (min_hungry_level == h.second)
       break;
-    needed_number_of_sandwitches += (h.second - min_hungry_level);
+    needed_number_of_sandwitches += h.second - min_hungry_level;
   }
 
   if (number_of_sandwiches >= needed_number_of_sandwitches)
     return 0;
 
+  int diff_level_between_neighbors;
+
   bool is_first_pair{true};
 
   for (size_t i{1}; i < arr_size - 1; i++) {
-    int s{abs(arr[i + 1] - arr[i])};
+    diff_level_between_neighbors = abs(arr[i + 1] - arr[i]);
 
     if (!number_of_sandwiches)
       break;
 
-    if (s > 0) {
-      if (s > number_of_sandwiches)
-        s = number_of_sandwiches;
+    if (diff_level_between_neighbors > 0) {
+      if (diff_level_between_neighbors > number_of_sandwiches)
+        diff_level_between_neighbors = number_of_sandwiches;
 
       if (is_first_pair && (arr[i] > arr[i + 1])) {
         is_first_pair = false;
 
-        arr[i] -= s;
+        arr[i] -= diff_level_between_neighbors;
 
-        number_of_sandwiches -= s;
+        number_of_sandwiches -= diff_level_between_neighbors;
       } else if (arr[i + 1] > arr[i]) {
-        arr[i + 1] -= s;
+        arr[i + 1] -= diff_level_between_neighbors;
 
-        number_of_sandwiches -= s;
+        number_of_sandwiches -= diff_level_between_neighbors;
       }
     }
   }
@@ -111,34 +113,33 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
 
   int prev_level{};
 
-  int s;
-
   for (size_t i{}; i < hungry_levels_arr.size(); i++) {
     if (!number_of_sandwiches)
       break;
 
     if (hungry_levels_arr[i] > average_hungry_level) {
-      s = hungry_levels_arr[i] - average_hungry_level;
+      diff_level_between_neighbors =
+          hungry_levels_arr[i] - average_hungry_level;
 
-      if (s > number_of_sandwiches) {
+      if (diff_level_between_neighbors > number_of_sandwiches) {
         hungry_levels_arr[i] -= number_of_sandwiches;
         break;
       }
 
-      hungry_levels_arr[i] -= s;
+      hungry_levels_arr[i] -= diff_level_between_neighbors;
 
-      number_of_sandwiches -= s;
+      number_of_sandwiches -= diff_level_between_neighbors;
     } else if (hungry_levels_arr[i] > prev_level) {
-      s = hungry_levels_arr[i] - prev_level;
+      diff_level_between_neighbors = hungry_levels_arr[i] - prev_level;
 
-      if (s > number_of_sandwiches) {
+      if (diff_level_between_neighbors > number_of_sandwiches) {
         hungry_levels_arr[i] -= number_of_sandwiches;
         break;
       }
 
-      hungry_levels_arr[i] -= s;
+      hungry_levels_arr[i] -= diff_level_between_neighbors;
 
-      number_of_sandwiches -= s;
+      number_of_sandwiches -= diff_level_between_neighbors;
     }
 
     prev_level = hungry_levels_arr[i];
@@ -157,16 +158,18 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
       break;
 
     if (hungry_levels[i].second > average_hungry_level) {
-      s = hungry_levels[i].second - average_hungry_level;
+      diff_level_between_neighbors =
+          hungry_levels[i].second - average_hungry_level;
 
-      if (s > number_of_sandwiches) {
+      if (diff_level_between_neighbors > number_of_sandwiches) {
         hungry_levels_sorted[hungry_levels[i].first] -= number_of_sandwiches;
         break;
       }
 
-      hungry_levels_sorted[hungry_levels[i].first] -= s;
+      hungry_levels_sorted[hungry_levels[i].first] -=
+          diff_level_between_neighbors;
 
-      number_of_sandwiches -= s;
+      number_of_sandwiches -= diff_level_between_neighbors;
     }
   }
 
@@ -179,7 +182,7 @@ size_t FoodDistribution(int* arr, const size_t arr_size) {
 
   size_t hl[3]{hungry_level_diff1, hungry_level_diff2, hungry_level_diff3};
 
-  std::sort(hl, hl + 3);
+  sort(hl, hl + 3);
 
   return *hl;
 }

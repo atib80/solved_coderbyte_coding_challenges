@@ -1,5 +1,5 @@
 /*
-Coderbyte coding challenge: Correct Path v2
+Coderbyte coding challenge: Correct Path v1
 
 Using the C++ language, have the function CorrectPath(str) read the str
 parameter being passed, which will represent the movements made in a 5x5 grid of
@@ -62,6 +62,7 @@ bool find_correct_path(vector<vector<int>>& maze,
                        const size_t y,
                        string& path,
                        const size_t current_path_index) {
+  
   if ((x == maze.size() - 1) && (y == maze[x].size() - 1) &&
       (current_path_index == path.length()))
     return true;
@@ -127,7 +128,8 @@ bool find_correct_path(vector<vector<int>>& maze,
     }
   }
 
-  maze[x][y] = 0;
+  if (x && y)
+    maze[x][y] = 0;
 
   return false;
 }
@@ -137,9 +139,10 @@ string CorrectPath(string str) {
 
   vector<vector<int>> maze(5, vector<int>(5));
 
-  find_correct_path(maze, 0, 0, str, 0);
+  if (find_correct_path(maze, 0, 0, str, 0))
+    return str;
 
-  return str;
+  return "not possible";
 }
 
 int main() {

@@ -57,7 +57,7 @@ vector<string> split(const string& source,
 
   const size_t source_len{source.length()};
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{needle_st.length()};
 
   if (!source_len)
     return parts;
@@ -82,7 +82,7 @@ vector<string> split(const string& source,
     if ((string::npos != max_count) && (parts.size() == max_count))
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
@@ -103,7 +103,7 @@ vector<string> split(const string& source,
 }
 
 pair<size_t, size_t> parse_event_start_and_end_time(const string& event_str) {
-  vector<string> time_parts_str = split(event_str, "-");
+  vector<string> time_parts_str{split(event_str, "-")};
 
   for (auto& str : time_parts_str)
     str = trim(str);
@@ -111,7 +111,7 @@ pair<size_t, size_t> parse_event_start_and_end_time(const string& event_str) {
   if (2 != time_parts_str.size())
     return make_pair(0, 0);
 
-  vector<string> start_time_parts_str = split(time_parts_str[0], ":");
+  vector<string> start_time_parts_str{split(time_parts_str[0], ":")};
 
   for (auto& str : start_time_parts_str)
     str = trim(str);
@@ -127,22 +127,26 @@ pair<size_t, size_t> parse_event_start_and_end_time(const string& event_str) {
   string start_time_am_pm_str{
       start_time_parts_str[1].substr(am_pm_start_char, 2)};
 
+  for (size_t i{}; i < start_time_am_pm_str.length(); i++)
+    start_time_am_pm_str[i] =
+        static_cast<char>(tolower(start_time_am_pm_str[i]));
+
   size_t start_time_hour{stoul(start_time_parts_str[0])};
 
   size_t start_time_minutes{
       stoul(start_time_parts_str[1].substr(0, am_pm_start_char))};
 
   const size_t start_time_in_minutes{
-      ("am" == start_time_am_pm_str || "AM" == start_time_am_pm_str)
-          ? ((start_time_hour % 12) * 60) + start_time_minutes
-          : ((start_time_hour % 12) * 60) + 720 + start_time_minutes};
+      "am" == start_time_am_pm_str
+          ? (start_time_hour % 12) * 60 + start_time_minutes
+          : (start_time_hour % 12) * 60 + 720 + start_time_minutes};
 
-  vector<string> end_time_parts_str = split(time_parts_str[1], ":");
+  vector<string> end_time_parts_str{split(time_parts_str[1], ":")};
 
   for (auto& str : end_time_parts_str)
     str = trim(str);
 
-  if (2u != end_time_parts_str.size())
+  if (2 != end_time_parts_str.size())
     return make_pair(0, 0);
 
   size_t am_pm_end_char{end_time_parts_str[1].find_first_of("apAP")};
@@ -152,15 +156,18 @@ pair<size_t, size_t> parse_event_start_and_end_time(const string& event_str) {
 
   string end_time_am_pm_str{end_time_parts_str[1].substr(am_pm_end_char, 2)};
 
-  size_t end_time_hour = stoul(end_time_parts_str[0]);
+  for (size_t i{}; i < end_time_am_pm_str.length(); i++)
+    end_time_am_pm_str[i] = static_cast<char>(tolower(end_time_am_pm_str[i]));
 
-  size_t end_time_minutes =
-      stoul(end_time_parts_str[1].substr(0, am_pm_end_char));
+  size_t end_time_hour{stoul(end_time_parts_str[0])};
+
+  size_t end_time_minutes{
+      stoul(end_time_parts_str[1].substr(0, am_pm_end_char))};
 
   const size_t end_time_in_minutes{
-      ("am" == end_time_am_pm_str || "AM" == end_time_am_pm_str)
-          ? ((end_time_hour % 12) * 60) + end_time_minutes
-          : ((end_time_hour % 12) * 60) + 720 + end_time_minutes};
+      "am" == end_time_am_pm_str
+          ? (end_time_hour % 12) * 60 + end_time_minutes
+          : (end_time_hour % 12) * 60 + 720 + end_time_minutes};
 
   return make_pair(start_time_in_minutes, end_time_in_minutes);
 }
@@ -177,7 +184,7 @@ string MostFreeTime(string* str_arr, const size_t str_arr_size) {
   }
 
   sort(begin(start_end_times), end(start_end_times),
-       [](const size_t lt, const size_t rt) { return (lt < rt); });
+       [](const size_t lt, const size_t rt) { return lt < rt; });
 
   size_t max_free_time_period{};
 

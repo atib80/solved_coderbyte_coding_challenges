@@ -1,5 +1,5 @@
 /*
-Coderbyte coding challenge: Correct Path
+Coderbyte coding challenge: Correct Path v2
 
 Using the C++ language, have the function CorrectPath(str) read the str
 parameter being passed, which will represent the movements made in a 5x5 grid of
