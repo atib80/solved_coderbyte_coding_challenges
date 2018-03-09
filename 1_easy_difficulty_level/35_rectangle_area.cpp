@@ -35,7 +35,7 @@ string trim(const string& input) {
                find_if(begin(output), end(output),
                        [](const char ch) { return !isspace(ch); }));
 
-  output.erase(find_if(rbegin(output), rend(output),
+  output.erase(find_if(output.rbegin(), output.rend(),
                        [](const char ch) { return !isspace(ch); })
                    .base(),
                end(output));
@@ -52,7 +52,7 @@ vector<string> split(const string& source,
 
   const size_t source_len{source.length()};
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{needle_st.length()};
 
   if (!source_len)
     return parts;
@@ -77,7 +77,7 @@ vector<string> split(const string& source,
     if ((string::npos != max_count) && (parts.size() == max_count))
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;

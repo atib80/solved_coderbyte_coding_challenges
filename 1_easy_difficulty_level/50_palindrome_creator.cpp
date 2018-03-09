@@ -66,28 +66,6 @@ bool is_palindrome(const string& str) {
   return str == reversed_str;
 }
 
-bool is_palindrome(const string& str, unordered_set<size_t> ignore_indices) {
-  stack<char> s{};
-  queue<char> q{};
-
-  for (size_t i{}; i != str.length(); i++) {
-    if (ignore_indices.count(i))
-      continue;
-
-    s.emplace(str[i]);
-    q.emplace(str[i]);
-  }
-
-  while (!s.empty() && !q.empty()) {
-    if (s.top() != q.front())
-      return false;
-    s.pop();
-    q.pop();
-  }
-
-  return true;
-}
-
 string PalindromeCreator_v1(string str) {
   str = trim(str);
 
@@ -129,6 +107,29 @@ string PalindromeCreator_v1(string str) {
   return "not possible";
 }
 
+bool is_palindrome(const string& str,
+                   const unordered_set<size_t>& ignore_indices) {
+  stack<char> s{};
+  queue<char> q{};
+
+  for (size_t i{}; i != str.length(); i++) {
+    if (ignore_indices.count(i))
+      continue;
+
+    s.emplace(str[i]);
+    q.emplace(str[i]);
+  }
+
+  while (!s.empty() && !q.empty()) {
+    if (s.top() != q.front())
+      return false;
+    s.pop();
+    q.pop();
+  }
+
+  return true;
+}
+
 string PalindromeCreator_v2(string str) {
   str = trim(str);
 
@@ -137,9 +138,15 @@ string PalindromeCreator_v2(string str) {
 
   const size_t str_len{str.length()};
 
+  unordered_set<size_t> ignore_indices{};
+
   for (size_t i{}; i < str_len; i++) {
-    if (is_palindrome(str, move(unordered_set<size_t>{i})))
+    ignore_indices.insert(i);
+
+    if (is_palindrome(str, ignore_indices))
       return string(1, str[i]);
+
+    ignore_indices.erase(i);
   }
 
   if (str_len < 5)
@@ -148,8 +155,12 @@ string PalindromeCreator_v2(string str) {
 
   for (size_t i{}; i < str_len - 1; i++) {
     for (size_t j{i + 1}; j < str_len; j++) {
-      if (is_palindrome(str, move(unordered_set<size_t>{i, j})))
+      ignore_indices.insert({i, j});
+      if (is_palindrome(str, ignore_indices))
         return string({str[i], str[j]});
+
+      ignore_indices.erase(i);
+      ignore_indices.erase(j);
     }
   }
 

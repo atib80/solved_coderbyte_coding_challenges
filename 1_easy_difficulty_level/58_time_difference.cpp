@@ -84,7 +84,7 @@ vector<string> split(const string& source,
     if ((string::npos != max_count) && (parts.size() == max_count))
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
@@ -107,16 +107,16 @@ vector<string> split(const string& source,
 string TimeDifference(const string* str_arr, const size_t str_arr_size) {
   vector<int> times{};
 
-  for (size_t i{}; i != str_arr_size; i++) {
-    vector<string> time_parts_str = split(str_arr[i], ":");
+  for (size_t i{}; i < str_arr_size; i++) {
+    vector<string> time_parts_str{split(str_arr[i], ":")};
 
     if (2 != time_parts_str.size())
-      return "Not possible!";
+      return "not possible";
 
     size_t am_pm_start_char{time_parts_str[1].find_first_of("ap")};
 
     if (string::npos == am_pm_start_char)
-      return "Not possible!";
+      return "not possible";
 
     string time_am_pm_str{time_parts_str[1].substr(am_pm_start_char, 2)};
 
@@ -125,8 +125,8 @@ string TimeDifference(const string* str_arr, const size_t str_arr_size) {
     int minutes{stoi(time_parts_str[1].substr(0, am_pm_start_char))};
 
     int time_in_minutes{"am" == time_am_pm_str
-                            ? ((hour % 12) * 60) + minutes
-                            : ((hour % 12) * 60) + 720 + minutes};
+                            ? (hour % 12) * 60 + minutes
+                            : (hour % 12) * 60 + 720 + minutes};
 
     times.emplace_back(time_in_minutes);
   }
@@ -135,7 +135,6 @@ string TimeDifference(const string* str_arr, const size_t str_arr_size) {
 
   for (size_t i{}; i < times.size() - 1; i++) {
     for (size_t j{i + 1}; j < times.size(); j++) {
-       
       if (times[j] > times[i]) {
         if (times[j] - times[i] < current_minimum)
           current_minimum = times[j] - times[i];
@@ -157,7 +156,6 @@ string TimeDifference(const string* str_arr, const size_t str_arr_size) {
 }
 
 int main() {
-
   // const string A[] = gets(stdin);
   // cout << TimeDifference(A, sizeof(A)/sizeof(*A));
   const string B[] = {"2:10pm", "1:30pm", "10:30am", "4:42pm"};

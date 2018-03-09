@@ -16,6 +16,8 @@ Input:  "abc **"
 Output: "979899 4242"
 */
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <algorithm>
 #include <cctype>
 #include <iostream>
@@ -25,32 +27,22 @@ Output: "979899 4242"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
 vector<string> split(const string& source,
-                     const char* needle = "",
+                     const char* needle,
                      size_t const max_count = string::npos) {
   vector<string> parts{};
 
@@ -58,7 +50,7 @@ vector<string> split(const string& source,
 
   const size_t source_len{source.length()};
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{needle_st.length()};
 
   if (!source_len)
     return parts;
@@ -83,7 +75,7 @@ vector<string> split(const string& source,
     if ((string::npos != max_count) && (parts.size() == max_count))
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
@@ -175,7 +167,7 @@ string ASCIIConversion_v2(string str) {
 string ASCIIConversion_v3(string str) {
   str = trim(str);
 
-  vector<string> chars{split(str)};
+  vector<string> chars{split(str, "")};
 
   transform(begin(chars), end(chars), begin(chars), [](const string& ch) {
     if (" " == ch)

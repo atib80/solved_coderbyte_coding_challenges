@@ -22,6 +22,7 @@ Output: "aBCDEFG"
 #include <cctype>
 #include <iostream>
 #include <locale>
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -50,7 +51,7 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
-string convert_to_camel_case(string str, const locale& loc = locale{}) {
+string convert_to_camel_case_v1(string str, const locale& loc = locale{}) {
   str = trim(str);
   string final_str{};
   final_str.reserve(str.length());
@@ -83,8 +84,40 @@ string convert_to_camel_case(string str, const locale& loc = locale{}) {
   return final_str;
 }
 
+string convert_to_camel_case_v2(string str, const locale& loc = locale{}) {
+  str = trim(str);
+
+  ostringstream oss{};
+
+  size_t si{};
+
+  while (!isalpha(str[si]))
+    si++;
+
+  oss << static_cast<char>(tolower(str[si], loc));
+
+  bool is_new_word{};
+
+  for (size_t i{si + 1}; i < str.length(); i++) {
+    if (!isalnum(str[i])) {
+      is_new_word = true;
+      continue;
+    }
+
+    if (is_new_word) {
+      oss << static_cast<char>(toupper(str[i], loc));
+      is_new_word = false;
+      continue;
+    }
+
+    oss << static_cast<char>(tolower(str[i], loc));
+  }
+
+  return oss.str();
+}
+
 string CamelCase(string str) {
-  return convert_to_camel_case(move(str));
+  return convert_to_camel_case_v2(move(str));
 }
 
 int main() {

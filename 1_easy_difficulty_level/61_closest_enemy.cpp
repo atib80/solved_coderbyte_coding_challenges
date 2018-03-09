@@ -35,7 +35,8 @@ size_t ClosestEnemy_v1(const int* arr, const size_t arr_size) {
         "Input array 'arr' does not contain a single hero element!"};
 
   if (hero_count > 1)
-    throw invalid_argument{"Input array 'arr' contains more than 1 hero element!"};
+    throw invalid_argument{
+        "Input array 'arr' contains more than 1 hero element!"};
 
   const auto enemy_count = count(arr, arr + arr_size, 2);
 
@@ -82,7 +83,8 @@ int ClosestEnemy_v2(const int* arr, const size_t arr_size) {
         "Input array 'arr' does not contain a single hero element!"};
 
   if (hero_count > 1)
-    throw invalid_argument{"Input array 'arr' contains more than 1 hero element!"};
+    throw invalid_argument{
+        "Input array 'arr' contains more than 1 hero element!"};
 
   const auto enemy_count = count(arr, arr + arr_size, 2);
 
