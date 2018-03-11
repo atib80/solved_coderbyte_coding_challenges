@@ -26,7 +26,6 @@ Output: 1
 using namespace std;
 
 int ElementMerger(int* arr, size_t arr_size) {
-
   while (arr_size > 1) {
     for (size_t i{}; i < arr_size - 1; i++)
       arr[i] = abs(arr[i + 1] - arr[i]);
@@ -38,7 +37,6 @@ int ElementMerger(int* arr, size_t arr_size) {
 }
 
 int main() {
-
   // int A[] = gets(stdin);
   // cout << ElementMerger(A, sizeof(A)/sizeof(*A));
   int A1[] = {4, 5, 1, 2, 7};

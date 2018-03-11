@@ -27,7 +27,7 @@ string SimpleEvens_v1(const int64_t num) {
 
   for (const char ch : num_str) {
     if (ch % 2 == 1)
-      return "false";  // or if ((ch - '0') % 2 == 1) return "false";
+      return "false";  // if ((ch - '0') % 2 == 1) return "false";
   }
 
   return "true";

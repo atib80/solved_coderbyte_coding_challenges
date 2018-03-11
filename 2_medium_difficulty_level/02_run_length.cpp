@@ -17,6 +17,7 @@ Input:  "wwwbbbw"
 Output: "3w3b1w"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <sstream>
@@ -24,28 +25,18 @@ Output: "3w3b1w"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
 string run_length_v1(string str) {

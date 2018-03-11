@@ -73,8 +73,7 @@ string palindrome_swapper(string str) {
   if ((2 == str_len) && (str[0] == str[1]))
     return str;
 
-  if (is_string_palindrome(str))
-    return str;
+  // if (is_string_palindrome(str)) return str;
 
   for (size_t i{}; i < str_len - 1; i++) {
     swap(str[i], str[i + 1]);
@@ -89,7 +88,7 @@ string palindrome_swapper(string str) {
 }
 
 int main() {
-  // cout << palindrome_swapper ( move ( string { gets(stdin) } ) );
+  // cout << palindrome_swapper(move(string{gets(stdin)}));
   cout << palindrome_swapper(move(string{"madam"}))
        << '\n';  // expected output: "madam"
   cout << palindrome_swapper(move(string{"rcaecar"}))

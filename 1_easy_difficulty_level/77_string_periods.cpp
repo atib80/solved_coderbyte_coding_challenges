@@ -113,8 +113,13 @@ string StringPeriods_v3(string str) {
 
   const size_t str_len{str.length()};
 
-  if (str_len < 2)
+  if (str_len < 3) {
+    if (2 == str_len) {
+      if (str[0] == str[1])
+        return string(1, str[0]);
+    }
     return "-1";
+  }
 
   size_t current_substr_len{str_len / 2};
 
@@ -155,6 +160,7 @@ int main() {
        << '\n';  // expected output: "-1"
   cout << StringPeriods_v3(move(string{"affedaaffed"}))
        << '\n';  // expected output: "-1"
+  cout << StringPeriods_v3(move(string{"gg"})) << '\n';  // expected output: "g"
 
   return 0;
 }

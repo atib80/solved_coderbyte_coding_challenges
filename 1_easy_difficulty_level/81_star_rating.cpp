@@ -20,6 +20,7 @@ Input:  "4.5"
 Output: "full full full full half"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <sstream>
@@ -27,34 +28,22 @@ Output: "full full full full half"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
-string StarRating(string str) {
+string StarRating_v1(string str) {
   str = trim(str);
-
-  const size_t max_stars{5};
 
   const float rating{stof(str)};
 
@@ -68,7 +57,7 @@ string StarRating(string str) {
 
   ostringstream oss{};
 
-  for (size_t i{}; i < max_stars; i++) {
+  for (size_t i{}; i < 5; i++) {
     if (whole_part) {
       whole_part--;
       oss << "full";
@@ -82,7 +71,35 @@ string StarRating(string str) {
     else
       oss << "empty";
 
-    if (i < max_stars - 1)
+    if (i < 4)
+      oss << ' ';
+  }
+
+  return oss.str();
+}
+
+string StarRating_v2(string str) {
+  str = trim(str);
+
+  int rating_times_100{static_cast<int>(round(stof(str) * 100.f))};
+
+  ostringstream oss{};
+
+  for (size_t i{}; i < 5; i++) {
+    if (rating_times_100 >= 75) {
+      rating_times_100 -= 100;
+      oss << "full";
+    }
+
+    else if (rating_times_100 >= 25 && rating_times_100 < 75) {
+      rating_times_100 -= 75;
+      oss << "half";
+    }
+
+    else
+      oss << "empty";
+
+    if (i < 4)
       oss << ' ';
   }
 
@@ -90,18 +107,18 @@ string StarRating(string str) {
 }
 
 int main() {
-  // cout << StarRating(move(string{gets(stdin)}));
-  cout << StarRating(move(string{"2.36"}))
+  // cout << StarRating_v2(move(string{gets(stdin)}));
+  cout << StarRating_v2(move(string{"2.36"}))
        << '\n';  // expected output: "full full half empty empty"
-  cout << StarRating(move(string{"0.38"}))
+  cout << StarRating_v2(move(string{"0.38"}))
        << '\n';  // expected output: "half empty empty empty empty"
-  cout << StarRating(move(string{"4.5"}))
+  cout << StarRating_v2(move(string{"4.5"}))
        << '\n';  // expected output: "full full full full half"
-  cout << StarRating(move(string{"0.0"}))
+  cout << StarRating_v2(move(string{"0.0"}))
        << '\n';  // expected output: "empty empty empty empty empty"
-  cout << StarRating(move(string{"3.02"}))
+  cout << StarRating_v2(move(string{"3.02"}))
        << '\n';  // expected output: "full full full empty empty"
-  cout << StarRating(move(string{"2.75"}))
+  cout << StarRating_v2(move(string{"2.75"}))
        << '\n';  // expected output: "full full full empty empty"
   return 0;
 }
