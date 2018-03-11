@@ -19,6 +19,7 @@ Output: -1
 
 #include <algorithm>
 #include <iostream>
+#include <set>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -83,20 +84,41 @@ int SimpleMode_v2(const int* arr, const size_t arr_size) {
   return -1;
 }
 
+int SimpleMode_v3(int* arr, const size_t arr_size) {
+  if (!arr || 1 == arr_size)
+    return -1;
+
+  int mode_number{-1};
+  size_t mode_freq{1};
+
+  multiset<int> number_freq(arr, arr + arr_size);
+
+  int* const last{unique(arr, arr + arr_size)};
+
+  for (int* start{arr}; start != last; ++start) {
+    if (number_freq.count(*start) > mode_freq) {
+      mode_freq = number_freq.count(*start);
+      mode_number = *start;
+    }
+  }
+
+  return mode_number;
+}
+
 int main() {
   // const int A[] = gets(stdin);
-  // cout << SimpleMode_v1(A, sizeof(A)/sizeof(*A));
-  const int B[] = {10, 4, 5, 2, 4};
-  cout << SimpleMode_v1(B, sizeof(B) / sizeof(*B))
+  // cout << SimpleMode_v3(A, sizeof(A)/sizeof(*A));
+  int B[] = {10, 4, 5, 2, 4};
+  cout << SimpleMode_v3(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 4
-  const int C[] = {5, 10, 10, 6, 5};
-  cout << SimpleMode_v1(C, sizeof(C) / sizeof(*C))
+  int C[] = {5, 10, 10, 6, 5};
+  cout << SimpleMode_v3(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 5
-  const int D[] = {5, 5, 2, 2, 1};
-  cout << SimpleMode_v1(D, sizeof(D) / sizeof(*D))
+  int D[] = {5, 5, 2, 2, 1};
+  cout << SimpleMode_v3(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 5
-  const int E[] = {3, 4, 1, 6, 10};
-  cout << SimpleMode_v1(E, sizeof(E) / sizeof(*E))
+  int E[] = {3, 4, 1, 6, 10};
+  cout << SimpleMode_v3(E, sizeof(E) / sizeof(*E))
        << '\n';  // expected output: -1
   return 0;
 }
