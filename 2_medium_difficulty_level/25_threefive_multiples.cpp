@@ -17,17 +17,14 @@ Output: 0
 */
 
 #include <iostream>
-#include <string>
 
 using namespace std;
 
-int ThreeFiveMultiples_v1(const int num) {
-  if (num < 3)
-    return 0;
+int ThreeFiveMultiples(const int num) {
 
-  int sum{3};
+  int sum{};
 
-  for (int i{5}; i < num; i++) {
+  for (int i{3}; i < num; i++) {
     if (i % 3 == 0 || i % 5 == 0)
       sum += i;
   }
@@ -35,37 +32,14 @@ int ThreeFiveMultiples_v1(const int num) {
   return sum;
 }
 
-int ThreeFiveMultiples_v2(const int num) {
-  if (num < 3)
-    return 0;
-
-  int sum{3};
-  int current_num1{5};
-  int current_num2{6};
-
-  bool is_first_cond_true{current_num1 < num};
-  bool is_second_cond_true{current_num2 < num};
-
-  while (is_first_cond_true || is_second_cond_true) {
-    if (is_first_cond_true)
-      sum += current_num1;
-    current_num1 += 5;
-
-    if (is_second_cond_true)
-      sum += current_num2;
-    current_num2 += 3;
-
-    is_first_cond_true = current_num1 < num;
-    is_second_cond_true = current_num2 < num;
-  }
-
-  return sum;
-}
-
 int main() {
-  // cout << ThreeFiveMultiples_v2(gets(stdin));
-  cout << ThreeFiveMultiples_v2(10) << '\n';  // expected output: 23
-  cout << ThreeFiveMultiples_v2(6) << '\n';   // expected output: 8
-  cout << ThreeFiveMultiples_v2(1) << '\n';   // expected output: 0
+  // cout << ThreeFiveMultiples(gets(stdin));
+  cout << ThreeFiveMultiples(10) << '\n';  // expected output: 23
+  cout << ThreeFiveMultiples(6) << '\n';   // expected output: 8
+  cout << ThreeFiveMultiples(1) << '\n';   // expected output: 0
+  cout << ThreeFiveMultiples(3) << '\n';   // expected output: 0
+  cout << ThreeFiveMultiples(31) << '\n';  // expected output: 225
+  cout << ThreeFiveMultiples(17) << '\n';  // expected output: 60
+  cout << ThreeFiveMultiples(4) << '\n';   // expected output: 3
   return 0;
 }
