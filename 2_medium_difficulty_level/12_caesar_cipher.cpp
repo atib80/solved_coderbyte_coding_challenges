@@ -59,7 +59,7 @@ string CaesarCipher(string str, size_t num) {
     if (isalpha(ch)) {
       if (islower(ch)) {
         if (ch + num > 122) {
-          const size_t diff = num - (122 - ch) - 1;
+          const size_t diff = ch + num - 123;
           ch = static_cast<char>(97 + diff);
         } else {
           ch = static_cast<char>(ch + num);
@@ -67,7 +67,7 @@ string CaesarCipher(string str, size_t num) {
 
       } else {
         if (ch + num > 90) {
-          const size_t diff = num - (90 - ch) - 1;
+          const size_t diff = ch + num - 91;
           ch = static_cast<char>(65 + diff);
         } else {
           ch = static_cast<char>(ch + num);
@@ -82,9 +82,9 @@ string CaesarCipher(string str, size_t num) {
 int main() {
   // cout << CaesarCipher(gets(stdin));
   cout << CaesarCipher("Caesar Cipher", 2)
-       << '\n';                              // expected output: "Ecguct Ekrjgt"
-  cout << CaesarCipher("Hello", 4) << '\n';  // expected output: "Lipps"
-  cout << CaesarCipher("abc", 0) << '\n';    // expected output: "abc"
+       << '\n';                                  // expected output: "Ecguct Ekrjgt"
+  cout << CaesarCipher("Hello", 4) << '\n';      // expected output: "Lipps"
+  cout << CaesarCipher("abc", 0) << '\n';        // expected output: "abc"
   cout << CaesarCipher("coderBYTE", 2) << '\n';  // expected output: "eqfgtDAVG"
   cout << CaesarCipher("dogs", 8) << '\n';       // expected output: "lwoa"
   cout << CaesarCipher("byte", 13) << '\n';      // expected output: "olgr"

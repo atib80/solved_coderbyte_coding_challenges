@@ -17,6 +17,7 @@ Input:  10 & num2 = 10
 Output: "1.0000"
 */
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -25,49 +26,50 @@ using namespace std;
 
 string FormattedDivision(const long num1, const long num2) {
   if (!num2)
-    return "not possible";
+    return !num1 ? "NaN" : num1 < 0 ? "-Inf" : "+Inf";
 
   if (!num1)
     return "0.0000";
 
   const double result{static_cast<double>(num1) / num2};
-  char buffer[32];
-  sprintf(buffer, "%.4lf", result);
+  // char buffer[32];
+  // sprintf(buffer, "%.4lf", result);
 
-  string result_str{buffer};
+  ostringstream oss1{};
+  oss1 << fixed << setprecision(4) << result;
 
-  const size_t start{result_str.find('.')};
+  string result_str{oss1.str()};
 
-  int i(start);
+  size_t start{result_str.find('.')};
 
   if (string::npos == start)
-    i = result_str.length();
+    start = result_str.length();
 
-  int number_of_commas{i / 3};
+  int number_of_commas = start / 3;
 
-  int leading_no_of_ch = i % 3;
+  int leading_no_of_ch = start % 3;
 
   if (!leading_no_of_ch) {
     number_of_commas--;
     leading_no_of_ch = 3;
   }
 
-  ostringstream oss{};
+  ostringstream oss2{};
 
-  oss << result_str.substr(0, leading_no_of_ch);
+  oss2 << result_str.substr(0, leading_no_of_ch);
 
   int j{leading_no_of_ch};
 
   while (number_of_commas > 0) {
-    oss << ',' << result_str.substr(j, 3);
+    oss2 << ',' << result_str.substr(j, 3);
     j += 3;
     number_of_commas--;
   }
 
   if (start < result_str.length())
-    oss << result_str.substr(start);
+    oss2 << result_str.substr(start);
 
-  return oss.str();
+  return oss2.str();
 }
 
 int main() {

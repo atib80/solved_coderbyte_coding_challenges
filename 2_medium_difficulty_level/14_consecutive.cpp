@@ -31,8 +31,10 @@ int Consecutive(int* arr, const size_t arr_size) {
 
   sort(arr, arr + arr_size);
 
-  for (size_t i{}; i < arr_size - 1; i++)
-    number_of_missing_numbers += arr[i + 1] - arr[i] - 1;
+  for (size_t i{}; i < arr_size - 1; i++) {
+    if (arr[i + 1] != arr[i])
+      number_of_missing_numbers += arr[i + 1] - arr[i] - 1;
+  }
 
   return number_of_missing_numbers;
 }

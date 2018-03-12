@@ -75,7 +75,7 @@ int SimpleMode_v2(const int* arr, const size_t arr_size) {
 
   stable_sort(begin(mode_freq), end(mode_freq),
               [](const pair<int, int>& lhs, const pair<int, int>& rhs) {
-                return (lhs.second > rhs.second);
+                return lhs.second > rhs.second;
               });
 
   if (mode_freq[0].second > 1)
