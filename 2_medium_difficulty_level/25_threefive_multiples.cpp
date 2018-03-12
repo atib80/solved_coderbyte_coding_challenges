@@ -43,14 +43,20 @@ int ThreeFiveMultiples_v2(const int num) {
   int current_num1{5};
   int current_num2{6};
 
-  while (current_num1 < num) {
-    sum += current_num1;
-    current_num1 += 5;
-  }
+  bool is_first_cond_true{current_num1 < num};
+  bool is_second_cond_true{current_num2 < num};
 
-  while (current_num2 < num) {
-    sum += current_num2;
+  while (is_first_cond_true || is_second_cond_true) {
+    if (is_first_cond_true)
+      sum += current_num1;
+    current_num1 += 5;
+
+    if (is_second_cond_true)
+      sum += current_num2;
     current_num2 += 3;
+
+    is_first_cond_true = current_num1 < num;
+    is_second_cond_true = current_num2 < num;
   }
 
   return sum;
