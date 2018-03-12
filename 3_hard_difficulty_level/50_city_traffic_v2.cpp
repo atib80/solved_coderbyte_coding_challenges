@@ -121,7 +121,7 @@ vector<string> split(const string& source,
     if (string::npos == max_count)
       parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count))
+    else if (parts.size() < max_count)
       parts.emplace_back(source.substr(prev));
   }
 
@@ -180,12 +180,12 @@ string find_maximum_traffic_for_all_city_nodes(
       int current_neighbor_node_max_traffic{};
 
       while (!q.empty()) {
-        const int current_neighbor_id{q.front()};
-        current_neighbor_node_max_traffic += current_neighbor_id;
-        q.pop();
+        current_neighbor_node_max_traffic += q.front();
 
         const vector<int>& next_neighbor_nodes{
-            city_graph.find(current_neighbor_id)->second.neighbors};
+            city_graph.find(q.front())->second.neighbors};
+
+        q.pop();
 
         for (const int next_node_id : next_neighbor_nodes) {
           if (visited_nodes.find(next_node_id) != end(visited_nodes))
