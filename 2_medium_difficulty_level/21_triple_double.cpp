@@ -114,10 +114,10 @@ int TripleDouble_v3(int64_t num1, int64_t num2) {
 }
 
 int main() {
-  // cout << TripleDouble_v3(gets(stdin));
-  cout << TripleDouble_v3(451999277LL, 41177722899LL)
+  // cout << TripleDouble_v1(gets(stdin));
+  cout << TripleDouble_v1(451999277LL, 41177722899LL)
        << '\n';                                       // expected output: 1
-  cout << TripleDouble_v3(465555LL, 5579LL) << '\n';  // expected output: 1
-  cout << TripleDouble_v3(67844LL, 66237LL) << '\n';  // expected output: 0
+  cout << TripleDouble_v1(465555LL, 5579LL) << '\n';  // expected output: 1
+  cout << TripleDouble_v1(67844LL, 66237LL) << '\n';  // expected output: 0
   return 0;
 }

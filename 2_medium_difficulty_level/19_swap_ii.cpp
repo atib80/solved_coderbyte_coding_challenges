@@ -15,6 +15,7 @@ Input:  "2S 6 du5d4e"
 Output: "2s 6 DU4D5E"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <string>
@@ -22,28 +23,18 @@ Output: "2s 6 DU4D5E"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
 void flip_character_case(char& ch) {
@@ -66,18 +57,14 @@ string SwapII(string str) {
       flip_character_case(str[i]);
 
     else if (isdigit(str[i])) {
-      if ((string::npos != prev_digit_pos) &&
-          isalpha(str[i - 1])) {
-          swap(str[prev_digit_pos], str[i]);
-          prev_digit_pos = string::npos;
-        }
-      else {
+      if ((string::npos != prev_digit_pos) && isalpha(str[i - 1])) {
+        swap(str[prev_digit_pos], str[i]);
+        prev_digit_pos = string::npos;
+      } else
         prev_digit_pos = i;
-      }
 
-    } else {
+    } else
       prev_digit_pos = string::npos;
-    }
   }
 
   return str;
