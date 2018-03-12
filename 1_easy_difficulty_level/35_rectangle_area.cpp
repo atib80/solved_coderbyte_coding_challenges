@@ -90,7 +90,7 @@ vector<string> split(const string& source,
     if (string::npos == max_count)
       parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count))
+    else if (parts.size() < max_count)
       parts.emplace_back(source.substr(prev));
   }
 

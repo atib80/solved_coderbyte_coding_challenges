@@ -26,7 +26,7 @@ uint64_t fibonacci(const uint64_t num) {
   if (num < 2)
     return num;
 
-  return (fibonacci(num - 1) + fibonacci(num - 2));
+  return fibonacci(num - 1) + fibonacci(num - 2);
 }
 
 string FibonacciChecker(const uint64_t num) {
@@ -42,10 +42,8 @@ string FibonacciChecker(const uint64_t num) {
     if (num == b)
       return "yes";
     if (num < b)
-      break;
+      return "no";
   }
-
-  return "no";
 }
 
 int main() {
