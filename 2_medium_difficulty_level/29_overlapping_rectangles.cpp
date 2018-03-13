@@ -151,14 +151,11 @@ pair<int, int> parse_x_y_coordinates(const string& str) {
   return make_pair(x, y);
 }
 
-string OverlappingRectangles(string* str_arr, const size_t str_arr_size) {
-  if (!str_arr || !str_arr_size)
-    return "not possible";
-
-  vector<string> coordinates_str{split(str_arr[0], "),(")};
+vector<pair<int, int>> parse_rectangle_coordinates(const string& input) {
+  vector<string> coordinates_str{split(input, "),(")};
 
   if (8 != coordinates_str.size())
-    return "not possible!";
+    return vector<pair<int, int>>{};
 
   for (auto& str : coordinates_str)
     str = trim(str);
@@ -196,6 +193,21 @@ string OverlappingRectangles(string* str_arr, const size_t str_arr_size) {
   const int min_y2{min_max_y2.first};
   const int max_y2{min_max_y2.second};
 
+  return vector<pair<int, int>>{min_max_x1, min_max_y1, min_max_x2, min_max_y2};
+}
+
+string calculate_area_of_overlapping_rectangle(
+    const vector<pair<int, int>>& rect_coordinates) {
+  const int min_x1{rect_coordinates[0].first};
+  const int max_x1{rect_coordinates[0].second};
+  const int min_y1{rect_coordinates[1].first};
+  const int max_y1{rect_coordinates[1].second};
+
+  const int min_x2{rect_coordinates[2].first};
+  const int max_x2{rect_coordinates[2].second};
+  const int min_y2{rect_coordinates[3].first};
+  const int max_y2{rect_coordinates[3].second};
+
   if (max_x1 <= min_x2 || max_y1 <= min_y2)
     return "0";
 
@@ -217,6 +229,16 @@ string OverlappingRectangles(string* str_arr, const size_t str_arr_size) {
       (overlapped_rectangle_y_coord[2] - overlapped_rectangle_y_coord[1])};
 
   return to_string(first_rectangle_area / overlapped_rectangle_area);
+}
+
+string OverlappingRectangles(string* str_arr, const size_t str_arr_size) {
+  if (!str_arr || !str_arr_size)
+    return "not possible";
+
+  const vector<pair<int, int>> coordinates{
+      parse_rectangle_coordinates(*str_arr)};
+
+  return calculate_area_of_overlapping_rectangle(coordinates);
 }
 
 int main() {
