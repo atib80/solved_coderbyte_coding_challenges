@@ -102,6 +102,7 @@ vector<string> split(const string& source,
 
 pair<int, int> find_min_max_x_coord(
     const vector<pair<int, int>> rectangle_coordinates) {
+
   const auto min_max_x_coord_iter_pair =
       minmax_element(begin(rectangle_coordinates), end(rectangle_coordinates),
                      [](const pair<int, int>& lp, const pair<int, int>& rp) {
@@ -114,6 +115,7 @@ pair<int, int> find_min_max_x_coord(
 
 pair<int, int> find_min_max_y_coord(
     const vector<pair<int, int>> rectangle_coordinates) {
+  
   const auto min_max_y_coord_iter_pair =
       minmax_element(begin(rectangle_coordinates), end(rectangle_coordinates),
                      [](const pair<int, int>& lp, const pair<int, int>& rp) {
@@ -152,6 +154,7 @@ pair<int, int> parse_x_y_coordinates(const string& str) {
 }
 
 vector<pair<int, int>> parse_rectangle_coordinates(const string& input) {
+  
   vector<string> coordinates_str{split(input, "),(")};
 
   if (8 != coordinates_str.size())
@@ -198,6 +201,7 @@ vector<pair<int, int>> parse_rectangle_coordinates(const string& input) {
 
 string calculate_area_of_overlapping_rectangle(
     const vector<pair<int, int>>& rect_coordinates) {
+
   const int min_x1{rect_coordinates[0].first};
   const int max_x1{rect_coordinates[0].second};
   const int min_y1{rect_coordinates[1].first};
@@ -253,6 +257,9 @@ int main() {
   string D[] = {"(0,0),(5,0),(0,2),(5,2),(2,1),(5,1),(2,-1),(5,-1)"};
   cout << OverlappingRectangles(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 3
+  string E[] = {"(1,0),(1,1),(4,0),(4,1),(5,0),(27,0),(5,-25),(27,-25)"};
+  cout << OverlappingRectangles(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 0
 
   return 0;
 }
