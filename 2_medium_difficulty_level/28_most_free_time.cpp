@@ -40,7 +40,7 @@ string trim(const string& input) {
                find_if(begin(output), end(output),
                        [](const char ch) { return !isspace(ch); }));
 
-  output.erase(find_if(rbegin(output), rend(output),
+  output.erase(find_if(output.rbegin(), output.rend(),
                        [](const char ch) { return !isspace(ch); })
                    .base(),
                end(output));
@@ -95,7 +95,7 @@ vector<string> split(const string& source,
     if (string::npos == max_count)
       parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count))
+    else if (parts.size() < max_count)
       parts.emplace_back(source.substr(prev));
   }
 
@@ -127,9 +127,8 @@ pair<size_t, size_t> parse_event_start_and_end_time(const string& event_str) {
   string start_time_am_pm_str{
       start_time_parts_str[1].substr(am_pm_start_char, 2)};
 
-  for (size_t i{}; i < start_time_am_pm_str.length(); i++)
-    start_time_am_pm_str[i] =
-        static_cast<char>(tolower(start_time_am_pm_str[i]));
+  start_time_am_pm_str[0] = static_cast<char>(tolower(start_time_am_pm_str[0]));
+  start_time_am_pm_str[1] = static_cast<char>(tolower(start_time_am_pm_str[1]));
 
   size_t start_time_hour{stoul(start_time_parts_str[0])};
 
@@ -156,8 +155,8 @@ pair<size_t, size_t> parse_event_start_and_end_time(const string& event_str) {
 
   string end_time_am_pm_str{end_time_parts_str[1].substr(am_pm_end_char, 2)};
 
-  for (size_t i{}; i < end_time_am_pm_str.length(); i++)
-    end_time_am_pm_str[i] = static_cast<char>(tolower(end_time_am_pm_str[i]));
+  end_time_am_pm_str[0] = static_cast<char>(tolower(end_time_am_pm_str[0]));
+  end_time_am_pm_str[1] = static_cast<char>(tolower(end_time_am_pm_str[1]));
 
   size_t end_time_hour{stoul(end_time_parts_str[0])};
 
@@ -183,13 +182,12 @@ string MostFreeTime(string* str_arr, const size_t str_arr_size) {
     start_end_times.emplace_back(event_time.second);
   }
 
-  sort(begin(start_end_times), end(start_end_times),
-       [](const size_t lt, const size_t rt) { return lt < rt; });
+  sort(begin(start_end_times), end(start_end_times));
 
   size_t max_free_time_period{};
 
   for (size_t i{1}; i < start_end_times.size() - 1; i += 2) {
-    if ((start_end_times[i + 1] - start_end_times[i]) > max_free_time_period)
+    if (start_end_times[i + 1] - start_end_times[i] > max_free_time_period)
       max_free_time_period = start_end_times[i + 1] - start_end_times[i];
   }
 
