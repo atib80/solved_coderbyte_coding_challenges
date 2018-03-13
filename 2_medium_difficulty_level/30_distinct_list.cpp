@@ -15,40 +15,36 @@ Input:  100,2,101,4
 Output: 0
 */
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <unordered_set>
 
 using namespace std;
 
-int DistinctList(const int* arr, const size_t arr_size) {
-  int duplicate_count{};
+int DistinctList_v1(int* arr, const size_t arr_size) {
+  unordered_set<int> visited_arr_elements(arr, arr + arr_size);
 
-  unordered_set<int> visited_arr_elements{};
+  return arr_size - visited_arr_elements.size();
+}
 
-  for (size_t i{}; i < arr_size; i++) {
-    if (visited_arr_elements.find(arr[i]) != end(visited_arr_elements)) {
-      duplicate_count++;
-      continue;
-    }
+int DistinctList_v2(int* arr, const size_t arr_size) {
+  int* const new_arr_last = unique(arr, arr + arr_size);
 
-    visited_arr_elements.insert(arr[i]);
-  }
-
-  return duplicate_count;
+  return static_cast<ptrdiff_t>(arr + arr_size - new_arr_last);
 }
 
 int main() {
   // const int A[] = gets(stdin);
-  // cout << DistinctList(A, sizeof(A)/sizeof(*A));
-  const int B[] = {1, 2, 2, 2, 3};
-  cout << DistinctList(B, sizeof(B) / sizeof(*B))
+  // cout << DistinctList_v2(A, sizeof(A)/sizeof(*A));
+  int B[] = {1, 2, 2, 2, 3};
+  cout << DistinctList_v2(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 2
-  const int C[] = {0, -2, -2, 5, 5, 5};
-  cout << DistinctList(C, sizeof(C) / sizeof(*C))
+  int C[] = {0, -2, -2, 5, 5, 5};
+  cout << DistinctList_v2(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 3
-  const int D[] = {100, 2, 101, 4};
-  cout << DistinctList(D, sizeof(D) / sizeof(*D))
+  int D[] = {100, 2, 101, 4};
+  cout << DistinctList_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 0
 
   return 0;
