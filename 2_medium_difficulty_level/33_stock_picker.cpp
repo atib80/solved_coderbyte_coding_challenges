@@ -63,13 +63,13 @@ int StockPicker_v2(const int* arr, const int arr_size) {
 
   sort(begin(numbers), end(numbers),
        [](const pair<int, int>& lp, const pair<int, int>& rp) {
-         return lp.first > rp.first;
+         return lp.first < rp.first;
        });
 
   for (int i{}; i < arr_size - 1; i++) {
     for (int j{arr_size - 1}; j > i; j--) {
-      if (numbers[i].second > numbers[j].second)
-        return numbers[i].first - numbers[j].first;
+      if (numbers[i].second < numbers[j].second)
+        return numbers[j].first - numbers[i].first;
     }
   }
 
@@ -78,15 +78,15 @@ int StockPicker_v2(const int* arr, const int arr_size) {
 
 int main() {
   // const int A[] = gets(stdin);
-  // cout << StockPicker_v1(A, sizeof(A)/sizeof(*A));
+  // cout << StockPicker_v2(A, sizeof(A)/sizeof(*A));
   const int B[] = {44, 30, 24, 32, 35, 30, 40, 38, 15};
-  cout << StockPicker_v1(B, sizeof(B) / sizeof(*B))
+  cout << StockPicker_v2(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 16
   const int C[] = {10, 12, 4, 5, 9};
-  cout << StockPicker_v1(C, sizeof(C) / sizeof(*C))
+  cout << StockPicker_v2(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 5
   const int D[] = {14, 20, 4, 12, 5, 11};
-  cout << StockPicker_v1(D, sizeof(D) / sizeof(*D))
+  cout << StockPicker_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 8
 
   return 0;

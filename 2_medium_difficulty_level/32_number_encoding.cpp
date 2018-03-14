@@ -24,21 +24,38 @@ Output: 10110-1
 
 using namespace std;
 
-string trim(const string& input) {
-  string output{input};
-  output.erase(begin(output),
-               find_if(begin(output), end(output),
-                       [](const char ch) { return !isspace(ch); }));
+string trim(const string& str) {
+  const size_t str_len{str.length()};
 
-  output.erase(find_if(output.rbegin(), output.rend(),
-                       [](const char ch) { return !isspace(ch); })
-                   .base(),
-               end(output));
+  if (!str_len)
+    return string{};
 
-  return output;
+  size_t begin_str{};
+  size_t end_str{str_len - 1};
+
+  while (begin_str <= end_str) {
+    bool cont{};
+    if (isspace(str[begin_str])) {
+      cont = true;
+      begin_str++;
+    }
+
+    if (isspace(str[end_str])) {
+      cont = true;
+      end_str--;
+    }
+
+    if (!cont)
+      break;
+  }
+
+  if (begin_str > end_str)
+    return string{};
+
+  return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-string NumberEncoding(string str) {
+string NumberEncoding_v1(string str) {
   static const string alphabet_str{"abcdefghijklmnopqrstuvwxyz"};
 
   str = trim(str);
@@ -60,19 +77,38 @@ string NumberEncoding(string str) {
   return oss.str();
 }
 
+string NumberEncoding_v2(string str) {
+  str = trim(str);
+
+  ostringstream oss{};
+
+  for (size_t i{}; i < str.length(); i++) {
+    const char ch{static_cast<char>(tolower(str[i]))};
+
+    if (isalpha(ch)) {
+      oss << static_cast<size_t>(ch - 'a') + 1;
+      continue;
+    }
+
+    oss << str[i];
+  }
+
+  return oss.str();
+}
+
 int main() {
-  // cout << NumberEncoding(move(string{gets(stdin)}));
-  cout << NumberEncoding(move(string{"af5c a#!"}))
+  // cout << NumberEncoding_v1(move(string{gets(stdin)}));
+  cout << NumberEncoding_v1(move(string{"af5c a#!"}))
        << '\n';  // expected output: 1653 1#!
-  cout << NumberEncoding(move(string{"hello 45"}))
+  cout << NumberEncoding_v1(move(string{"hello 45"}))
        << '\n';  // expected output: 85121215 45
-  cout << NumberEncoding(move(string{"jaj-a"}))
+  cout << NumberEncoding_v1(move(string{"jaj-a"}))
        << '\n';  // expected output: 10110-1
-  cout << NumberEncoding(move(string{"km#e"}))
+  cout << NumberEncoding_v1(move(string{"km#e"}))
        << '\n';  // expected output: 1113#5
-  cout << NumberEncoding(move(string{"af5c a#!"}))
+  cout << NumberEncoding_v1(move(string{"af5c a#!"}))
        << '\n';  // expected output: 1653 1#!
-  cout << NumberEncoding(move(string{"---fc9#"}))
+  cout << NumberEncoding_v1(move(string{"---fc9#"}))
        << '\n';  // expected output: ---639#
 
   return 0;
