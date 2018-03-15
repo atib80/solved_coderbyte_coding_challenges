@@ -52,13 +52,13 @@ void find_and_mark_neighboring_holes(const size_t origin_x,
     if (x > 0 && !bitmap[x - 1][y])
       q.emplace(make_pair(x - 1, y));
 
-    if ((x < bitmap.size() - 1) && !bitmap[x + 1][y])
+    if (x < bitmap.size() - 1 && !bitmap[x + 1][y])
       q.emplace(make_pair(x + 1, y));
 
-    if ((y > 0) && !bitmap[x][y - 1])
+    if (y > 0 && !bitmap[x][y - 1])
       q.emplace(make_pair(x, y - 1));
 
-    if ((y < bitmap[x].size() - 1) && !bitmap[x][y + 1])
+    if (y < bitmap[x].size() - 1 && !bitmap[x][y + 1])
       q.emplace(make_pair(x, y + 1));
   }
 }
