@@ -1,5 +1,6 @@
 /*
 Coderbyte coding challenge: Bitmap Holes
+(iterative solution using std::queue<T>)
 
 Using the C++ language, have the function BitmapHoles(strArr) take the array of
 strings stored in strArr, which will be a 2D matrix of 0 and 1's, and determine
@@ -27,28 +28,39 @@ Output: 2
 */
 
 #include <iostream>
+#include <queue>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
 
-void find_and_mark_neighboring_holes(const size_t x,
-                                     const size_t y,
+void find_and_mark_neighboring_holes(const size_t origin_x,
+                                     const size_t origin_y,
                                      vector<vector<int>>& bitmap,
                                      const int mark_value = -1) {
-  bitmap[x][y] = mark_value;
+  queue<pair<size_t, size_t>> q{{make_pair(origin_x, origin_y)}};
 
-  if ((x > 0) && !bitmap[x - 1][y])
-    find_and_mark_neighboring_holes(x - 1, y, bitmap);
+  while (!q.empty()) {
+    const size_t x{q.front().first};
+    const size_t y{q.front().second};
 
-  if ((x < bitmap.size() - 1) && !bitmap[x + 1][y])
-    find_and_mark_neighboring_holes(x + 1, y, bitmap);
+    q.pop();
 
-  if ((y > 0) && !bitmap[x][y - 1])
-    find_and_mark_neighboring_holes(x, y - 1, bitmap);
+    bitmap[x][y] = mark_value;
 
-  if ((y < bitmap[x].size() - 1) && !bitmap[x][y + 1])
-    find_and_mark_neighboring_holes(x, y + 1, bitmap);
+    if (x > 0 && !bitmap[x - 1][y])
+      q.emplace(make_pair(x - 1, y));
+
+    if ((x < bitmap.size() - 1) && !bitmap[x + 1][y])
+      q.emplace(make_pair(x + 1, y));
+
+    if ((y > 0) && !bitmap[x][y - 1])
+      q.emplace(make_pair(x, y - 1));
+
+    if ((y < bitmap[x].size() - 1) && !bitmap[x][y + 1])
+      q.emplace(make_pair(x, y + 1));
+  }
 }
 
 void print_bitmap_contents(const vector<vector<int>>& bitmap,
@@ -90,7 +102,7 @@ string BitmapHoles(const string* str_arr, const size_t row_size) {
     }
   }
 
-  print_bitmap_contents(bitmap, row_size, column_size);
+  // print_bitmap_contents(bitmap, row_size, column_size);
 
   int current_hole_id{-1};
   size_t holes_count{};
@@ -105,7 +117,7 @@ string BitmapHoles(const string* str_arr, const size_t row_size) {
     }
   }
 
-  print_bitmap_contents(bitmap, row_size, column_size);
+  // print_bitmap_contents(bitmap, row_size, column_size);
 
   return to_string(holes_count);
 }
