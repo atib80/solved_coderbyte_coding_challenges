@@ -107,74 +107,92 @@ vector<string> split(const string& source,
   return parts;
 }
 
-template <typename BidirIter, typename T>
-T find_lca_of_given_two_values_using_binary_search(BidirIter first,
-                                                   BidirIter last,
-                                                   const T& value1,
-                                                   const T& value2) {
-  using value_type = typename iterator_traits<BidirIter>::value_type;
-  using difference_type = typename iterator_traits<BidirIter>::difference_type;
+struct node {
+  int number;
+  node* left{};
+  node* right{};
+  node* parent{};
 
-  vector<value_type> visited_values_for_value1{};
+  node(const int n, node* p = nullptr) : number{n}, parent{p} {}
 
-  const BidirIter orig_first{first};
-  const BidirIter orig_last{last};
+  ~node() {
+    if (left) {
+      delete left;
+    }
 
-  while (first <= last) {
-    BidirIter current{first};
-
-    const difference_type d{distance(first, last)};
-
-    advance(current, d / 2);
-
-    visited_values_for_value1.emplace_back(*current);
-
-    if (value1 == *current)
-      break;
-
-    if (value1 < *current) {
-      --current;
-      last = current;
-    } else {
-      ++current;
-      first = current;
+    if (right) {
+      delete right;
     }
   }
 
-  unordered_set<value_type> visited_values_for_value2{};
-
-  first = orig_first;
-  last = orig_last;
-
-  while (first <= last) {
-    BidirIter current{first};
-
-    const difference_type d{distance(first, last)};
-
-    advance(current, d / 2);
-
-    visited_values_for_value2.insert(*current);
-
-    if (value2 == *current) {
-      for (int i = visited_values_for_value1.size() - 1; i >= 0; i--) {
-        if (visited_values_for_value2.find(visited_values_for_value1[i]) !=
-            end(visited_values_for_value2))
-          return visited_values_for_value1[i];
+  node* insert(const int n) {
+    if (n < number) {
+      if (left)
+        return left->insert(n);
+      else {
+        left = new node(n, this);
+        return left;
       }
 
-      break;
-    }
-
-    if (value2 < *current) {
-      --current;
-      last = current;
     } else {
-      ++current;
-      first = current;
+      if (right)
+        return right->insert(n);
+      else {
+        right = new node(n, this);
+        return right;
+      }
     }
   }
+};
 
-  return T{};
+node* find_lca_util(node* root,
+                    const int n1,
+                    const int n2,
+                    bool& n1_found,
+                    bool& n2_found) {
+  if (!root)
+    return nullptr;
+
+  if (root->number == n1) {
+    n1_found = true;
+    return root;
+  }
+
+  if (root->number == n2) {
+    n2_found = true;
+    return root;
+  }
+
+  node* left_lca = find_lca_util(root->left, n1, n2, n1_found, n2_found);
+  node* right_lca = find_lca_util(root->right, n1, n2, n1_found, n2_found);
+
+  if (left_lca && right_lca)
+    return root;
+
+  return left_lca != nullptr ? left_lca : right_lca;
+}
+
+bool find(node* root, const int number) {
+  if (!root)
+    return false;
+
+  if (root->number == number || find(root->left, number) ||
+      find(root->right, number))
+    return true;
+
+  return false;
+}
+
+node* find_lca(node* root, const int n1, const int n2) {
+  bool n1_found{}, n2_found{};
+
+  node* lca{find_lca_util(root, n1, n2, n1_found, n2_found)};
+
+  if (n1_found && n2_found || n1_found && find(lca, n2) ||
+      n2_found && find(lca, n1))
+    return lca;
+
+  return nullptr;
 }
 
 int BinarySearchTreeLCA_v2(string* str_arr, const size_t str_arr_size) {
@@ -198,10 +216,17 @@ int BinarySearchTreeLCA_v2(string* str_arr, const size_t str_arr_size) {
   const int number1{stoi(str_arr[1])};
   const int number2{stoi(str_arr[2])};
 
-  sort(begin(numbers), end(numbers));
+  node bst{numbers[0]};
 
-  return find_lca_of_given_two_values_using_binary_search(
-      begin(numbers), end(numbers), number1, number2);
+  for (size_t i{1}; i < numbers.size(); i++)
+    bst.insert(numbers[i]);
+
+  node* lca{find_lca(&bst, number1, number2)};
+
+  if (lca)
+    return lca->number;
+
+  return -1;
 }
 
 int main() {
@@ -215,6 +240,13 @@ int main() {
        << '\n';  // expected output: 10
   string D[] = {"[3, 2, 1, 12, 4, 5, 13]", "5", "13"};
   cout << BinarySearchTreeLCA_v2(D, sizeof(D) / sizeof(*D))
-       << '\n';  // expected output: 12
+       << '\n';                                        // expected output: 12
+  string E[] = {"[3, 2, 1, 12, 4, 5, 13]", "2", "5"};  // 1 2 3 4 5 12 13
+  cout << BinarySearchTreeLCA_v2(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 3
+  string F[] = {"[5, 3, 1, 7, 6, 12, 45, 32]", "5", "32"};
+  cout << BinarySearchTreeLCA_v2(F, sizeof(F) / sizeof(*F))
+       << '\n';  // expected output: 5
+
   return 0;
 }

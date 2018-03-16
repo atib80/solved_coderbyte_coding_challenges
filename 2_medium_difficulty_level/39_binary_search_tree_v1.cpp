@@ -205,5 +205,11 @@ int main() {
   string D[] = {"[3, 2, 1, 12, 4, 5, 13]", "5", "13"};
   cout << BinarySearchTreeLCA_v1(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 12
+  string E[] = {"[3, 2, 1, 12, 4, 5, 13]", "2", "5"}; // 1 2 3 4 5 12 13
+  cout << BinarySearchTreeLCA_v1(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 3
+  string F[] = {"[5, 3, 1, 7, 6, 12, 45, 32]", "5", "32"};
+  cout << BinarySearchTreeLCA_v1(F, sizeof(F) / sizeof(*F))
+       << '\n';  // expected output: 5
   return 0;
 }
