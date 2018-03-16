@@ -32,9 +32,7 @@ Output: 12
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <iterator>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 using namespace std;
