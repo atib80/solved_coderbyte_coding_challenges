@@ -52,28 +52,20 @@ int StockPicker_v1(const int* arr, const int arr_size) {
   return current_max_profit;
 }
 
-int StockPicker_v2(const int* arr, const int arr_size) {
-  if (arr_size < 2)
-    return -1;
+int StockPicker_v2(const int* arr, const size_t arr_size) {
+  int current_max_profit{-1};
 
-  vector<pair<int, int>> numbers(arr_size);
+  for (size_t i{}; i < arr_size - 1; i++) {
+    for (size_t j{i + 1}; j < arr_size; j++) {
+      if (arr[j] <= arr[i])
+        continue;
 
-  for (int i{}; i < arr_size; i++)
-    numbers[i] = make_pair(arr[i], i);
-
-  sort(begin(numbers), end(numbers),
-       [](const pair<int, int>& lp, const pair<int, int>& rp) {
-         return lp.first < rp.first;
-       });
-
-  for (int i{}; i < arr_size - 1; i++) {
-    for (int j{arr_size - 1}; j > i; j--) {
-      if (numbers[i].second < numbers[j].second)
-        return numbers[j].first - numbers[i].first;
+      if (arr[j] - arr[i] > current_max_profit)
+        current_max_profit = arr[j] - arr[i];
     }
   }
 
-  return -1;
+  return current_max_profit;
 }
 
 int main() {
@@ -87,7 +79,10 @@ int main() {
        << '\n';  // expected output: 5
   const int D[] = {14, 20, 4, 12, 5, 11};
   cout << StockPicker_v2(D, sizeof(D) / sizeof(*D))
-       << '\n';  // expected output: 8
+       << '\n';                      // expected output: 8
+  const int E[] = {5, 10, 4, 6, 7};  // 4, 5, 6, 7, 10
+  cout << StockPicker_v2(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 5
 
   return 0;
 }
