@@ -27,6 +27,7 @@ Input:  "1011", "0010"
 Output: 2
 */
 
+#include <algorithm>
 #include <iostream>
 #include <queue>
 #include <string>
@@ -34,6 +35,20 @@ Output: 2
 #include <vector>
 
 using namespace std;
+
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
+
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
+
+  return output;
+}
 
 void find_and_mark_neighboring_holes(const size_t origin_x,
                                      const size_t origin_y,
@@ -63,46 +78,44 @@ void find_and_mark_neighboring_holes(const size_t origin_x,
   }
 }
 
-void print_bitmap_contents(const vector<vector<int>>& bitmap,
-                           const size_t row_size,
-                           const size_t column_size) {
+void print_bitmap_contents(const vector<vector<int>>& bitmap) {
+  if (bitmap.empty())
+    return;
+
   printf("\n");
 
-  for (size_t i{}; i < column_size; i++)
+  for (size_t i{}; i < bitmap[0].size(); i++)
     printf("---");
 
-  for (size_t i{}; i < row_size; i++) {
+  for (size_t i{}; i < bitmap.size(); i++) {
     printf("\n|");
 
-    for (size_t j{}; j < column_size; j++) {
+    for (size_t j{}; j < bitmap[0].size(); j++) {
       printf("%2d|", bitmap[i][j]);
     }
   }
 
   printf("\n");
 
-  for (size_t i{}; i < column_size; i++)
+  for (size_t i{}; i < bitmap[0].size(); i++)
     printf("---");
 
   printf("\n");
 }
 
-string BitmapHoles(const string* str_arr, const size_t row_size) {
+string BitmapHoles(string* str_arr, const size_t row_size) {
   const size_t column_size{str_arr[0].length()};
-
-  vector<vector<int>> bitmap(row_size, vector<int>{});
-
-  for (size_t i{}; i < row_size; i++)
-    bitmap[i].resize(str_arr[i].length());
+  vector<vector<int>> bitmap(row_size, vector<int>(column_size, 0));
 
   for (size_t i{}; i < row_size; i++) {
-    for (size_t j{}; j < str_arr[i].length(); j++) {
+    str_arr[i] = trim(str_arr[i]);
+    for (size_t j{}; j < min(column_size, str_arr[i].length()); j++) {
       if ('1' == str_arr[i][j])
         bitmap[i][j] = 1;
     }
   }
 
-  // print_bitmap_contents(bitmap, row_size, column_size);
+  // print_bitmap_contents(bitmap);
 
   int current_hole_id{-1};
   size_t holes_count{};
@@ -117,19 +130,19 @@ string BitmapHoles(const string* str_arr, const size_t row_size) {
     }
   }
 
-  // print_bitmap_contents(bitmap, row_size, column_size);
+  // print_bitmap_contents(bitmap);
 
   return to_string(holes_count);
 }
 
 int main() {
-  // const string A[] = gets(stdin);
+  // string A[] = gets(stdin);
   // cout << BitmapHoles(A, sizeof(A)/sizeof(*A));
-  const string B[] = {"10111", "10101", "11101", "11111"};
+  string B[] = {"10111", "10101", "11101", "11111"};
   cout << BitmapHoles(B, sizeof(B) / sizeof(*B)) << '\n';  // expected output: 2
-  const string C[] = {"01111", "01101", "00011", "11110"};
+  string C[] = {"01111", "01101", "00011", "11110"};
   cout << BitmapHoles(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: 3
-  const string D[] = {"1011", "0010"};
+  string D[] = {"1011", "0010"};
   cout << BitmapHoles(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: 2
   return 0;
 }

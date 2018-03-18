@@ -30,107 +30,91 @@ Output: "false"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <map>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 using namespace std;
 
-string trim(const string& str) {
-  size_t begin_str{};
-  size_t end_str{str.size() - 1};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (0u == str.length())
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return string{};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return output;
 }
 
-using namespace std;
-
 string TreeConstructor(string* str_arr, const size_t str_arr_size) {
-  vector<pair<int, int>> child_parent_value_pairs(str_arr_size);
+  vector<pair<int, int>> child_parent_value_pairs{};
 
-  for (size_t i{}; i != str_arr_size; i++) {
+  for (size_t i{}; i < str_arr_size; i++) {
     str_arr[i] = trim(str_arr[i]);
     str_arr[i].erase(begin(str_arr[i]));
     str_arr[i].erase(--end(str_arr[i]));
     const size_t comma_pos{str_arr[i].find(',')};
     if (string::npos == comma_pos)
-      return string{"Not possible!"};
-    const string child_number_str{str_arr[i].substr(0, comma_pos)};
-    const string parent_number_str{str_arr[i].substr(comma_pos + 1)};
-    const int child_number{stoi(child_number_str)};
-    const int parent_number{stoi(parent_number_str)};
-    child_parent_value_pairs[i] = make_pair(child_number, parent_number);
+      return "not possible";
+    const int child_number{stoi(str_arr[i].substr(0, comma_pos))};
+    const int parent_number{stoi(str_arr[i].substr(comma_pos + 1))};
+    child_parent_value_pairs.emplace_back(
+        make_pair(child_number, parent_number));
   }
 
-  if ((1u == child_parent_value_pairs.size()) &&
-      (child_parent_value_pairs[0].first < child_parent_value_pairs[0].second))
-    return string{"true"};
+  if (1 == child_parent_value_pairs.size() &&
+      child_parent_value_pairs.front().first <
+          child_parent_value_pairs.front().second)
+    return "true";
 
-  map<int, size_t> child_value_count{}, parent_value_count{};
-
-  map<int, vector<int>> parent_children_values{};
+  unordered_set<int> child_value_count{};
+  unordered_map<int, size_t> parent_value_count{};
+  unordered_map<int, vector<int>> parent_children_values{};
 
   sort(begin(child_parent_value_pairs), end(child_parent_value_pairs),
        [](const pair<int, int>& lp, const pair<int, int>& rp) {
 
-         return (lp.second < rp.second);
+         return lp.second < rp.second;
        });
 
   for (const auto& cp : child_parent_value_pairs) {
-    if (child_value_count.find(cp.first) == end(child_value_count))
-      child_value_count.insert(make_pair(cp.first, 1u));
+    if (child_value_count.count(cp.first))
+      return "false";
+
+    child_value_count.insert(cp.first);
+
+    parent_value_count[cp.second]++;
+
+    if (parent_value_count[cp.second] > 2)
+      return "false";
+
+    if (parent_children_values.find(cp.second) == end(parent_children_values))
+      parent_children_values.insert(
+          make_pair(cp.second, vector<int>{cp.first}));
     else
-      return string{"false"};
-
-    if (parent_value_count.find(cp.second) == end(parent_value_count))
-      parent_value_count.insert(make_pair(cp.second, 1u));
-    else {
-      parent_value_count[cp.second]++;
-      if (parent_value_count[cp.second] > 2u)
-        return string{"false"};
-    }
-
-    if (parent_children_values.find(cp.second) == end(parent_children_values)) {
-      parent_children_values.insert(make_pair(cp.second, vector<int>{}));
       parent_children_values[cp.second].emplace_back(cp.first);
-    } else {
-      parent_children_values[cp.second].emplace_back(cp.first);
-    }
   }
 
   for (const auto& cp_values : parent_children_values) {
-    if (cp_values.second.size() > 2u)
-      return string{"false"};
+    if (cp_values.second.size() > 2)
+      return "false";
 
-    if (2u == cp_values.second.size()) {
-      if ((cp_values.second[0] < cp_values.first) &&
-          (cp_values.second[1] < cp_values.first))
-        return string{"false"};
-
-      if ((cp_values.second[0] > cp_values.first) &&
-          (cp_values.second[1] > cp_values.first))
-        return string{"false"};
+    if (2 == cp_values.second.size()) {
+      if ((cp_values.second[0] < cp_values.first &&
+           cp_values.second[1] < cp_values.first) ||
+          (cp_values.second[0] > cp_values.first &&
+           cp_values.second[1] > cp_values.first))
+        return "false";
     }
   }
 
-  return string{"true"};
+  return "true";
 }
 
 int main() {
