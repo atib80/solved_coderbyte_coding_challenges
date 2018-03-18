@@ -112,11 +112,15 @@ vector<string> split(const string& source,
 template <typename T>
 struct node {
   T data;
-  node<T>* left{};
-  node<T>* right{};
-  node<T>* parent{};
+  node<T>* left;
+  node<T>* right;
+  node<T>* parent;
 
-  node(const T& d, node<T>* p = nullptr) : data{d}, parent{p} {}
+  node(const T& d,
+       node<T>* p = nullptr,
+       node<T>* l = nullptr,
+       node<T>* r = nullptr)
+      : data{d}, parent{p}, left{l}, right{r} {}
 
   ~node() {
     if (left)
