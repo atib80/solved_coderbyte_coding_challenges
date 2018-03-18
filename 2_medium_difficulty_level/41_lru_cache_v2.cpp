@@ -1,5 +1,11 @@
 /*
-Coderbyte coding challenge: LRU Cache
+Coderbyte coding challenge: LRU Cache v2
+
+LRU Cache v2 is an alternative second solution to Coderbyte's LRU cache
+coding challenge that makes use of a deque<char> container for storing all of
+LRU cache's contents in a sequential order based on the order of arrival of its
+elements and an unordered_map<char, size_t> associative container for providing
+quick lookup of LRU cache's previously stored elements.
 
 Using the C++ language, have the function LRUCache(strArr) take the array of
 characters stored in strArr, which will contain characters ranging from A to Z
@@ -84,25 +90,19 @@ deque<char> build_lru_cache_contents(const string* str_arr,
       lru_cache.emplace_back(cache_item);
       lru_cache_index[cache_item] = lru_cache.size() - 1;
 
-      for (size_t i{}; i < lru_cache.size() - 1; i++)
-        lru_cache_index[lru_cache[i]] = i;
-
     } else if (lru_cache.size() == max_capacity) {
       lru_cache_index.erase(lru_cache[0]);
       lru_cache.erase(begin(lru_cache));
       lru_cache.emplace_back(cache_item);
       lru_cache_index[cache_item] = max_capacity - 1;
 
-      for (size_t i{}; i < max_capacity - 1; i++)
-        lru_cache_index[lru_cache[i]] = i;
-
     } else {
       lru_cache.emplace_back(cache_item);
       lru_cache_index[cache_item] = lru_cache.size() - 1;
-
-      for (size_t i{}; i < lru_cache.size() - 1; i++)
-        lru_cache_index[lru_cache[i]] = i;
     }
+
+    for (size_t i{}; i < lru_cache.size() - 1; i++)
+      lru_cache_index[lru_cache[i]] = i;
   }
 
   return lru_cache;
