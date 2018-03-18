@@ -88,19 +88,22 @@ list<char> build_lru_cache_contents(const string* str_arr,
 
     if (lru_cache_index.find(cache_item) != end(lru_cache_index)) {
       lru_cache.erase(lru_cache_index[cache_item]);
-      lru_cache.emplace_back(cache_item);
+      const auto new_cache_item_iter_pos =
+          lru_cache.insert(end(lru_cache), cache_item);
+      lru_cache_index[cache_item] = new_cache_item_iter_pos;
 
     } else if (lru_cache.size() == max_capacity) {
       lru_cache_index.erase(lru_cache.front());
       lru_cache.pop_front();
-      lru_cache.emplace_back(cache_item);
+      const auto new_cache_item_iter_pos =
+          lru_cache.insert(end(lru_cache), cache_item);
+      lru_cache_index[cache_item] = new_cache_item_iter_pos;
 
     } else {
-      lru_cache.emplace_back(cache_item);
+      const auto new_cache_item_iter_pos =
+          lru_cache.insert(end(lru_cache), cache_item);
+      lru_cache_index[cache_item] = new_cache_item_iter_pos;
     }
-
-    for (auto start = begin(lru_cache); start != end(lru_cache); ++start)
-      lru_cache_index[*start] = start;
   }
 
   return lru_cache;
