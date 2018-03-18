@@ -138,37 +138,42 @@ bool construct_binary_heap_tree(const vector<string>& data,
   queue<node<string>*> q{{root_node}};
 
   const size_t data_len{data.size()};
-  size_t index{1};
+  size_t index{};
 
   while (!q.empty()) {
     node<string>* parent{q.front()};
     q.pop();
 
-    if (data_len == index)
+    if (!parent) {
+      index++;
+      continue;
+    }
+
+    index++;
+
+    if (index >= data_len)
       return true;
 
     if ("#" != data[index]) {
       node<string>* left{new node<string>(data[index], parent)};
-
       parent->left = left;
-
       q.emplace(left);
-    }
+
+    } else
+      q.emplace(nullptr);
 
     index++;
 
-    if (data_len == index)
+    if (index >= data_len)
       return true;
 
     if ("#" != data[index]) {
       node<string>* right{new node<string>(data[index], parent)};
-
       parent->right = right;
-
       q.emplace(right);
-    }
 
-    index++;
+    } else
+      q.emplace(nullptr);
   }
 
   return true;
@@ -256,6 +261,9 @@ int main() {
   string D[] = {"[5, 2, 6, 1, #, 8, 12, #, #, #, #, #, #, 3, #]", "3", "12"};
   cout << BinaryTreeLCA(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: "12"
+  string E[] = {"[5, 2, 6, 1, #, 8, 12, #, #, #, #, #, #, 3, #]", "3", "8"};
+  cout << BinaryTreeLCA(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: "6"
 
   return 0;
 }
