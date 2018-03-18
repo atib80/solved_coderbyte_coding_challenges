@@ -1,6 +1,6 @@
 /*
 Coderbyte coding challenge: Binary Tree LCA
-(iterative solution using "finding common parent node's index" calculation technique)
+(iterative solution using queue<node<string*>>)
 
 Using the C++ language, have the function BinaryTreeLCA(strArr) take the array
 of strings stored in strArr, which will contain 3 elements: the first element
@@ -34,7 +34,9 @@ Output: 12
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <queue>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
@@ -107,6 +109,114 @@ vector<string> split(const string& source,
   return parts;
 }
 
+template <typename T>
+struct node {
+  T data;
+  node<T>* left{};
+  node<T>* right{};
+  node<T>* parent{};
+
+  node(const T& d, node<T>* p = nullptr) : data{d}, parent{p} {}
+
+  ~node() {
+    if (left)
+      delete left;
+    if (right)
+      delete right;
+  }
+};
+
+bool construct_binary_heap_tree(const vector<string>& data,
+                                node<string>* root_node) {
+  if (data.empty() || "#" == data[0])
+    return false;
+
+  queue<node<string>*> q{{root_node}};
+
+  const size_t data_len{data.size()};
+  size_t index{1};
+
+  while (!q.empty()) {
+    node<string>* parent{q.front()};
+    q.pop();
+
+    if (data_len == index)
+      return true;
+
+    if ("#" != data[index]) {
+      node<string>* left{new node<string>(data[index], parent)};
+
+      parent->left = left;
+
+      q.emplace(left);
+    }
+
+    index++;
+
+    if (data_len == index)
+      return true;
+
+    if ("#" != data[index]) {
+      node<string>* right{new node<string>(data[index], parent)};
+
+      parent->right = right;
+
+      q.emplace(right);
+    }
+
+    index++;
+  }
+
+  return true;
+}
+
+string find_lca(const node<string>* root, const string& n1, const string& n2) {
+  if (!root)
+    return "not possible";
+
+  const node<string>*left_lca{}, *right_lca{};
+
+  queue<const node<string>*> q{{root}};
+
+  while (!q.empty()) {
+    const node<string>* current{q.front()};
+    q.pop();
+
+    if (!left_lca && current->data == n1)
+      left_lca = current;
+    else if (!right_lca && current->data == n2)
+      right_lca = current;
+
+    if (left_lca && right_lca)
+      break;
+
+    if (current->left)
+      q.emplace(current->left);
+    if (current->right)
+      q.emplace(current->right);
+  }
+
+  if (left_lca && !right_lca)
+    return left_lca->data;
+  if (!left_lca && right_lca)
+    return right_lca->data;
+
+  unordered_set<string> ancestor_node_values{};
+
+  for (const node<string>* tree_node{left_lca}; tree_node;
+       tree_node = tree_node->parent) {
+    ancestor_node_values.insert(tree_node->data);
+  }
+
+  for (const node<string>* tree_node{right_lca}; tree_node;
+       tree_node = tree_node->parent) {
+    if (ancestor_node_values.find(tree_node->data) != end(ancestor_node_values))
+      return tree_node->data;
+  }
+
+  return "not possible";
+}
+
 string BinaryTreeLCA(string* str_arr, const size_t str_arr_size) {
   if (str_arr_size < 3)
     return "-1";
@@ -120,59 +230,14 @@ string BinaryTreeLCA(string* str_arr, const size_t str_arr_size) {
 
   vector<string> numbers_str{split(str_arr[0], ", ")};
 
-  const string number1_str{str_arr[1]};
-  const string number2_str{str_arr[2]};
+  node<string> heap_btree(numbers_str[0]);
 
-  size_t number1_index{string::npos}, number2_index{string::npos};
+  if (!construct_binary_heap_tree(numbers_str, &heap_btree))
+    return "not possible";
 
-  for (size_t i{}; i < numbers_str.size(); i++) {
-    if ("#" == numbers_str[i])
-      continue;
+  const string lca{find_lca(&heap_btree, str_arr[1], str_arr[2])};
 
-    if (string::npos != number1_index && string::npos != number2_index)
-      break;
-
-    if (number1_str == numbers_str[i] && string::npos == number1_index)
-      number1_index = i;
-
-    else if (number2_str == numbers_str[i] && string::npos == number2_index)
-      number2_index = i;
-  }
-
-  if (number1_index < number2_index) {
-    if (number2_index - number1_index == 1)
-      return numbers_str[(number2_index - 1) / 2];
-
-    number2_index = (number2_index - 1) / 2;
-
-    while (number1_index != number2_index) {
-      if (number2_index > number1_index) {
-        number2_index = (number2_index - 1) / 2;
-      }
-
-      if (number1_index > number2_index) {
-        number1_index = (number1_index - 1) / 2;
-      }
-    }
-
-  } else {
-    if (number1_index - number2_index == 1)
-      return numbers_str[(number1_index - 1) / 2];
-
-    number1_index = (number1_index - 1) / 2;
-
-    while (number1_index != number2_index) {
-      if (number1_index > number2_index) {
-        number1_index = (number1_index - 1) / 2;
-      }
-
-      if (number2_index > number1_index) {
-        number2_index = (number2_index - 1) / 2;
-      }
-    }
-  }
-
-  return numbers_str[number1_index];
+  return lca;
 }
 
 int main() {
