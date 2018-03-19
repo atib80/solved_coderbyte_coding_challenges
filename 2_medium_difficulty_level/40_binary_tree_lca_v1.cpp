@@ -1,6 +1,7 @@
 /*
 Coderbyte coding challenge: Binary Tree LCA
-(iterative solution using "finding common parent node's index" calculation technique)
+(iterative solution using "finding common parent node's index" calculation
+method)
 
 Using the C++ language, have the function BinaryTreeLCA(strArr) take the array
 of strings stored in strArr, which will contain 3 elements: the first element
