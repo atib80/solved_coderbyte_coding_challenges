@@ -1,5 +1,6 @@
 /*
 Coderbyte coding challenge: Word Split v1
+(iterative solution using an unordered_set<string> container for storing unique words)
 
 Using the C++ language, have the function WordSplit(strArr) read the array of
 strings stored in strArr, which will contain 2 elements: the first element will

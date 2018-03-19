@@ -1,5 +1,7 @@
 /*
-Coderbyte coding challenge: Word Split
+Coderbyte coding challenge: Word Split v2
+(iterative solution using 2 unordered_map<string, size_t> containers for storing
+unique words and their respective lengths
 
 Using the C++ language, have the function WordSplit(strArr) read the array of
 strings stored in strArr, which will contain 2 elements: the first element will
