@@ -1,6 +1,9 @@
 /*
-Coderbyte coding challenge: Array Min Jumps (an alternative simpler, shorter
-solution to the same coding challenge using recursion)
+Coderbyte coding challenge: Array Min Jumps v3
+
+(An alternative simple, easy to understand iterative solution implemented by
+using queue<pair<int, int>> for tracking current array positions and their
+respective number of steps)
 
 Using the C++ language, have the function ArrayMinJumps(arr) take the array of
 integers stored in arr, where each integer represents the maximum number of
@@ -26,44 +29,46 @@ Output: 4
 
 #include <climits>
 #include <iostream>
+#include <queue>
+#include <utility>
 
 using namespace std;
 
-void find_min_number_of_steps_needed_from_current_position(
-    const int current_pos,
-    const int* arr,
-    const int arr_size,
-    int& min_steps_needed,
-    int current_step_count = 0) {
-  if (!arr[current_pos])
-    return;
+int find_min_number_of_steps_needed_from_current_position(const int* arr,
+                                                          const int arr_size) {
+  queue<pair<int, int>> q{{make_pair(0, 1)}};
+  int min_steps_needed{INT_MAX};
 
-  if (current_pos + arr[current_pos] >= arr_size - 1) {
-    if (current_step_count + 1 < min_steps_needed)
-      min_steps_needed = current_step_count + 1;
-    return;
+  while (!q.empty()) {
+    const int current_pos{q.front().first};
+    const int current_steps_count{q.front().second};
+    q.pop();
+
+    if (current_pos + arr[current_pos] >= arr_size - 1 &&
+        current_steps_count < min_steps_needed)
+      min_steps_needed = current_steps_count;
+
+    else {
+      for (int start{current_pos + 1}; start <= current_pos + arr[current_pos];
+           start++) {
+        if (current_steps_count + 1 >= min_steps_needed)
+          break;
+        q.emplace(make_pair(start, current_steps_count + 1));
+      }
+    }
   }
 
-  for (int start{current_pos + 1}; start <= current_pos + arr[current_pos];
-       start++) {
-    find_min_number_of_steps_needed_from_current_position(
-        start, arr, arr_size, min_steps_needed, current_step_count + 1);
-  }
+  if (INT_MAX != min_steps_needed)
+    return min_steps_needed;
+
+  return -1;
 }
 
 int ArrayMinJumps(const int* arr, const int arr_size) {
   if (arr_size < 2)
     return 0;
 
-  int min_steps_needed{INT_MAX};
-
-  find_min_number_of_steps_needed_from_current_position(0, arr, arr_size,
-                                                        min_steps_needed);
-
-  if (INT_MAX != min_steps_needed)
-    return min_steps_needed;
-
-  return -1;
+  return find_min_number_of_steps_needed_from_current_position(arr, arr_size);
 }
 
 int main() {
