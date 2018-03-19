@@ -106,7 +106,7 @@ vector<string> split(const string& source,
   return parts;
 }
 
-string WordSplit(string* str_arr, const size_t str_arr_size) {
+string WordSplit_v2(string* str_arr, const size_t str_arr_size) {
   if (!str_arr || str_arr_size < 2)
     return "not possible";
 
@@ -151,15 +151,15 @@ string WordSplit(string* str_arr, const size_t str_arr_size) {
 
 int main() {
   // string A[] = gets(stdin);
-  // cout << WordSplit(A, sizeof(A)/sizeof(A[0]));
+  // cout << WordSplit_v2(A, sizeof(A)/sizeof(A[0]));
   string B[] = {"hellocat", "apple,bat,cat,goodbye,hello,yellow,why"};
-  cout << WordSplit(B, sizeof(B) / sizeof(B[0]))
+  cout << WordSplit_v2(B, sizeof(B) / sizeof(B[0]))
        << '\n';  // expected output: "hello,cat"
   string C[] = {"baseball", "a,all,b,ball,bas,base,cat,code,d,e,quit,z"};
-  cout << WordSplit(C, sizeof(C) / sizeof(C[0]))
+  cout << WordSplit_v2(C, sizeof(C) / sizeof(C[0]))
        << '\n';  // expected output: "base,ball"
   string D[] = {"abcgefd", "a,ab,abc,abcg,b,c,dog,e,efd,zzzz"};
-  cout << WordSplit(D, sizeof(D) / sizeof(D[0]))
+  cout << WordSplit_v2(D, sizeof(D) / sizeof(D[0]))
        << '\n';  // expected output: "abcg,efd"
 
   return 0;
