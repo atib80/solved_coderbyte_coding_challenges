@@ -1,16 +1,23 @@
 /*
 Coderbyte coding challenge: Word Split
 
-Using the C++ language, have the function WordSplit(strArr) read the array of strings stored in strArr, which will contain 2 elements: 
-the first element will be a sequence of characters, and the second element will be a long string of comma-separated words, in alphabetical order, 
-that represents a dictionary of some arbitrary length. For example: strArr can be: ["hellocat", "apple,bat,cat,goodbye,hello,yellow,why"]. 
-Your goal is to determine if the first element in the input can be split into two words, where both words exist in the dictionary 
-that is provided in the second input. In this example, the first element can be split into two words: 
-hello and cat because both of those words are in the dictionary.
+Using the C++ language, have the function WordSplit(strArr) read the array of
+strings stored in strArr, which will contain 2 elements: the first element will
+be a sequence of characters, and the second element will be a long string of
+comma-separated words, in alphabetical order, that represents a dictionary of
+some arbitrary length. For example: strArr can be: ["hellocat",
+"apple,bat,cat,goodbye,hello,yellow,why"]. Your goal is to determine if the
+first element in the input can be split into two words, where both words exist
+in the dictionary that is provided in the second input. In this example, the
+first element can be split into two words: hello and cat because both of those
+words are in the dictionary.
 
-Your program should return the two words that exist in the dictionary separated by a comma. So for the example above, your program should return hello,cat. 
-There will only be one correct way to split the first element of characters into two words. If there is no way to split string into two words 
-that exist in the dictionary, return the string not possible. The first element itself will never exist in the dictionary as a real word.
+Your program should return the two words that exist in the dictionary separated
+by a comma. So for the example above, your program should return hello,cat.
+There will only be one correct way to split the first element of characters into
+two words. If there is no way to split string into two words that exist in the
+dictionary, return the string not possible. The first element itself will never
+exist in the dictionary as a real word.
 
 Sample test cases:
 
@@ -21,126 +28,139 @@ Input:  "abcgefd", "a,ab,abc,abcg,b,c,dog,e,efd,zzzz"
 Output: "abcg,efd"
 */
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <unordered_map>
-#include <cctype>
+#include <vector>
 
 using namespace std;
 
-string trim(const string& str)
-{
-	size_t begin_str{};
-	size_t end_str{str.size() - 1};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-	if (0u == str.length()) return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-	for (; begin_str <= end_str; ++begin_str)
-	{
-		if (!isspace(str[begin_str])) break;
-	}
-
-	if (begin_str > end_str) return string{};
-
-	for (; end_str > begin_str; --end_str)
-	{
-		if (!isspace(str[end_str])) break;
-	}
-
-	return str.substr(begin_str, end_str - begin_str + 1);
+  return output;
 }
 
-std::vector<string> split(const string& source, const char* needle, const size_t max_count = string::npos)
-{
-	std::vector<string> parts{};			
+vector<string> split(const string& source,
+                     const char* needle,
+                     size_t const max_count = string::npos) {
+  vector<string> parts{};
 
-	string needle_st{needle};
+  string needle_st{needle};
 
-	const size_t source_len{source.length()};
-	const size_t needle_len{needle_st.length()};
+  const size_t source_len{source.length()};
 
-	if ((0u == source_len) || (0u == needle_len)) return parts;
+  const size_t needle_len{needle_st.length()};
 
-	size_t number_of_parts{}, prev{};
+  if (!source_len)
+    return parts;
 
-	while (true)
-	{
-		const size_t current { source.find(needle_st, prev) };
+  if (!needle_len) {
+    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    for (size_t i{}; i < upper_limit; i++)
+      parts.emplace_back(1, source[i]);
+    return parts;
+  }
 
-		if (string::npos == current) break;
+  size_t number_of_parts{}, prev{};
 
-		number_of_parts++;
+  while (true) {
+    const size_t current{source.find(needle_st, prev)};
 
-		if ((string::npos != max_count) && (parts.size() == max_count)) break;
+    if (string::npos == current)
+      break;
 
-		if ((current - prev) > 0) parts.emplace_back(source.substr(prev, current - prev));
+    number_of_parts++;
 
-		prev = current + needle_len;
+    if ((string::npos != max_count) && (parts.size() == max_count))
+      break;
 
-		if (prev >= source_len) break;
-	}
+    if (current - prev > 0)
+      parts.emplace_back(source.substr(prev, current - prev));
 
-	if (prev < source_len)
-	{
-		if (string::npos == max_count) parts.emplace_back(source.substr(prev));
+    prev = current + needle_len;
 
-		else if ((string::npos != max_count) && (parts.size() < max_count)) parts.emplace_back(source.substr(prev));
-	}
+    if (prev >= source_len)
+      break;
+  }
 
-	return parts;
+  if (prev < source_len) {
+    if (string::npos == max_count)
+      parts.emplace_back(source.substr(prev));
+
+    else if (parts.size() < max_count)
+      parts.emplace_back(source.substr(prev));
+  }
+
+  return parts;
 }
 
 string WordSplit(string* str_arr, const size_t str_arr_size) {
+  if (!str_arr || str_arr_size < 2)
+    return "not possible";
 
-  if (str_arr_size < 2u) return "not possible"; 
-
-  const string tw { trim(str_arr[0]) };
-  const size_t tw_len { tw.length() };
-  const char tw_fc { tw.front() };
-  const char tw_lc { tw.back() };
+  const string target_word{trim(str_arr[0])};
+  const size_t target_word_len{target_word.length()};
+  const char target_word_first_char{target_word.front()};
+  const char target_word_last_char{target_word.back()};
 
   str_arr[1] = trim(str_arr[1]);
-
   vector<string> words = split(str_arr[1], ",");
 
   unordered_map<string, size_t> first_word_dict{};
   unordered_map<string, size_t> second_word_dict{};
 
-  for (const auto& w : words) {
-  	const size_t w_len { w.length() };  	
-  	if ( w_len >= tw_len ) continue;
-  	if ( ( tw_fc == w.front() ) && ( tw.substr(0, w_len) == w ) ) first_word_dict.insert(make_pair(w, w_len));
-  	if ( ( tw_lc == w.back() ) && ( tw.substr(tw_len - w_len) == w) ) second_word_dict.insert(make_pair(w, w_len));
+  for (const auto& word : words) {
+    const size_t word_len{word.length()};
+    if (word_len >= target_word_len)
+      continue;
+    if (target_word_first_char == word.front() &&
+        target_word.substr(0, word_len) == word)
+      first_word_dict.insert(make_pair(word, word_len));
+    if (target_word_last_char == word.back() &&
+        target_word.substr(target_word_len - word_len) == word)
+      second_word_dict.insert(make_pair(word, word_len));
   }
-  
+
   for (const auto& first_dict_pair : first_word_dict) {
+    for (const auto& second_dict_pair : second_word_dict) {
+      if (first_dict_pair.second + second_dict_pair.second != target_word_len)
+        continue;
 
-  	for (const auto& second_dict_pair : second_word_dict) {
-
-  		if ( ( first_dict_pair.second + second_dict_pair.second ) != tw_len ) continue;
-
-  		if ( ( first_dict_pair.first + second_dict_pair.first ) == tw ) 
-  		    return string{first_dict_pair.first + "," + second_dict_pair.first};
-  	}
-
+      if (first_dict_pair.first + second_dict_pair.first == target_word) {
+        ostringstream oss{};
+        oss << first_dict_pair.first << ',' << second_dict_pair.first;
+        return oss.str();
+      }
+    }
   }
 
-  return "not possible";            
+  return "not possible";
 }
 
-int main() {   
-    
+int main() {
   // string A[] = gets(stdin);
   // cout << WordSplit(A, sizeof(A)/sizeof(A[0]));
   string B[] = {"hellocat", "apple,bat,cat,goodbye,hello,yellow,why"};
-  cout << WordSplit(B, sizeof(B)/sizeof(B[0])) << '\n'; // expected output: "hello,cat"
+  cout << WordSplit(B, sizeof(B) / sizeof(B[0]))
+       << '\n';  // expected output: "hello,cat"
   string C[] = {"baseball", "a,all,b,ball,bas,base,cat,code,d,e,quit,z"};
-  cout << WordSplit(C, sizeof(C)/sizeof(C[0])) << '\n'; // expected output: "base,ball"
+  cout << WordSplit(C, sizeof(C) / sizeof(C[0]))
+       << '\n';  // expected output: "base,ball"
   string D[] = {"abcgefd", "a,ab,abc,abcg,b,c,dog,e,efd,zzzz"};
-  cout << WordSplit(D, sizeof(D)/sizeof(D[0])) << '\n'; // expected output: "abcg,efd"
-  
-  return 0;
+  cout << WordSplit(D, sizeof(D) / sizeof(D[0]))
+       << '\n';  // expected output: "abcg,efd"
 
+  return 0;
 }
