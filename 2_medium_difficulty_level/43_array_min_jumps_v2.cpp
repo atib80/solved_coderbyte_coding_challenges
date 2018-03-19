@@ -44,6 +44,9 @@ void find_min_number_of_steps_needed_from_current_position(
     return;
   }
 
+  if (current_step_count + 1 >= min_steps_needed)
+    return;
+
   for (int start{current_pos + 1}; start <= current_pos + arr[current_pos];
        start++) {
     find_min_number_of_steps_needed_from_current_position(
