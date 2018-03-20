@@ -1,6 +1,6 @@
 /*
 Coderbyte coding challenge: Boggle Solver v2
-(iterative solution using std::set<size_t> and std::queue<pair<size_t, size_t>>)
+(iterative solution using unordered_set<T> and std::queue<T>)
 
 Using the C++ language, have the function BoggleSolver(strArr) read the array of
 strings stored in strArr, which will contain 2 elements: the first element will
@@ -119,10 +119,8 @@ vector<string> split(const string& source,
 
 bool search_word_in_matrix(const vector<vector<char>>& matrix,
                            const string& word) {
-  const size_t max_x{matrix.size() - 1}, max_y{matrix[0].size() - 1};
-
-  for (size_t x{}; x <= max_x; x++) {
-    for (size_t y{}; y < max_y; y++) {
+  for (size_t x{}; x < matrix.size(); x++) {
+    for (size_t y{}; y < matrix[x].size(); y++) {
       if (matrix[x][y] == word.front()) {
         queue<tuple<size_t, size_t, size_t>> q{{make_tuple(x, y, 0)}};
         unordered_set<size_t> visited_coordinates{};
@@ -144,33 +142,35 @@ bool search_word_in_matrix(const vector<vector<char>>& matrix,
             q.emplace(make_tuple(i - 1, j, offset + 1));
 
           // NE direction
-          if (i > 0 && j < max_y && offset < word.length() - 1 &&
+          if (i > 0 && j < matrix[i - 1].size() - 1 &&
+              offset < word.length() - 1 &&
               !visited_coordinates.count((i - 1) * matrix[i - 1].size() + j +
                                          1) &&
               word[offset + 1] == matrix[i - 1][j + 1])
             q.emplace(make_tuple(i - 1, j + 1, offset + 1));
 
           // E direction
-          if (j < max_y && offset < word.length() - 1 &&
+          if (j < matrix[i].size() - 1 && offset < word.length() - 1 &&
               !visited_coordinates.count(i * matrix[i].size() + j + 1) &&
               word[offset + 1] == matrix[i][j + 1])
             q.emplace(make_tuple(i, j + 1, offset + 1));
 
           // SE direction
-          if (i < max_x && j < max_y && offset < word.length() - 1 &&
+          if (i < matrix.size() - 1 && j < matrix[i + 1].size() - 1 &&
+              offset < word.length() - 1 &&
               !visited_coordinates.count((i + 1) * matrix[i + 1].size() + j +
                                          1) &&
               word[offset + 1] == matrix[i + 1][j + 1])
             q.emplace(make_tuple(i + 1, j + 1, offset + 1));
 
           // S direction
-          if (i < max_x && offset < word.length() - 1 &&
+          if (i < matrix.size() - 1 && offset < word.length() - 1 &&
               !visited_coordinates.count((i + 1) * matrix[i + 1].size() + j) &&
               word[offset + 1] == matrix[i + 1][j])
             q.emplace(make_tuple(i + 1, j, offset + 1));
 
           // SW direction
-          if (i < max_x && j > 0 && offset < word.length() - 1 &&
+          if (i < matrix.size() - 1 && j > 0 && offset < word.length() - 1 &&
               !visited_coordinates.count((i + 1) * matrix[i + 1].size() + j -
                                          1) &&
               word[offset + 1] == matrix[i + 1][j - 1])
@@ -181,7 +181,7 @@ bool search_word_in_matrix(const vector<vector<char>>& matrix,
               !visited_coordinates.count(i * matrix[i].size() + j - 1) &&
               word[offset + 1] == matrix[i][j - 1])
             q.emplace(make_tuple(i, j - 1, offset + 1));
-          
+
           // NW direction
           if (i > 0 && j > 0 && offset < word.length() - 1 &&
               !visited_coordinates.count((i - 1) * matrix[i - 1].size() + j -
