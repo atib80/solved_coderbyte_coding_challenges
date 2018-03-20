@@ -98,12 +98,11 @@ string MissingDigitII(string str) {
 
   for (size_t i{}; i < first_number_digits.length(); ++i) {
     for (size_t j{}; j < result_number_digits.length(); ++j) {
-      swap(first_number_digits[i],
-           first_number_str[first_number_question_mark_pos]);
+      first_number_str[first_number_question_mark_pos] = first_number_digits[i];
       const int first_number{stoi(first_number_str)};
 
-      swap(result_number_digits[j],
-           result_number_str[result_number_question_mark_pos]);
+      result_number_str[result_number_question_mark_pos] =
+          result_number_digits[j];
       const int result_number{stoi(result_number_str)};
 
       switch (operation_sign) {
@@ -144,11 +143,6 @@ string MissingDigitII(string str) {
           throw runtime_error(
               "Illegal unsupported math operation has been specified!");
       }
-
-      swap(first_number_digits[i],
-           first_number_str[first_number_question_mark_pos]);
-      swap(result_number_digits[j],
-           result_number_str[result_number_question_mark_pos]);
     }
   }
 
