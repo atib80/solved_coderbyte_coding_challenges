@@ -94,6 +94,8 @@ string MissingDigitII(string str) {
 
   const int second_number{stoi(second_number_str)};
 
+  ostringstream oss{};
+
   for (size_t i{}; i < first_number_digits.length(); ++i) {
     for (size_t j{}; j < result_number_digits.length(); ++j) {
       swap(first_number_digits[i],
@@ -104,27 +106,19 @@ string MissingDigitII(string str) {
            result_number_str[result_number_question_mark_pos]);
       const int result_number{stoi(result_number_str)};
 
-      ostringstream oss{};
-
       switch (operation_sign) {
         case '+':
           if (result_number == first_number + second_number) {
-            swap(first_number_digits[i],
-                 first_number_str[first_number_question_mark_pos]);
-            swap(result_number_digits[j],
-                 result_number_str[result_number_question_mark_pos]);
-            oss << first_number_digits[i] << ' ' << result_number_digits[j];
+            oss << first_number_str[first_number_question_mark_pos] << ' '
+                << result_number_str[result_number_question_mark_pos];
             return oss.str();
           }
           break;
 
         case '-':
           if (result_number == first_number - second_number) {
-            swap(first_number_digits[i],
-                 first_number_str[first_number_question_mark_pos]);
-            swap(result_number_digits[j],
-                 result_number_str[result_number_question_mark_pos]);
-            oss << first_number_digits[i] << ' ' << result_number_digits[j];
+            oss << first_number_str[first_number_question_mark_pos] << ' '
+                << result_number_str[result_number_question_mark_pos];
             return oss.str();
           }
           break;
@@ -132,22 +126,16 @@ string MissingDigitII(string str) {
         case '*':
         case 'x':
           if (result_number == first_number * second_number) {
-            swap(first_number_digits[i],
-                 first_number_str[first_number_question_mark_pos]);
-            swap(result_number_digits[j],
-                 result_number_str[result_number_question_mark_pos]);
-            oss << first_number_digits[i] << ' ' << result_number_digits[j];
+            oss << first_number_str[first_number_question_mark_pos] << ' '
+                << result_number_str[result_number_question_mark_pos];
             return oss.str();
           }
           break;
 
         case '/':
           if (result_number == first_number / second_number) {
-            swap(first_number_digits[i],
-                 first_number_str[first_number_question_mark_pos]);
-            swap(result_number_digits[j],
-                 result_number_str[result_number_question_mark_pos]);
-            oss << first_number_digits[i] << ' ' << result_number_digits[j];
+            oss << first_number_str[first_number_question_mark_pos] << ' '
+                << result_number_str[result_number_question_mark_pos];
             return oss.str();
           }
           break;
