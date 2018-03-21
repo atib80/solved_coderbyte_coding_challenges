@@ -70,8 +70,8 @@ string CorrectPath_v2(string path) {
     const size_t x{get<0>(q.front())};
     const size_t y{get<1>(q.front())};
     const size_t current_path_index{get<2>(q.front())};
-    string current_path{get<3>(q.front())};
-    unordered_set<size_t> prev_visited_coordinates{get<4>(q.front())};
+    string current_path{move(get<3>(q.front()))};
+    unordered_set<size_t> prev_visited_coordinates{move(get<4>(q.front()))};
     q.pop();
 
     if (x == 4 && y == 4 && current_path_index == path_len)
@@ -80,39 +80,47 @@ string CorrectPath_v2(string path) {
     if (distance(x, y, 4, 4) > path_len - current_path_index)
       continue;
 
-    if ('u' == current_path[current_path_index] && x > 0 &&
-        !prev_visited_coordinates.count((x - 1) * 5 + y)) {
-      prev_visited_coordinates.insert((x - 1) * 5 + y);
-      q.emplace(make_tuple(x - 1, y, current_path_index + 1, current_path,
-                           prev_visited_coordinates));
-      prev_visited_coordinates.erase((x - 1) * 5 + y);
+    if ('u' == current_path[current_path_index]) {
+      if (x > 0 && !prev_visited_coordinates.count((x - 1) * 5 + y)) {
+        prev_visited_coordinates.insert((x - 1) * 5 + y);
+        q.emplace(make_tuple(x - 1, y, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.erase((x - 1) * 5 + y);
+      } else
+        continue;
     }
 
-    if ('d' == current_path[current_path_index] && x < 4 &&
-        !prev_visited_coordinates.count((x + 1) * 5 + y)) {
-      prev_visited_coordinates.insert((x + 1) * 5 + y);
-      q.emplace(make_tuple(x + 1, y, current_path_index + 1, current_path,
-                           prev_visited_coordinates));
-      prev_visited_coordinates.erase((x + 1) * 5 + y);
+    else if ('d' == current_path[current_path_index]) {
+      if (x < 4 && !prev_visited_coordinates.count((x + 1) * 5 + y)) {
+        prev_visited_coordinates.insert((x + 1) * 5 + y);
+        q.emplace(make_tuple(x + 1, y, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.erase((x + 1) * 5 + y);
+      } else
+        continue;
     }
 
-    if ('l' == current_path[current_path_index] && y > 0 &&
-        !prev_visited_coordinates.count(x * 5 + y - 1)) {
-      prev_visited_coordinates.insert(x * 5 + y - 1);
-      q.emplace(make_tuple(x, y - 1, current_path_index + 1, current_path,
-                           prev_visited_coordinates));
-      prev_visited_coordinates.erase(x * 5 + y - 1);
+    else if ('l' == current_path[current_path_index]) {
+      if (y > 0 && !prev_visited_coordinates.count(x * 5 + y - 1)) {
+        prev_visited_coordinates.insert(x * 5 + y - 1);
+        q.emplace(make_tuple(x, y - 1, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.erase(x * 5 + y - 1);
+      } else
+        continue;
     }
 
-    if ('r' == current_path[current_path_index] && y < 4 &&
-        !prev_visited_coordinates.count(x * 5 + y + 1)) {
-      prev_visited_coordinates.insert(x * 5 + y + 1);
-      q.emplace(make_tuple(x, y + 1, current_path_index + 1, current_path,
-                           prev_visited_coordinates));
-      prev_visited_coordinates.erase(x * 5 + y + 1);
+    else if ('r' == current_path[current_path_index]) {
+      if (y < 4 && !prev_visited_coordinates.count(x * 5 + y + 1)) {
+        prev_visited_coordinates.insert(x * 5 + y + 1);
+        q.emplace(make_tuple(x, y + 1, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.erase(x * 5 + y + 1);
+      } else
+        continue;
     }
 
-    if ('?' == path[current_path_index]) {
+    else if ('?' == path[current_path_index]) {
       if (x > 0 && !prev_visited_coordinates.count((x - 1) * 5 + y)) {
         current_path[current_path_index] = 'u';
         prev_visited_coordinates.insert((x - 1) * 5 + y);
