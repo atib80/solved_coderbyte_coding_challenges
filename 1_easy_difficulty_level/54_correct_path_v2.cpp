@@ -1,5 +1,6 @@
 /*
 Coderbyte coding challenge: Correct Path v2
+(iterative solution using queue<T>)
 
 Using the C++ language, have the function CorrectPath(str) read the str
 parameter being passed, which will represent the movements made in a 5x5 grid of
@@ -27,121 +28,145 @@ Output: "drdruurrdddd"
 */
 
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <iostream>
+#include <queue>
 #include <string>
-#include <vector>
+#include <tuple>
+#include <unordered_set>
 
 using namespace std;
 
-string CorrectPath(string str) {
-  const string unsolved_path = [&str]() {
-    string path{str};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-    for (auto& ch : path)
-      ch = static_cast<char>(tolower(ch));
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-    return path;
-  }();
+  return output;
+}
 
-  size_t number_of_question_marks{};
-  vector<size_t> question_mark_indices{};
+size_t distance(const size_t x_src,
+                const size_t y_src,
+                const size_t x_dst = 4,
+                const size_t y_dst = 4) {
+  return ((x_src <= x_dst ? x_dst - x_src : x_src - x_dst) +
+          (y_src <= y_dst ? y_dst - y_src : y_src - y_dst));
+}
 
-  for (size_t i{}; i < unsolved_path.size(); i++) {
-    if ('?' == unsolved_path[i]) {
-      number_of_question_marks++;
-      question_mark_indices.emplace_back(i);
+string CorrectPath_v2(string path) {
+  path = trim(path);
+  const size_t path_len{path.length()};
+
+  queue<tuple<size_t, size_t, size_t, string, unordered_set<size_t>>> q{
+      {make_tuple(0, 0, 0, path, unordered_set<size_t>{{0}})}};
+
+  while (!q.empty()) {
+    const size_t x{get<0>(q.front())};
+    const size_t y{get<1>(q.front())};
+    const size_t current_path_index{get<2>(q.front())};
+    string current_path{get<3>(q.front())};
+    unordered_set<size_t> prev_visited_coordinates{get<4>(q.front())};
+    q.pop();
+
+    if (x == 4 && y == 4 && current_path_index == path_len)
+      return current_path;
+
+    if (distance(x, y, 4, 4) > path_len - current_path_index)
+      continue;
+
+    if ('u' == current_path[current_path_index] && x > 0 &&
+        !prev_visited_coordinates.count((x - 1) * 5 + y)) {
+      prev_visited_coordinates.insert((x - 1) * 5 + y);
+      q.emplace(make_tuple(x - 1, y, current_path_index + 1, current_path,
+                           prev_visited_coordinates));
+      prev_visited_coordinates.erase((x - 1) * 5 + y);
     }
-  }
 
-  string potential_directions{string(number_of_question_marks, 'r') +
-                              string(number_of_question_marks, 'd') +
-                              string(number_of_question_marks, 'u') +
-                              string(number_of_question_marks, 'l')};
-
-  sort(begin(potential_directions), end(potential_directions));
-
-  do {
-    string current_path{unsolved_path};
-
-    for (size_t i{}; i < number_of_question_marks; i++) {
-      current_path[question_mark_indices[i]] = potential_directions[i];
+    if ('d' == current_path[current_path_index] && x < 4 &&
+        !prev_visited_coordinates.count((x + 1) * 5 + y)) {
+      prev_visited_coordinates.insert((x + 1) * 5 + y);
+      q.emplace(make_tuple(x + 1, y, current_path_index + 1, current_path,
+                           prev_visited_coordinates));
+      prev_visited_coordinates.erase((x + 1) * 5 + y);
     }
 
-    array<array<bool, 5>, 5> maze{{}};
+    if ('l' == current_path[current_path_index] && y > 0 &&
+        !prev_visited_coordinates.count(x * 5 + y - 1)) {
+      prev_visited_coordinates.insert(x * 5 + y - 1);
+      q.emplace(make_tuple(x, y - 1, current_path_index + 1, current_path,
+                           prev_visited_coordinates));
+      prev_visited_coordinates.erase(x * 5 + y - 1);
+    }
 
-    maze[0][0] = true;
+    if ('r' == current_path[current_path_index] && y < 4 &&
+        !prev_visited_coordinates.count(x * 5 + y + 1)) {
+      prev_visited_coordinates.insert(x * 5 + y + 1);
+      q.emplace(make_tuple(x, y + 1, current_path_index + 1, current_path,
+                           prev_visited_coordinates));
+      prev_visited_coordinates.erase(x * 5 + y + 1);
+    }
 
-    bool is_wrong_path{};
-
-    size_t xi{}, yi{};
-
-    for (const char dir : current_path) {
-      switch (dir) {
-        case 'l':
-          if (0 == yi || maze[xi][yi - 1])
-            is_wrong_path = true;
-          else
-            yi--;
-
-          break;
-
-        case 'r':
-          if (4 == yi || maze[xi][yi + 1])
-            is_wrong_path = true;
-          else
-            yi++;
-
-          break;
-
-        case 'u':
-          if (0 == xi || maze[xi - 1][yi])
-            is_wrong_path = true;
-          else
-            xi--;
-
-          break;
-
-        case 'd':
-          if (4 == xi || maze[xi + 1][yi])
-            is_wrong_path = true;
-          else
-            xi++;
-
-          break;
-
-        default:
-          break;
+    if ('?' == path[current_path_index]) {
+      if (x > 0 && !prev_visited_coordinates.count((x - 1) * 5 + y)) {
+        current_path[current_path_index] = 'u';
+        prev_visited_coordinates.insert((x - 1) * 5 + y);
+        q.emplace(make_tuple(x - 1, y, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.erase((x - 1) * 5 + y);
+        current_path[current_path_index] = '?';
       }
 
-      if (is_wrong_path)
-        break;
+      if (x < 4 && !prev_visited_coordinates.count((x + 1) * 5 + y)) {
+        current_path[current_path_index] = 'd';
+        prev_visited_coordinates.insert((x + 1) * 5 + y);
+        q.emplace(make_tuple(x + 1, y, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.erase((x + 1) * 5 + y);
+        current_path[current_path_index] = '?';
+      }
 
-      maze[xi][yi] = true;
+      if (y > 0 && !prev_visited_coordinates.count(x * 5 + y - 1)) {
+        current_path[current_path_index] = 'l';
+        prev_visited_coordinates.insert(x * 5 + y - 1);
+        q.emplace(make_tuple(x, y - 1, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.insert(x * 5 + y - 1);
+        current_path[current_path_index] = '?';
+      }
+
+      if (y < 4 && !prev_visited_coordinates.count(x * 5 + y + 1)) {
+        current_path[current_path_index] = 'r';
+        prev_visited_coordinates.insert(x * 5 + y + 1);
+        q.emplace(make_tuple(x, y + 1, current_path_index + 1, current_path,
+                             prev_visited_coordinates));
+        prev_visited_coordinates.insert(x * 5 + y + 1);
+        current_path[current_path_index] = '?';
+      }
     }
-
-    if (!is_wrong_path && (4 == xi) && (4 == yi))
-      return current_path;
-  } while (
-      next_permutation(begin(potential_directions), end(potential_directions)));
+  }
 
   return "not possible";
 }
 
 int main() {
-  // cout << CorrectPath(gets(stdin));
-  cout << CorrectPath(move(string{"r?d?drdd"}))
+  // cout << CorrectPath_v2(move(string{gets(stdin)}));
+  cout << CorrectPath_v2(move(string{"r?d?drdd"}))
        << '\n';  // expected output: "rrdrdrdd"
-  cout << CorrectPath(move(string{"???rrurdr?"}))
+  cout << CorrectPath_v2(move(string{"???rrurdr?"}))
        << '\n';  // expected output: "dddrrurdrd"
-  cout << CorrectPath(move(string{"drdr??rrddd?"}))
+  cout << CorrectPath_v2(move(string{"drdr??rrddd?"}))
        << '\n';  // expected output: "drdruurrdddd"
-  cout << CorrectPath(move(string{"rd?u??dld?ddrr"}))
+  cout << CorrectPath_v2(move(string{"rd?u??dld?ddrr"}))
        << '\n';  // expected output: "rdrurrdldlddrr"
-  cout << CorrectPath(move(string{"ddr?rdrrd?dr"}))
+  cout << CorrectPath_v2(move(string{"ddr?rdrrd?dr"}))
        << '\n';  // expected output: "ddrurdrrdldr"
-  cout << CorrectPath(move(string{"rdrdr??rddd?dr"}))
+  cout << CorrectPath_v2(move(string{"rdrdr??rddd?dr"}))
        << '\n';  // expected output: "rdrdruurdddldr"
 
   return 0;

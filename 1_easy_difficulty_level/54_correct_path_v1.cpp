@@ -1,5 +1,6 @@
 /*
 Coderbyte coding challenge: Correct Path v1
+(recursive method)
 
 Using the C++ language, have the function CorrectPath(str) read the str
 parameter being passed, which will represent the movements made in a 5x5 grid of
@@ -26,6 +27,7 @@ Input:  "drdr??rrddd?"
 Output: "drdruurrdddd"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <string>
@@ -33,28 +35,26 @@ Output: "drdruurrdddd"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
+  return output;
+}
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+size_t distance(const size_t x_src,
+                const size_t y_src,
+                const size_t x_dst = 4,
+                const size_t y_dst = 4) {
+  return ((x_src <= x_dst ? x_dst - x_src : x_src - x_dst) +
+          (y_src <= y_dst ? y_dst - y_src : y_src - y_dst));
 }
 
 bool find_correct_path(vector<vector<int>>& maze,
@@ -62,68 +62,56 @@ bool find_correct_path(vector<vector<int>>& maze,
                        const size_t y,
                        string& path,
                        const size_t current_path_index) {
-  
-  if ((x == maze.size() - 1) && (y == maze[x].size() - 1) &&
-      (current_path_index == path.length()))
+  if (x == 4 && y == 4 && current_path_index == path.length())
     return true;
 
-  if (current_path_index == path.length())
+  if (distance(x, y, 4, 4) > path.length() - current_path_index)
     return false;
 
   maze[x][y] = -1;
 
-  if (('u' == path[current_path_index]) && (x > 0) && (-1 != maze[x - 1][y]) &&
+  if ('u' == path[current_path_index] && x > 0 && -1 != maze[x - 1][y] &&
       find_correct_path(maze, x - 1, y, path, current_path_index + 1))
     return true;
 
-  if (('d' == path[current_path_index]) && (x < maze.size() - 1) &&
-      (-1 != maze[x + 1][y]) &&
+  if ('d' == path[current_path_index] && x < 4 && -1 != maze[x + 1][y] &&
       find_correct_path(maze, x + 1, y, path, current_path_index + 1))
     return true;
 
-  if (('l' == path[current_path_index]) && (y > 0) && (-1 != maze[x][y - 1]) &&
+  if ('l' == path[current_path_index] && y > 0 && -1 != maze[x][y - 1] &&
       find_correct_path(maze, x, y - 1, path, current_path_index + 1))
     return true;
 
-  if (('r' == path[current_path_index]) && (y < maze[x].size() - 1) &&
-      (-1 != maze[x][y + 1]) &&
+  if ('r' == path[current_path_index] && y < 4 && -1 != maze[x][y + 1] &&
       find_correct_path(maze, x, y + 1, path, current_path_index + 1))
     return true;
 
   if ('?' == path[current_path_index]) {
-    if ((x > 0) && (-1 != maze[x - 1][y])) {
+    if (x > 0 && -1 != maze[x - 1][y]) {
       path[current_path_index] = 'u';
-
       if (find_correct_path(maze, x - 1, y, path, current_path_index + 1))
         return true;
-
       path[current_path_index] = '?';
     }
 
-    if ((x < maze.size() - 1) && (-1 != maze[x + 1][y])) {
+    if (x < 4 && -1 != maze[x + 1][y]) {
       path[current_path_index] = 'd';
-
       if (find_correct_path(maze, x + 1, y, path, current_path_index + 1))
         return true;
-
       path[current_path_index] = '?';
     }
 
-    if ((y > 0) && (-1 != maze[x][y - 1])) {
+    if (y > 0 && -1 != maze[x][y - 1]) {
       path[current_path_index] = 'l';
-
       if (find_correct_path(maze, x, y - 1, path, current_path_index + 1))
         return true;
-
       path[current_path_index] = '?';
     }
 
-    if ((y < maze[x].size() - 1) && (-1 != maze[x][y + 1])) {
+    if (y < 4 && -1 != maze[x][y + 1]) {
       path[current_path_index] = 'r';
-
       if (find_correct_path(maze, x, y + 1, path, current_path_index + 1))
         return true;
-
       path[current_path_index] = '?';
     }
   }
@@ -134,7 +122,7 @@ bool find_correct_path(vector<vector<int>>& maze,
   return false;
 }
 
-string CorrectPath(string str) {
+string CorrectPath_v1(string str) {
   str = trim(str);
 
   vector<vector<int>> maze(5, vector<int>(5));
@@ -146,18 +134,18 @@ string CorrectPath(string str) {
 }
 
 int main() {
-  // cout << CorrectPath(move(string{gets(stdin)}));
-  cout << CorrectPath(move(string{"r?d?drdd"}))
+  // cout << CorrectPath_v1(move(string{gets(stdin)}));
+  cout << CorrectPath_v1(move(string{"r?d?drdd"}))
        << '\n';  // expected output: "rrdrdrdd"
-  cout << CorrectPath(move(string{"???rrurdr?"}))
+  cout << CorrectPath_v1(move(string{"???rrurdr?"}))
        << '\n';  // expected output: "dddrrurdrd"
-  cout << CorrectPath(move(string{"drdr??rrddd?"}))
+  cout << CorrectPath_v1(move(string{"drdr??rrddd?"}))
        << '\n';  // expected output: "drdruurrdddd"
-  cout << CorrectPath(move(string{"rd?u??dld?ddrr"}))
+  cout << CorrectPath_v1(move(string{"rd?u??dld?ddrr"}))
        << '\n';  // expected output: "rdrurrdldlddrr"
-  cout << CorrectPath(move(string{"ddr?rdrrd?dr"}))
+  cout << CorrectPath_v1(move(string{"ddr?rdrrd?dr"}))
        << '\n';  // expected output: "ddrurdrrdldr"
-  cout << CorrectPath(move(string{"rdrdr??rddd?dr"}))
+  cout << CorrectPath_v1(move(string{"rdrdr??rddd?dr"}))
        << '\n';  // expected output: "rdrdruurdddldr"
 
   return 0;
