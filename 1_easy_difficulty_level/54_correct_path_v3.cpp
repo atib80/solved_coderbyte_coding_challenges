@@ -128,7 +128,6 @@ string CorrectPath(string path) {
             xi++;
 
           break;
-
       }
 
       if (is_wrong_path)

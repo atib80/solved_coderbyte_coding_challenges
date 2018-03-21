@@ -1,5 +1,6 @@
 /*
-Coderbyte coding challenge: Matrix Path
+Coderbyte coding challenge: Matrix Path v2
+(alternative iterative solution using queue<T>)
 
 Using the C++ language, have the function MatrixPath(strArr) take the strArr
 parameter being passed which will be a 2D matrix of 0 and 1's of some arbitrary
@@ -40,8 +41,11 @@ Output: "not possible"
 
 #include <cctype>
 #include <iostream>
+#include <queue>
 #include <stdexcept>
 #include <string>
+#include <tuple>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
@@ -52,67 +56,69 @@ string trim(const string& str) {
   if (!str_len)
     return string{};
 
-  size_t first{}, last{str_len - 1};
+  size_t begin_str{};
+  size_t end_str{str_len - 1};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
+  while (begin_str <= end_str) {
+    bool cont{};
+    if (isspace(str[begin_str])) {
+      cont = true;
+      begin_str++;
+    }
+
+    if (isspace(str[end_str])) {
+      cont = true;
+      end_str--;
+    }
+
+    if (!cont)
       break;
   }
 
-  if (first > last)
+  if (begin_str > end_str)
     return string{};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-bool is_matrix_path_connected(vector<vector<bool>>& matrix,
-                              const size_t x,
-                              const size_t y,
-                              const size_t row_size,
-                              const size_t col_size) {
-  if ((x == (row_size - 1)) && (y == (col_size - 1)))
-    return true;
+bool is_matrix_path_connected(const vector<vector<bool>>& matrix) {
+  const size_t row_size{matrix.size()};
+  const size_t col_size{matrix[0].size()};
 
-  matrix[x][y] = false;
+  queue<tuple<size_t, size_t, unordered_set<size_t>>> q{
+      {make_tuple(0, 0, unordered_set<size_t>{})}};
 
-  // N direction
-  if ((x > 0) && matrix[x - 1][y]) {
-    if (is_matrix_path_connected(matrix, x - 1, y, row_size, col_size)) {
-      matrix[x][y] = true;
+  while (!q.empty()) {      
+    const size_t x{get<0>(q.front())};
+    const size_t y{get<1>(q.front())};
+    unordered_set<size_t> already_visited{move(get<2>(q.front()))};
+    q.pop();
+
+    if (x == row_size - 1 && y == col_size - 1)
       return true;
-    }
-  }
 
-  // E direction
-  if ((y < (col_size - 1)) && matrix[x][y + 1]) {
-    if (is_matrix_path_connected(matrix, x, y + 1, row_size, col_size)) {
-      matrix[x][y] = true;
-      return true;
-    }
-  }
+    already_visited.insert(x * col_size + y);
 
-  // S direction
-  if ((x < (row_size - 1)) && matrix[x + 1][y]) {
-    if (is_matrix_path_connected(matrix, x + 1, y, row_size, col_size)) {
-      matrix[x][y] = true;
-      return true;
-    }
-  }
+    // N direction
+    if (x > 0 && matrix[x - 1][y] &&
+        !already_visited.count((x - 1) * col_size + y))
+      q.emplace(make_tuple(x - 1, y, already_visited));
 
-  // W direction
-  if ((y > 0) && matrix[x][y - 1]) {
-    if (is_matrix_path_connected(matrix, x, y - 1, row_size, col_size)) {
-      matrix[x][y] = true;
-      return true;
-    }
-  }
+    // E direction
+    if (y < col_size - 1 && matrix[x][y + 1] &&
+        !already_visited.count(x * col_size + y + 1))
+      q.emplace(make_tuple(x, y + 1, already_visited));
 
-  matrix[x][y] = true;
+    // S direction
+    if (x < row_size - 1 && matrix[x + 1][y] &&
+        !already_visited.count((x + 1) * col_size + y))
+      q.emplace(make_tuple(x + 1, y, already_visited));
+
+    // W direction
+    if (y > 0 && matrix[x][y - 1] &&
+        !already_visited.count(x * col_size + y - 1))
+      q.emplace(make_tuple(x, y - 1, already_visited));
+  }
 
   return false;
 }
@@ -130,7 +136,7 @@ size_t find_connected_paths_in_matrix(vector<vector<bool>>& matrix,
       if (!matrix[i][j]) {
         matrix[i][j] = true;
 
-        if (is_matrix_path_connected(matrix, 0, 0, row_size, col_size))
+        if (is_matrix_path_connected(matrix))
           count++;
 
         matrix[i][j] = false;
@@ -141,8 +147,8 @@ size_t find_connected_paths_in_matrix(vector<vector<bool>>& matrix,
   return count;
 }
 
-string MatrixPath(string* str_arr, const size_t str_arr_size) {
-  if (!str_arr || str_arr_size < 1)
+string MatrixPath_v2(string* str_arr, const size_t str_arr_size) {
+  if (!str_arr || !str_arr_size)
     return "not possible";
 
   vector<vector<bool>> matrix(str_arr_size, vector<bool>{});
@@ -159,7 +165,7 @@ string MatrixPath(string* str_arr, const size_t str_arr_size) {
     matrix[i].resize(str_arr[i].length());
 
     for (size_t j{}; j != str_arr[i].length(); j++)
-      matrix[i][j] = ('0' != str_arr[i][j]);
+      matrix[i][j] = '0' != str_arr[i][j];
   }
 
   if (!matrix[0][0] || !matrix[row_size - 1][col_size - 1])
@@ -168,7 +174,7 @@ string MatrixPath(string* str_arr, const size_t str_arr_size) {
         "leftmost (0,0) and/or rightmost (row_size - 1, col_size - 1) "
         "cells have false values!");
 
-  if (is_matrix_path_connected(matrix, 0, 0, row_size, col_size))
+  if (is_matrix_path_connected(matrix))
     return "true";
 
   const size_t possible_connections_count{
@@ -182,13 +188,15 @@ string MatrixPath(string* str_arr, const size_t str_arr_size) {
 
 int main() {
   // string A[] = gets(stdin);
-  // cout << MatrixPath(A, sizeof(A)/sizeof(*A));
+  // cout << MatrixPath_v2(A, sizeof(A)/sizeof(*A));
   string B[] = {"11100", "10011", "10101", "10011"};
-  cout << MatrixPath(B, sizeof(B) / sizeof(*B)) << '\n';  // expected output: 2
+  cout << MatrixPath_v2(B, sizeof(B) / sizeof(*B))
+       << '\n';  // expected output: 2
   string C[] = {"10000", "11011", "10101", "11001"};
-  cout << MatrixPath(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: 1
+  cout << MatrixPath_v2(C, sizeof(C) / sizeof(*C))
+       << '\n';  // expected output: 1
   string D[] = {"1000001", "1001111", "1010101"};
-  cout << MatrixPath(D, sizeof(D) / sizeof(*D))
+  cout << MatrixPath_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: "not possible"
 
   return 0;
