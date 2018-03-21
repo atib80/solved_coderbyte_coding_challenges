@@ -70,23 +70,43 @@ bool find_correct_path(vector<vector<int>>& maze,
 
   maze[x][y] = -1;
 
-  if ('u' == path[current_path_index] && x > 0 && -1 != maze[x - 1][y] &&
-      find_correct_path(maze, x - 1, y, path, current_path_index + 1))
-    return true;
+  if ('u' == path[current_path_index]) {
+    if (x > 0 && -1 != maze[x - 1][y] &&
+        find_correct_path(maze, x - 1, y, path, current_path_index + 1))
+      return true;
+    if (x && y)
+      maze[x][y] = 0;
+    return false;
+  }
 
-  if ('d' == path[current_path_index] && x < 4 && -1 != maze[x + 1][y] &&
-      find_correct_path(maze, x + 1, y, path, current_path_index + 1))
-    return true;
+  else if ('d' == path[current_path_index]) {
+    if (x < 4 && -1 != maze[x + 1][y] &&
+        find_correct_path(maze, x + 1, y, path, current_path_index + 1))
+      return true;
+    if (x && y)
+      maze[x][y] = 0;
+    return false;
+  }
 
-  if ('l' == path[current_path_index] && y > 0 && -1 != maze[x][y - 1] &&
-      find_correct_path(maze, x, y - 1, path, current_path_index + 1))
-    return true;
+  else if ('l' == path[current_path_index]) {
+    if (y > 0 && -1 != maze[x][y - 1] &&
+        find_correct_path(maze, x, y - 1, path, current_path_index + 1))
+      return true;
+    if (x && y)
+      maze[x][y] = 0;
+    return false;
+  }
 
-  if ('r' == path[current_path_index] && y < 4 && -1 != maze[x][y + 1] &&
-      find_correct_path(maze, x, y + 1, path, current_path_index + 1))
-    return true;
+  else if ('r' == path[current_path_index]) {
+    if (y < 4 && -1 != maze[x][y + 1] &&
+        find_correct_path(maze, x, y + 1, path, current_path_index + 1))
+      return true;
+    if (x && y)
+      maze[x][y] = 0;
+    return false;
+  }
 
-  if ('?' == path[current_path_index]) {
+  else if ('?' == path[current_path_index]) {
     if (x > 0 && -1 != maze[x - 1][y]) {
       path[current_path_index] = 'u';
       if (find_correct_path(maze, x - 1, y, path, current_path_index + 1))
