@@ -136,7 +136,7 @@ string CorrectPath_v2(string path) {
         prev_visited_coordinates.insert(x * 5 + y - 1);
         q.emplace(make_tuple(x, y - 1, current_path_index + 1, current_path,
                              prev_visited_coordinates));
-        prev_visited_coordinates.insert(x * 5 + y - 1);
+        prev_visited_coordinates.erase(x * 5 + y - 1);
         current_path[current_path_index] = '?';
       }
 
@@ -145,7 +145,7 @@ string CorrectPath_v2(string path) {
         prev_visited_coordinates.insert(x * 5 + y + 1);
         q.emplace(make_tuple(x, y + 1, current_path_index + 1, current_path,
                              prev_visited_coordinates));
-        prev_visited_coordinates.insert(x * 5 + y + 1);
+        prev_visited_coordinates.erase(x * 5 + y + 1);
         current_path[current_path_index] = '?';
       }
     }
