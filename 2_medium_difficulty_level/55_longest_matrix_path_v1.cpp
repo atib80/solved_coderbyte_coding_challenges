@@ -93,11 +93,11 @@ string LongestMatrixPath(string* str_arr, const size_t str_arr_size) {
     }
   }
 
-  size_t longest_increasing_path{1};
+  size_t longest_increasing_path{};
 
   for (size_t i{}; i < row_size; i++) {
     for (size_t j{}; j < column_size; j++) {
-      size_t current_longest_path{1};
+      size_t current_longest_path{};
 
       find_max_path_distance(matrix, i, j, current_longest_path);
 
@@ -121,6 +121,9 @@ int main() {
   string D[] = {"67", "21", "45"};
   cout << LongestMatrixPath(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 3
+  string E[] = {"111", "111", "111"};
+  cout << LongestMatrixPath(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 0
 
   return 0;
 }
