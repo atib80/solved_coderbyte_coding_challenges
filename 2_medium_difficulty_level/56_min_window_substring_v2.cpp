@@ -75,11 +75,11 @@ size_t calculate_min_substring_length(const string& src_substr,
   return (max_index - min_index + 1);
 }
 
-string MinWindowSubstring(string* str_arr, const size_t str_arr_size) {
+string MinWindowSubstring_v2(string* str_arr, const size_t str_arr_size) {
   if (str_arr_size < 2)
     return string{
         "string str_arr[] must contain at least 2 elements (source and needle "
-        "strings)!"};
+        "string)!"};
 
   const string source_str{trim(str_arr[0])};
   const size_t src_len{source_str.length()};
@@ -136,18 +136,18 @@ string MinWindowSubstring(string* str_arr, const size_t str_arr_size) {
 
 int main() {
   // string A[] = gets(stdin);
-  // cout << MinWindowSubstring(A, sizeof(A)/sizeof(*A));
+  // cout << MinWindowSubstring_v2(A, sizeof(A)/sizeof(*A));
   string B[] = {"aaabaaddae", "aed"};
-  cout << MinWindowSubstring(B, sizeof(B) / sizeof(*B))
+  cout << MinWindowSubstring_v2(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: "dae"
   string C[] = {"aabdccdbcacd", "aad"};
-  cout << MinWindowSubstring(C, sizeof(C) / sizeof(*C))
+  cout << MinWindowSubstring_v2(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: "aabd"
   string D[] = {"ahffaksfajeeubsne", "jefaa"};
-  cout << MinWindowSubstring(D, sizeof(D) / sizeof(*D))
+  cout << MinWindowSubstring_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: "aksfaje"
   string E[] = {"aaffhkksemckelloe", "fhea"};
-  cout << MinWindowSubstring(E, sizeof(E) / sizeof(*E))
+  cout << MinWindowSubstring_v2(E, sizeof(E) / sizeof(*E))
        << '\n';  // expected output: "affhkkse"
 
   return 0;
