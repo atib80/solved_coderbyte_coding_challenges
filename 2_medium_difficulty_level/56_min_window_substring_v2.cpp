@@ -49,28 +49,40 @@ string trim(const string& input) {
   return output;
 }
 
-size_t calculate_min_substring_length(const string& src_substr,
+size_t calculate_min_substring_length(const string& src,
+                                      const size_t src_substr_offset,
+                                      const size_t src_substr_len,
                                       const string& needle_str) {
-  const size_t min_index{src_substr.find(needle_str[0])};
+  size_t min_index{string::npos};
+
+  for (size_t i{src_substr_offset}; i < src_substr_offset + src_substr_len;
+       i++) {
+    if (needle_str.front() == src[i]) {
+      min_index = i;
+      break;
+    }
+  }
 
   if (string::npos == min_index)
     return string::npos;
 
-  size_t prev_index{min_index};
+  size_t max_index{string::npos}, prev_index{min_index};
 
-  size_t max_index{};
-
-  for (size_t i{1u}; i != needle_str.length(); i++) {
-    max_index = src_substr.find(needle_str[i], prev_index + 1);
+  for (size_t i{1}; i < needle_str.length(); i++) {
+    max_index = string::npos;
+    for (size_t j{prev_index + 1}; j < src_substr_offset + src_substr_len;
+         j++) {
+      if (needle_str[i] == src[j]) {
+        max_index = j;
+        break;
+      }
+    }
 
     if (string::npos == max_index)
       return string::npos;
 
     prev_index = max_index;
   }
-
-  if (!max_index)
-    return string::npos;
 
   return (max_index - min_index + 1);
 }
@@ -99,21 +111,19 @@ string MinWindowSubstring_v2(string* str_arr, const size_t str_arr_size) {
   do {
     size_t current_substr_len{needle_len};
 
-    const size_t min_start_offset{source_str.find(needle_str[0])};
+    const size_t min_start_offset{source_str.find(needle_str.front())};
 
     size_t current_substr_offset{min_start_offset};
 
     while (current_substr_offset + current_substr_len <= src_len) {
-      const string current_src_substr{
-          source_str.substr(current_substr_offset, current_substr_len)};
-
-      const size_t current_min_substr_len{
-          calculate_min_substring_length(current_src_substr, needle_str)};
+      const size_t current_min_substr_len{calculate_min_substring_length(
+          source_str, current_substr_offset, current_substr_len, needle_str)};
 
       if (current_min_substr_len != string::npos &&
           current_min_substr_len < min_substr_len) {
         min_substr_len = current_min_substr_len;
-        found_substr = current_src_substr;
+        found_substr =
+            source_str.substr(current_substr_offset, current_substr_len);
         if (needle_len == min_substr_len)
           return found_substr;
       }
