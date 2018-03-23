@@ -51,17 +51,21 @@ string trim(const string& input) {
   return output;
 }
 
-size_t find_max_path_distance(const vector<vector<char>>& matrix,
-                              const size_t origin_x,
-                              const size_t origin_y) {
+void find_max_path_distance(const vector<vector<char>>& matrix,
+                            const size_t origin_x,
+                            const size_t origin_y,
+                            const char max_value,
+                            size_t& longest_path) {
   queue<tuple<size_t, size_t, size_t>> q{{make_tuple(origin_x, origin_y, 0)}};
-  size_t current_longest_path{};
 
   while (!q.empty()) {
     const size_t x{get<0>(q.front())};
     const size_t y{get<1>(q.front())};
     size_t distance{get<2>(q.front())};
     q.pop();
+
+    if (max_value - matrix[x][y] + distance <= longest_path)
+      continue;
 
     if (x > 0 && matrix[x][y] < matrix[x - 1][y])
       q.emplace(make_tuple(x - 1, y, distance + 1));
@@ -75,11 +79,9 @@ size_t find_max_path_distance(const vector<vector<char>>& matrix,
     if (y < matrix[x].size() - 1 && matrix[x][y] < matrix[x][y + 1])
       q.emplace(make_tuple(x, y + 1, distance + 1));
 
-    if (distance > current_longest_path)
-      current_longest_path = distance;
+    if (distance > longest_path)
+      longest_path = distance;
   }
-
-  return current_longest_path;
 }
 
 string LongestMatrixPath(string* str_arr, const size_t str_arr_size) {
@@ -91,9 +93,13 @@ string LongestMatrixPath(string* str_arr, const size_t str_arr_size) {
 
   vector<vector<char>> matrix(row_size, vector<char>(column_size));
 
+  char max_value{matrix[0][0]};
+
   for (size_t i{}; i < row_size; i++) {
     for (size_t j{}; j < column_size; j++) {
       matrix[i][j] = str_arr[i][j];
+      if (matrix[i][j] > max_value)
+        max_value = matrix[i][j];
     }
   }
 
@@ -101,10 +107,7 @@ string LongestMatrixPath(string* str_arr, const size_t str_arr_size) {
 
   for (size_t i{}; i < row_size; i++) {
     for (size_t j{}; j < column_size; j++) {
-      const size_t current_longest_path{find_max_path_distance(matrix, i, j)};
-
-      if (current_longest_path > longest_increasing_path)
-        longest_increasing_path = current_longest_path;
+      find_max_path_distance(matrix, i, j, max_value, longest_increasing_path);
     }
   }
 
