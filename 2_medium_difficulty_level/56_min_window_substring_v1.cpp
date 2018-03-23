@@ -31,7 +31,7 @@ Output: "affhkkse"
 #include <cctype>
 #include <iostream>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 
 using namespace std;
 
@@ -64,27 +64,42 @@ string MinWindowSubstring_v1(const string* str_arr, const size_t str_arr_size) {
   if (string::npos != source_str.find(needle_str))
     return needle_str;
 
-  const unordered_multiset<char> needle_chars(begin(needle_str),
-                                              end(needle_str));
+  const unordered_map<char, int> needle_char_count = [&]() {
+    unordered_map<char, int> char_freq{};
+    for_each(begin(needle_str), end(needle_str),
+             [&](const char ch) { char_freq[ch]++; });
+    return char_freq;
+  }();
 
   size_t current_substr_len{needle_len};
 
   while (current_substr_len <= src_len) {
-    unordered_multiset<char> source_chars(
-        begin(source_str), begin(source_str) + current_substr_len);
+    unordered_map<char, int> current_substr_char_count{};
+    for_each(begin(source_str), begin(source_str) + current_substr_len,
+             [&](const char ch) { current_substr_char_count[ch]++; });
 
-    if (all_of(begin(needle_chars), end(needle_chars), [&](const char ch) {
-          return source_chars.count(ch) >= needle_chars.count(ch);
-        }))
+    if (all_of(begin(needle_char_count), end(needle_char_count),
+               [&](const pair<char, int>& ch_freq) {
+                 return current_substr_char_count.find(ch_freq.first) !=
+                                end(current_substr_char_count)
+                            ? current_substr_char_count[ch_freq.first] >=
+                                  ch_freq.second
+                            : false;
+               }))
       return source_str.substr(0, current_substr_len);
 
     for (size_t offset{1}; offset + current_substr_len <= src_len; offset++) {
-      source_chars.erase(source_chars.find(source_str[offset - 1]));
-      source_chars.insert(source_str[offset + current_substr_len - 1]);
+      current_substr_char_count[source_str[offset - 1]]--;
+      current_substr_char_count[source_str[offset + current_substr_len - 1]]++;
 
-      if (all_of(begin(needle_chars), end(needle_chars), [&](const char ch) {
-            return source_chars.count(ch) >= needle_chars.count(ch);
-          }))
+      if (all_of(begin(needle_char_count), end(needle_char_count),
+                 [&](const pair<char, int>& ch_freq) {
+                   return current_substr_char_count.find(ch_freq.first) !=
+                                  end(current_substr_char_count)
+                              ? current_substr_char_count[ch_freq.first] >=
+                                    ch_freq.second
+                              : false;
+                 }))
         return source_str.substr(offset, current_substr_len);
     }
 
