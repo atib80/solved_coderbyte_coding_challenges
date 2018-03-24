@@ -30,37 +30,30 @@ Output: 98
 
 #include <climits>
 #include <iostream>
+#include <vector>
 
 using std::cout;
+using std::vector;
 
 // Matrix Ai has dimension p[i-1] x p[i] for i = 1..n
 int MatrixChainOrder(const int* p, const size_t n) {
   /* For simplicity of the program, one extra row and one
      extra column are allocated in m[][].  0th row and 0th
      column of m[][] are not used */
-  int** m = new int* [n] {};
-
-  for (size_t i{}; i < n; i++)
-    m[i] = new int[n]{};
-
-  int j, k, q;
+  vector<vector<int>> m(n, vector<int>(n));
 
   /* m[i,j] = Minimum number of scalar multiplications needed
      to compute the matrix A[i]A[i+1]...A[j] = A[i..j] where
      dimension of A[i] is p[i-1] x p[i] */
 
-  // cost is zero when multiplying one matrix.
-  for (size_t i{1}; i < n; i++)
-    m[i][i] = 0;
-
   // L is chain length.
   for (size_t L{2}; L < n; L++) {
     for (size_t i{1}; i < n - L + 1; i++) {
-      j = i + L - 1;
+      const size_t j{i + L - 1};
       m[i][j] = INT_MAX;
-      for (k = i; k <= j - 1; k++) {
+      for (size_t k{i}; k <= j - 1; k++) {
         // q = cost/scalar multiplications
-        q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
+        const int q{m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j]};
         if (q < m[i][j])
           m[i][j] = q;
       }
@@ -68,18 +61,6 @@ int MatrixChainOrder(const int* p, const size_t n) {
   }
 
   const int result{m[1][n - 1]};
-
-  for (size_t i{}; i < n; i++) {
-    if (m[i]) {
-      delete[] m[i];
-      m[i] = nullptr;
-    }
-  }
-
-  if (m) {
-    delete[] m;
-    m = nullptr;
-  }
 
   return result;
 }
