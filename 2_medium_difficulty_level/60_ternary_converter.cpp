@@ -15,6 +15,7 @@ Input:  67
 Output: 2111
 */
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
