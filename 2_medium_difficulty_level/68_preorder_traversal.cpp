@@ -48,12 +48,12 @@ string trim(const string& input) {
 
 string print_out_btree_contents_using_preorder_traversal(
     const vector<string>& binary_tree) {
-  queue<size_t> q{{0}};
+  queue<size_t> q({0});
   stack<size_t> s{};
   ostringstream oss{};
 
   while (!q.empty()) {
-    const size_t index{q.front()};
+    size_t index{q.front()};
     q.pop();
 
     if (index >= binary_tree.size() || "#" == binary_tree[index]) {
@@ -66,8 +66,10 @@ string print_out_btree_contents_using_preorder_traversal(
 
     oss << binary_tree[index] << ' ';
 
-    q.emplace(2 * index + 1);
-    s.emplace(2 * index + 2);
+    index *= 2;
+
+    q.emplace(index + 1);
+    s.emplace(index + 2);
   }
 
   string output{oss.str()};
