@@ -21,6 +21,7 @@ Output: 5
 */
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -57,8 +58,11 @@ size_t LongestConsecutive_v1(int* arr, const size_t arr_size) {
 }
 
 size_t LongestConsecutive_v2(int* arr, int arr_size) {
-  if (arr_size < 2)
+  if (!arr || arr_size < 2)
     return arr_size;
+
+  if (2 == arr_size && 1 == abs(arr[0] - arr[1]))
+    return 2;
 
   sort(arr, arr + arr_size);
   const int* unique_arr_end{unique(arr, arr + arr_size)};
@@ -95,6 +99,9 @@ int main() {
   int F[] = {5, 15, 16, 21, 4, 5, 10, 9, 8, 22, 23, 7, 3, 2, 24, 1, 6};
   cout << LongestConsecutive_v2(F, sizeof(F) / sizeof(*F))
        << '\n';  // expected output: 10
+  int G[] = {8, 7};
+  cout << LongestConsecutive_v2(G, sizeof(G) / sizeof(*G))
+       << '\n';  // expected output: 2
 
   return 0;
 }
