@@ -67,7 +67,6 @@ string print_out_btree_contents_using_preorder_traversal(
     oss << binary_tree[index] << ' ';
 
     index *= 2;
-
     q.emplace(index + 1);
     s.emplace(index + 2);
   }
