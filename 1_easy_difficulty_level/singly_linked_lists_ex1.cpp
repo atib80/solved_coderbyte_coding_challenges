@@ -36,6 +36,62 @@ void append_second_list(node<int>** list_front, node<int>** list_back) {
   *list_back = nullptr;
 }
 
+template <typename T, typename Compare>
+T* connect_two_linked_lists_in_sorted_order(const T* slist_in1,
+                                            const T* slist_in2,
+                                            Compare cmp) {
+  if (!slist_in1 && !slist_in2)
+    return nullptr;
+
+  T* out_list{};
+
+  while (slist_in1 || slist_in2) {
+    if (slist_in1) {
+      if (!out_list) {
+        out_list = new T(slist_in1->data);
+        out_list->next = nullptr;
+      } else {
+        T* head{out_list};
+        T* prev{head};
+
+        while (head && !cmp(slist_in1->data, head->data)) {
+          prev = head;
+          head = head->next;
+        }
+
+        T* new_node = new T(slist_in1->data);
+        new_node->next = prev->next;
+        prev->next = new_node;
+      }
+
+      slist_in1 = slist_in1->next;
+    }
+
+    if (slist_in2) {
+      if (!out_list) {
+        out_list = new T(slist_in2->data);
+        out_list->next = nullptr;
+      } else {
+        T* head{out_list};
+        T* prev{head};
+
+        while (head && !cmp(slist_in2->data, head->data)) {
+          prev = head;
+          head = head->next;
+        }
+
+        T* new_node = new T(slist_in2->data);
+        new_node->next = prev->next;
+        prev->next = new_node;
+      }
+
+      slist_in2 = slist_in2->next;
+    }
+  }
+
+  return out_list;
+}
+
 void split_front_back(node<int>* src_list,
                       node<int>** list_front,
                       node<int>** list_back) {
