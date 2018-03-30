@@ -120,8 +120,6 @@ string PlusMinus_v2(const int num) {
 
   size_t op_seq{};
 
-  vector<string> result_op_seq_strings{};
-
   do {
     int result{static_cast<int>(num_str[0] - '0')};
     string current_operations_seq{};
@@ -135,21 +133,14 @@ string PlusMinus_v2(const int num) {
       if (op_seq & (1u << i)) {
         current_operations_seq.push_back('-');
         result -= static_cast<int>(num_str[i + 1] - '0');
-        if (!result) {
-          if (current_operations_seq.length() == max_operations) {
-            result_op_seq_strings.emplace_back(current_operations_seq);
-            break;
-          }
-        }
+        if (!result && current_operations_seq.length() == max_operations)
+          return current_operations_seq;
+
       } else {
         current_operations_seq.push_back('+');
         result += static_cast<int>(num_str[i + 1] - '0');
-        if (!result) {
-          if (current_operations_seq.length() == max_operations) {
-            result_op_seq_strings.emplace_back(current_operations_seq);
-            break;
-          }
-        }
+        if (!result && current_operations_seq.length() == max_operations)
+          return current_operations_seq;
       }
 
       op_seq_count[op_seq_bin_str[i]]--;
@@ -157,25 +148,11 @@ string PlusMinus_v2(const int num) {
         break;
       else if (result < 0 && 0 == op_seq_count['0'])
         break;
-
-      /*
-      if (result > 0 &&
-          all_of(begin(op_seq_bin_str) + i + 1, end(op_seq_bin_str),
-                 [](const char digit) { return digit == '0'; }))
-        break;
-      else if (result < 0 &&
-               all_of(begin(op_seq_bin_str) + i + 1, end(op_seq_bin_str),
-                      [](const char digit) { return digit == '1'; }))
-        break;
-      */
     }
 
   } while (++op_seq < max_operations_limit);
 
-  if (result_op_seq_strings.empty())
-    return "not possible";
-
-  return result_op_seq_strings.back();
+  return "not possible";
 }
 
 int main() {
