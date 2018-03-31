@@ -30,19 +30,21 @@ using namespace std;
 
 string PlusMinus_v1(const int num) {
   const string num_str{to_string(num)};
-  const size_t num_digits_size{num_str.length()};
-  if (1 == num_digits_size)
+  if (1 == num_str.length())
     return "not possible";
-  const size_t max_operations{num_digits_size - 1};
+  const size_t max_operations{num_str.length() - 1};
 
   string op_seq{string(max_operations, '-') + string(max_operations, '+')};
 
   sort(begin(op_seq), end(op_seq));
 
+  vector<int> num_digits{};
+  transform(begin(num_str), end(num_str), back_inserter(num_digits),
+            [](const char d) { return d - '0'; });
   vector<string> result_op_seq_strings{};
 
   do {
-    int result{static_cast<int>(num_str[0] - '0')};
+    int result{num_digits[0]};
     string current_operations_seq{};
     bool is_result_zero{};
 
@@ -50,7 +52,7 @@ string PlusMinus_v1(const int num) {
       switch (op_seq[i]) {
         case '-':
           current_operations_seq.push_back('-');
-          result -= static_cast<int>(num_str[i + 1] - '0');
+          result -= num_digits[i + 1];
           if (!result) {
             is_result_zero = true;
             if (current_operations_seq.length() == max_operations)
@@ -60,7 +62,7 @@ string PlusMinus_v1(const int num) {
 
         case '+':
           current_operations_seq.push_back('+');
-          result += static_cast<int>(num_str[i + 1] - '0');
+          result += num_digits[i + 1];
           if (!result) {
             is_result_zero = true;
             if (current_operations_seq.length() == max_operations)
@@ -112,16 +114,17 @@ string dec2bin(size_t decimal_number,
 
 string PlusMinus_v2(const int num) {
   const string num_str{to_string(num)};
-  const size_t num_digits_size{num_str.length()};
-  if (1 == num_digits_size)
+  if (1 == num_str.length())
     return "not possible";
-  const size_t max_operations{num_digits_size - 1};
+  const size_t max_operations{num_str.length() - 1};
   const size_t max_operations_limit{1u << max_operations};
-
+  vector<int> num_digits{};
+  transform(begin(num_str), end(num_str), back_inserter(num_digits),
+            [](const char d) { return d - '0'; });
   size_t op_seq{};
 
   do {
-    int result{static_cast<int>(num_str[0] - '0')};
+    int result{num_digits[0]};
     string current_operations_seq{};
 
     const string op_seq_bin_str{dec2bin(op_seq, true, max_operations)};
@@ -132,13 +135,13 @@ string PlusMinus_v2(const int num) {
     for (size_t i{}; i < max_operations; i++) {
       if (op_seq & (1u << i)) {
         current_operations_seq.push_back('-');
-        result -= static_cast<int>(num_str[i + 1] - '0');
+        result -= num_digits[i + 1];
         if (!result && current_operations_seq.length() == max_operations)
           return current_operations_seq;
 
       } else {
         current_operations_seq.push_back('+');
-        result += static_cast<int>(num_str[i + 1] - '0');
+        result += num_digits[i + 1];
         if (!result && current_operations_seq.length() == max_operations)
           return current_operations_seq;
       }
