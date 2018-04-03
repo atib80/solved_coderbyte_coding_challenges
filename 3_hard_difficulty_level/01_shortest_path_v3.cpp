@@ -1,5 +1,5 @@
 /*
-Coderbyte coding challenge: Shortest path v2
+Coderbyte coding challenge: Shortest path
 
 (recursive solution implemented by using a simplified edge list representation
 (unordered_map<string, unordered_set<string>>) for storing graph's
