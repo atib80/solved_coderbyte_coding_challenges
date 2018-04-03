@@ -23,7 +23,6 @@ Output: "-+--"
 #include <algorithm>
 #include <iostream>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -128,29 +127,20 @@ string PlusMinus_v2(const int num) {
     string current_operations_seq{};
 
     const string op_seq_bin_str{dec2bin(op_seq, true, max_operations)};
-    unordered_map<char, int> op_seq_count{
-        {'0', count(begin(op_seq_bin_str), end(op_seq_bin_str), '0')},
-        {'1', count(begin(op_seq_bin_str), end(op_seq_bin_str), '1')}};
 
     for (size_t i{}; i < max_operations; i++) {
       if (op_seq & (1u << i)) {
-        current_operations_seq.push_back('-');
-        result -= num_digits[i + 1];
-        if (!result && current_operations_seq.length() == max_operations)
-          return current_operations_seq;
-
-      } else {
         current_operations_seq.push_back('+');
         result += num_digits[i + 1];
         if (!result && current_operations_seq.length() == max_operations)
           return current_operations_seq;
-      }
 
-      op_seq_count[op_seq_bin_str[i]]--;
-      if (result > 0 && 0 == op_seq_count['1'])
-        break;
-      else if (result < 0 && 0 == op_seq_count['0'])
-        break;
+      } else {
+        current_operations_seq.push_back('-');
+        result -= num_digits[i + 1];
+        if (!result && current_operations_seq.length() == max_operations)
+          return current_operations_seq;
+      }
     }
 
   } while (++op_seq < max_operations_limit);
@@ -163,6 +153,10 @@ int main() {
   cout << PlusMinus_v2(35132) << '\n';  // expected output: "-++-"
   cout << PlusMinus_v2(199) << '\n';    // expected output: "not possible"
   cout << PlusMinus_v2(26712) << '\n';  // expected output: "-+--"
+
+  cout << PlusMinus_v2(145) << '\n';     // expected output: "+-"
+  cout << PlusMinus_v2(4563) << '\n';    // expected output: "+--"
+  cout << PlusMinus_v2(563594) << '\n';  // expected output: "+-+--"
 
   return 0;
 }
