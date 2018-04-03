@@ -1,5 +1,5 @@
 /*
-Coderbyte coding challenge: Shortest path
+Coderbyte coding challenge: Shortest path v3
 
 (recursive solution implemented by using a simplified edge list representation
 (unordered_map<string, unordered_set<string>>) for storing graph's
@@ -150,8 +150,10 @@ void find_shortest_path(
     size_t& shortest_path_distance,
     const size_t travelled_distance = 0) {
   const auto cv_iter = adj_list.find(current_vertex);
-
   if (cv_iter == end(adj_list))
+    return;
+
+  if (travelled_distance + 1 >= shortest_path_distance)
     return;
 
   for (const string& neighbor_vertex : cv_iter->second) {
@@ -159,8 +161,6 @@ void find_shortest_path(
         end(already_visited_vertices))
       continue;
 
-    if (travelled_distance + 1 >= shortest_path_distance)
-      return;
     if (neighbor_vertex == dest_vertex) {
       shortest_path_distance = travelled_distance + 1;
       ostringstream oss{};
@@ -196,7 +196,7 @@ string shortest_path_v3(string* str_arr, const size_t str_arr_size) {
 
   find_shortest_path(adj_list, already_visited_vertices, vertices.front(),
                      vertices.back(), shortest_path, shortest_path_vertices,
-                     shortest_path_distance);
+                     shortest_path_distance, 0);
 
   return shortest_path;
 }
