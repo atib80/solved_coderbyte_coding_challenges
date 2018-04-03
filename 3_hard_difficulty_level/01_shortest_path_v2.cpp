@@ -1,9 +1,9 @@
 /*
 Coderbyte coding challenge: Shortest path v2
 
-(alternative iterative solution implemented by using queue, tuple and a
-simplified edge list representation (using unordered_map<string,
-unordered_set<string>>) of graph's connected vertices (nodes))
+(alternative iterative solution implemented by using queue, list and
+unordered_map<string, unordered_set<string>> [simplified edge list
+representation of graph's connected vertices])
 
 Using the C++ language, have the function ShortestPath(strArr) take strArr which
 will be an array of strings which models a non-looping Graph. The structure of
@@ -39,9 +39,9 @@ Output: "X-W"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <list>
 #include <queue>
 #include <string>
-#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -116,6 +116,22 @@ vector<string> split(const string& source,
   return parts;
 }
 
+struct path_segment {
+  string current_vertex;
+  string travelled_path;
+  unordered_set<string> visited_vertices;
+  size_t travelled_distance;
+
+  path_segment(const string& cv,
+               const string& path,
+               const unordered_set<string>& prev_visited_vertices = {},
+               const size_t distance = 0)
+      : current_vertex{cv},
+        travelled_path{path},
+        visited_vertices{prev_visited_vertices},
+        travelled_distance{distance} {}
+};
+
 void create_graph_adjacency_list(
     string* str_arr,
     const size_t str_arr_size,
@@ -145,38 +161,42 @@ string shortest_path_v2(string* str_arr, const size_t str_arr_size) {
 
   create_graph_adjacency_list(str_arr, str_arr_size, vertices, adj_list);
 
-  const string& src{vertices.front()};
-  const string& dst{vertices.back()};
-
-  queue<tuple<string, unordered_set<string>, string, size_t>> q{
-      {make_tuple(src, unordered_set<string>{src}, src, 0)}};
   size_t shortest_path_distance{string::npos};
-  string shortest_path{};
+  string shortest_path{"-1"};
+
+  list<path_segment> visited_node_data{};
+  list<path_segment>::iterator list_iter{visited_node_data.insert(
+      end(visited_node_data),
+      move(path_segment(vertices.front(), vertices.front(), {vertices.front()},
+                        0)))};
+  queue<list<path_segment>::iterator> q{{list_iter}};
 
   while (!q.empty()) {
-    const string current_vertex{get<0>(move(q.front()))};
-    unordered_set<string> already_visited_neighbors{move(get<1>(q.front()))};
-    const string travelled_path{get<2>(move(q.front()))};
-    const size_t travelled_distance{get<3>(q.front()) + 1};
+    list_iter = q.front();
     q.pop();
 
-    for (const string& neighbor_vertex : adj_list[current_vertex]) {
-      if (already_visited_neighbors.find(neighbor_vertex) !=
-          end(already_visited_neighbors))
+    for (const string& neighbor_vertex : adj_list[list_iter->current_vertex]) {
+      if (list_iter->visited_vertices.find(neighbor_vertex) !=
+          end(list_iter->visited_vertices))
         continue;
-      already_visited_neighbors.insert(neighbor_vertex);
+      list_iter->visited_vertices.insert(neighbor_vertex);
 
-      if (travelled_distance >= shortest_path_distance)
+      if (list_iter->travelled_distance + 1 >= shortest_path_distance)
         break;
-      if (neighbor_vertex == dst) {
-        shortest_path_distance = travelled_distance;
-        shortest_path = travelled_path + "-" + dst;
+      if (neighbor_vertex == vertices.back()) {
+        shortest_path_distance = list_iter->travelled_distance + 1;
+        shortest_path = list_iter->travelled_path + "-" + vertices.back();
         break;
       }
-      q.emplace(make_tuple(neighbor_vertex, already_visited_neighbors,
-                           move(string{travelled_path + "-" + neighbor_vertex}),
-                           travelled_distance));
-      already_visited_neighbors.erase(neighbor_vertex);
+      list<path_segment>::iterator iter{visited_node_data.insert(
+          end(visited_node_data),
+          move(path_segment(
+              neighbor_vertex,
+              move(list_iter->travelled_path + "-" + neighbor_vertex),
+              list_iter->visited_vertices,
+              list_iter->travelled_distance + 1)))};
+      q.emplace(iter);
+      list_iter->visited_vertices.erase(neighbor_vertex);
     }
   }
 
