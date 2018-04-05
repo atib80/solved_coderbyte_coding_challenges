@@ -124,7 +124,7 @@ struct path_segment {
 
   path_segment(const string& cv,
                const string& path,
-               const unordered_set<string>& prev_visited_vertices = {},
+               const unordered_set<string>& prev_visited_vertices = unordered_set<string>{},
                const size_t distance = 0)
       : current_vertex{cv},
         travelled_path{path},

@@ -153,12 +153,12 @@ bool is_math_expression_correctly_formatted(const string& expression) {
   if ('(' == expression.back())
     return false;
 
-  for (size_t i{}; i <= expression.length(); i++) {
+  for (size_t i{}; i < expression.length(); i++) {
     if ('(' == expression[i])
       prnths_balance_count++;
 
     else if (')' == expression[i]) {
-      if (prnths_balance_count <= 0)
+      if (!prnths_balance_count)
         return false;
 
       prnths_balance_count--;
@@ -300,12 +300,14 @@ string evaluate_math_expression(
     }
 
     const size_t sub_expression_start{opening_prnths_positions.top() + 1};
+    const size_t sub_expression_last{next_pos};
 
     expression.replace(
         opening_prnths_positions.top(),
-        next_pos - opening_prnths_positions.top() + 1,
-        to_string(evaluate_simple_math_expression(move(expression.substr(
-            sub_expression_start, next_pos - sub_expression_start)))));
+        sub_expression_last - opening_prnths_positions.top() + 1,
+        to_string(evaluate_simple_math_expression(move(
+            expression.substr(sub_expression_start,
+                              sub_expression_last - sub_expression_start)))));
     opening_prnths_positions.pop();
     prev_pos = sub_expression_start;
 
