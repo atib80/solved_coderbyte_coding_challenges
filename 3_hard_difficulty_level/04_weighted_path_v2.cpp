@@ -177,7 +177,7 @@ void create_graph_adjacency_list(
   }
 }
 
-void find_shortest_path(
+void find_least_costly_route(
     const unordered_map<string, unordered_map<string, size_t>>&
         adjacent_vertices_and_their_weights,
     unordered_set<string>& already_visited_vertices,
@@ -192,11 +192,9 @@ void find_shortest_path(
     return;
 
   for (const auto& neighbor_vertex : cv_iter->second) {
-    if (already_visited_vertices.find(neighbor_vertex.first) !=
-        end(already_visited_vertices))
-      continue;
-
-    if (path_weight + neighbor_vertex.second >= shortest_path_weight)
+    if ((already_visited_vertices.find(neighbor_vertex.first) !=
+         end(already_visited_vertices)) ||
+        (path_weight + neighbor_vertex.second >= shortest_path_weight))
       continue;
 
     if (neighbor_vertex.first == dest_vertex) {
@@ -212,11 +210,11 @@ void find_shortest_path(
     already_visited_vertices.insert(neighbor_vertex.first);
     shortest_path_vertices.emplace_back(neighbor_vertex.first);
 
-    find_shortest_path(adjacent_vertices_and_their_weights,
-                       already_visited_vertices, neighbor_vertex.first,
-                       dest_vertex, shortest_path, shortest_path_vertices,
-                       shortest_path_weight,
-                       path_weight + neighbor_vertex.second);
+    find_least_costly_route(adjacent_vertices_and_their_weights,
+                            already_visited_vertices, neighbor_vertex.first,
+                            dest_vertex, shortest_path, shortest_path_vertices,
+                            shortest_path_weight,
+                            path_weight + neighbor_vertex.second);
 
     shortest_path_vertices.pop_back();
     already_visited_vertices.erase(neighbor_vertex.first);
@@ -236,10 +234,10 @@ string weighted_path_v2(string* str_arr, const size_t str_arr_size) {
   unordered_set<string> already_visited_vertices{};
   vector<string> shortest_path_vertices{vertices.front()};
 
-  find_shortest_path(adjacent_vertices_and_their_weights,
-                     already_visited_vertices, vertices.front(),
-                     vertices.back(), shortest_path, shortest_path_vertices,
-                     shortest_path_weight, 0);
+  find_least_costly_route(adjacent_vertices_and_their_weights,
+                          already_visited_vertices, vertices.front(),
+                          vertices.back(), shortest_path,
+                          shortest_path_vertices, shortest_path_weight, 0);
 
   return shortest_path;
 }
