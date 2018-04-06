@@ -1,5 +1,7 @@
 /*
-Coderbyte coding challenge: Weighted Path v1
+Coderbyte coding challenge: Weighted Path v2
+
+(recursive solution)
 
 Using the C++ language, have the function WeightedPath(strArr) take strArr which
 will be an array of strings which models a non-looping weighted Graph. The
@@ -38,8 +40,7 @@ Output: "-1"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <list>
-#include <queue>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -176,52 +177,69 @@ void create_graph_adjacency_list(
   }
 }
 
-string weighted_path_v2(vector<string> str_arr) {
-  vector<string> vertices{};
-  unordered_map<string, unordered_map<string, size_t>> adj_list{};
+void find_shortest_path(
+    const unordered_map<string, unordered_map<string, size_t>>&
+        adjacent_vertices_and_their_weights,
+    unordered_set<string>& already_visited_vertices,
+    const string& current_vertex,
+    const string& dest_vertex,
+    string& shortest_path,
+    vector<string>& shortest_path_vertices,
+    size_t& shortest_path_weight,
+    const size_t path_weight = 0) {
+  const auto cv_iter = adjacent_vertices_and_their_weights.find(current_vertex);
+  if (cv_iter == end(adjacent_vertices_and_their_weights))
+    return;
 
-  create_graph_adjacency_list(move(str_arr), vertices, adj_list);
+  for (const auto& neighbor_vertex : cv_iter->second) {
+    if (already_visited_vertices.find(neighbor_vertex.first) !=
+        end(already_visited_vertices))
+      continue;
 
-  size_t shortest_path_distance{string::npos};
-  string shortest_path{"-1"};
+    if (path_weight + neighbor_vertex.second >= shortest_path_weight)
+      continue;
 
-  list<path_segment> visited_node_data{};
-  list<path_segment>::iterator list_iter{visited_node_data.insert(
-      end(visited_node_data),
-      move(path_segment(vertices.front(), vertices.front(), {vertices.front()},
-                        0)))};
-  queue<list<path_segment>::iterator> q{{list_iter}};
-
-  while (!q.empty()) {
-    list_iter = q.front();
-    q.pop();
-
-    for (const string& neighbor_vertex : adj_list[list_iter->current_vertex]) {
-      if (list_iter->visited_vertices.find(neighbor_vertex.first) !=
-          end(list_iter->visited_vertices))
-        continue;
-      list_iter->visited_vertices.insert(neighbor_vertex.first);
-
-      if (list_iter->travelled_distance + neighbor_vertex.second >=
-          shortest_path_distance)
-        break;
-      if (neighbor_vertex.first == vertices.back()) {
-        shortest_path_distance =
-            list_iter->travelled_distance + neighbor_vertex.second;
-        shortest_path = list_iter->travelled_path + "-" + vertices.back();
-        break;
-      }
-      list<path_segment>::iterator iter{visited_node_data.insert(
-          end(visited_node_data),
-          move(path_segment(
-              neighbor_vertex,
-              move(list_iter->travelled_path + "-" + neighbor_vertex),
-              list_iter->visited_vertices,
-              list_iter->travelled_distance + 1)))};
-      q.emplace(iter);
-      list_iter->visited_vertices.erase(neighbor_vertex);
+    if (neighbor_vertex.first == dest_vertex) {
+      shortest_path_weight = path_weight + neighbor_vertex.second;
+      ostringstream oss{};
+      for (const string& v : shortest_path_vertices)
+        oss << v << '-';
+      oss << dest_vertex;
+      shortest_path = oss.str();
+      continue;
     }
+
+    already_visited_vertices.insert(neighbor_vertex.first);
+    shortest_path_vertices.emplace_back(neighbor_vertex.first);
+
+    find_shortest_path(adjacent_vertices_and_their_weights,
+                       already_visited_vertices, neighbor_vertex.first,
+                       dest_vertex, shortest_path, shortest_path_vertices,
+                       shortest_path_weight,
+                       path_weight + neighbor_vertex.second);
+
+    shortest_path_vertices.pop_back();
+    already_visited_vertices.erase(neighbor_vertex.first);
   }
+}
+
+string weighted_path_v2(string* str_arr, const size_t str_arr_size) {
+  vector<string> vertices{};
+  unordered_map<string, unordered_map<string, size_t>>
+      adjacent_vertices_and_their_weights{};
+
+  create_graph_adjacency_list(str_arr, str_arr_size, vertices,
+                              adjacent_vertices_and_their_weights);
+
+  size_t shortest_path_weight{string::npos};
+  string shortest_path{"-1"};
+  unordered_set<string> already_visited_vertices{};
+  vector<string> shortest_path_vertices{vertices.front()};
+
+  find_shortest_path(adjacent_vertices_and_their_weights,
+                     already_visited_vertices, vertices.front(),
+                     vertices.back(), shortest_path, shortest_path_vertices,
+                     shortest_path_weight, 0);
 
   return shortest_path;
 }
