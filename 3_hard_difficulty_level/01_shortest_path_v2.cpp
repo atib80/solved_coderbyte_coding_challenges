@@ -124,7 +124,8 @@ struct path_segment {
 
   path_segment(const string& cv,
                const string& path,
-               const unordered_set<string>& prev_visited_vertices = unordered_set<string>{},
+               const unordered_set<string>& prev_visited_vertices =
+                   unordered_set<string>{},
                const size_t distance = 0)
       : current_vertex{cv},
         travelled_path{path},
@@ -179,15 +180,18 @@ string shortest_path_v2(string* str_arr, const size_t str_arr_size) {
       if (list_iter->visited_vertices.find(neighbor_vertex) !=
           end(list_iter->visited_vertices))
         continue;
-      list_iter->visited_vertices.insert(neighbor_vertex);
 
       if (list_iter->travelled_distance + 1 >= shortest_path_distance)
         break;
+
       if (neighbor_vertex == vertices.back()) {
         shortest_path_distance = list_iter->travelled_distance + 1;
         shortest_path = list_iter->travelled_path + "-" + vertices.back();
         break;
       }
+
+      list_iter->visited_vertices.insert(neighbor_vertex);
+
       list<path_segment>::iterator iter{visited_node_data.insert(
           end(visited_node_data),
           move(path_segment(
@@ -198,6 +202,8 @@ string shortest_path_v2(string* str_arr, const size_t str_arr_size) {
       q.emplace(iter);
       list_iter->visited_vertices.erase(neighbor_vertex);
     }
+
+    visited_node_data->erase(list_iter);
   }
 
   return shortest_path;

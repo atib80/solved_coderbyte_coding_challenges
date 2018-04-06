@@ -1,9 +1,6 @@
 /*
 Coderbyte coding challenge: Calculator
 
-(alternative iterative solution for the Calculator coding challenge
-(simple math expression parser) implemented by using stack)
-
 Using the C++ language, have the function Calculator(str) take the str parameter
 being passed and evaluate the mathematical expression within in. For example, if
 str were "2+(3-1)*3" the output should be 8. Another example: if str were
@@ -27,11 +24,7 @@ Output: "1"
 
 #include <algorithm>
 #include <cctype>
-#include <cmath>
-#include <cstdint>
 #include <iostream>
-#include <sstream>
-#include <stack>
 #include <string>
 #include <vector>
 
@@ -49,18 +42,6 @@ string trim(const string& input) {
                end(output));
 
   return output;
-}
-
-string remove_unnecessary_white_space_characters(string str) {
-  string cleaned_str{};
-  cleaned_str.reserve(str.length());
-
-  for (size_t i{}; i < str.length(); i++) {
-    if (!isspace(str[i]))
-      cleaned_str.push_back(str[i]);
-  }
-
-  return cleaned_str;
 }
 
 void insert_missing_multiplication_symbols(string& str) {
@@ -107,15 +88,17 @@ void insert_missing_multiplication_symbols(string& str) {
       str.insert(number_end_pos, 1, '*');
 
       number_end_pos += 2;
-    } else if (number_end_pos < str.length() - 1 &&
-               ' ' == str[number_end_pos] && '(' == str[number_end_pos + 1]) {
+
+    } else if ((number_end_pos < (str.length() - 1)) &&
+               (' ' == str[number_end_pos]) &&
+               ('(' == str[number_end_pos + 1])) {
       str[number_end_pos] = '*';
 
       number_end_pos += 2;
     }
   }
 
-  size_t prnths_end_pos{};
+  size_t number_start_pos{}, prnths_end_pos{};
 
   while (true) {
     prnths_end_pos = str.find(')', prnths_end_pos);
@@ -123,8 +106,7 @@ void insert_missing_multiplication_symbols(string& str) {
     if (string::npos == prnths_end_pos)
       break;
 
-    const size_t number_start_pos{
-        str.find_first_of("0123456789", prnths_end_pos + 1)};
+    number_start_pos = str.find_first_of("0123456789", prnths_end_pos + 1);
 
     if (string::npos == number_start_pos)
       break;
@@ -133,9 +115,12 @@ void insert_missing_multiplication_symbols(string& str) {
       str.insert(number_start_pos, 1, '*');
 
       number_end_pos += 2;
-    } else if (' ' == str[number_start_pos - 1] &&
-               ')' == str[number_start_pos - 2]) {
+
+    } else if ((' ' == str[number_start_pos - 1]) &&
+               (')' == str[number_start_pos - 2])) {
       str[number_start_pos - 1] = '*';
+
+      number_start_pos++;
     }
 
     prnths_end_pos += 2;
@@ -144,49 +129,50 @@ void insert_missing_multiplication_symbols(string& str) {
 
 enum class operation { plus, minus, multiplies, divides };
 
-bool is_math_expression_correctly_formatted(const string& expression) {
-  int prnths_balance_count{};
+// TODO: convert to iterative solution using queue/stack or create a new
+// solution
 
-  if (')' == expression.front())
-    return false;
+int evaluate_expression_in_parenthesis(string expression) {
+  int multiply_divide_op_count{};
+  int plus_minus_op_count{};
 
-  if ('(' == expression.back())
-    return false;
-
-  for (size_t i{}; i < expression.length(); i++) {
-    if ('(' == expression[i])
-      prnths_balance_count++;
-
-    else if (')' == expression[i]) {
-      if (!prnths_balance_count)
-        return false;
-
-      prnths_balance_count--;
-    }
-  }
-
-  if (prnths_balance_count)
-    return false;
-
-  return true;
-}
-
-double evaluate_simple_math_expression(string expression) {
-  size_t multiply_divide_op_count{};
-  size_t plus_minus_op_count{};
   vector<operation> operations{};
-  vector<double> sub_expression_results{};
-
-  const char* expression_iter{expression.c_str()};
-  const char* expression_last{expression_iter + expression.length()};
+  vector<int> sub_expression_results{};
 
   while (true) {
-    char* last_iter{};
-    sub_expression_results.emplace_back(strtod(expression_iter, &last_iter));
-    expression_iter = last_iter;
+    size_t number_start_pos{expression.find_first_of("0123456789")};
 
-    if (expression_iter < expression_last) {
-      switch (*expression_iter) {
+    if (string::npos == number_start_pos)
+      break;
+
+    size_t begin_prnths_pos{expression.find('(')};
+
+    size_t end_prnths_pos{string::npos};
+
+    if (string::npos != begin_prnths_pos)
+      end_prnths_pos = expression.find(')', begin_prnths_pos + 1);
+
+    if ((string::npos != begin_prnths_pos) &&
+        (string::npos != end_prnths_pos) &&
+        (begin_prnths_pos < number_start_pos)) {
+      string sub_expression_str{expression.substr(
+          begin_prnths_pos + 1, end_prnths_pos - (begin_prnths_pos + 1))};
+
+      sub_expression_results.emplace_back(
+          evaluate_expression_in_parenthesis(move(sub_expression_str)));
+
+      const size_t operation_pos =
+          expression.find_first_of("+-*/", end_prnths_pos + 1);
+
+      begin_prnths_pos = expression.find('(', end_prnths_pos + 1);
+
+      number_start_pos =
+          expression.find_first_of("0123456789", end_prnths_pos + 1);
+
+      if (string::npos == operation_pos || string::npos == number_start_pos)
+        break;
+
+      switch (expression[operation_pos]) {
         case '+':
           operations.emplace_back(operation::plus);
           plus_minus_op_count++;
@@ -208,126 +194,161 @@ double evaluate_simple_math_expression(string expression) {
           break;
 
         default:
-          ostringstream oss{};
-          oss << expression[0] << " is not a valid operator!";
-          throw runtime_error{oss.str()};
+          break;
       }
 
-      expression_iter++;
-    } else
+      expression.erase(
+          begin(expression),
+          begin(expression) + min(begin_prnths_pos, number_start_pos));
+
+      continue;
+    }
+
+    const size_t number_end_pos{
+        expression.find_first_not_of("0123456789", number_start_pos + 1)};
+
+    int number_value = stoi(
+        expression.substr(number_start_pos, number_end_pos - number_start_pos));
+
+    size_t operation_pos{expression.find_first_of("+-*/")};
+
+    if (string::npos == operation_pos) {
+      sub_expression_results.emplace_back(number_value);
       break;
-  }
-
-  size_t i{};
-  while (multiply_divide_op_count && i < sub_expression_results.size() - 1) {
-    if (operation::multiplies == operations[i]) {
-      sub_expression_results[i] *= sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      multiply_divide_op_count--;
-      continue;
     }
 
-    if (operation::divides == operations[i]) {
-      sub_expression_results[i] /= sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      multiply_divide_op_count--;
-      continue;
+    if (operation_pos < number_start_pos) {
+      for (size_t i{operation_pos}; i < number_start_pos; i++) {
+        if ('-' == expression[i])
+          number_value = -number_value;
+      }
+
+      operation_pos = expression.find_first_of("+-*/", number_end_pos);
+
+      if (string::npos == operation_pos) {
+        sub_expression_results.emplace_back(number_value);
+        break;
+      }
     }
 
-    i++;
-  }
+    sub_expression_results.emplace_back(number_value);
 
-  i = 0;
-  while (plus_minus_op_count && i < sub_expression_results.size() - 1) {
-    if (operation::plus == operations[i]) {
-      sub_expression_results[i] += sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      plus_minus_op_count--;
-      continue;
+    switch (expression[operation_pos]) {
+      case '+':
+        operations.emplace_back(operation::plus);
+        plus_minus_op_count++;
+        break;
+
+      case '-':
+        operations.emplace_back(operation::minus);
+        plus_minus_op_count++;
+        break;
+
+      case '*':
+        operations.emplace_back(operation::multiplies);
+        multiply_divide_op_count++;
+        break;
+
+      case '/':
+        operations.emplace_back(operation::divides);
+        multiply_divide_op_count++;
+        break;
+
+      default:
+        break;
     }
 
-    if (operation::minus == operations[i]) {
-      sub_expression_results[i] -= sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      plus_minus_op_count--;
-      continue;
-    }
-
-    i++;
+    expression.erase(
+        begin(expression),
+        begin(expression) +
+            expression.find_first_of("+-*/()0123456789", operation_pos + 1));
   }
 
-  return sub_expression_results.front();
-}
+  while (multiply_divide_op_count) {
+    for (size_t i{}; i < sub_expression_results.size() - 1; i++) {
+      if (operation::multiplies == operations[i]) {
+        sub_expression_results[i] *= sub_expression_results[i + 1];
+        sub_expression_results.erase(begin(sub_expression_results) + i + 1);
+        operations.erase(begin(operations) + i);
+        multiply_divide_op_count--;
+        break;
+      }
 
-string evaluate_math_expression(
-    string expression,
-    const bool is_round_to_nearest_whole_number = false) {
-  size_t open_prnths_count{}, close_prnths_count{};
-
-  for (size_t i{}; i < expression.length(); i++) {
-    if ('(' == expression[i])
-      open_prnths_count++;
-    else if (')' == expression[i])
-      close_prnths_count++;
-  }
-
-  if (!open_prnths_count && !close_prnths_count) {
-    const auto result = evaluate_simple_math_expression(move(expression));
-    if (is_round_to_nearest_whole_number)
-      return to_string(static_cast<int64_t>(round(result)));
-    return to_string(result);
-  }
-  if (open_prnths_count != close_prnths_count ||
-      !is_math_expression_correctly_formatted(expression))
-    throw runtime_error(
-        "Input math expression string isn't correctly formatted!");
-
-  stack<size_t> opening_prnths_positions{{expression.find('(')}};
-
-  size_t prev_pos{opening_prnths_positions.top()};
-
-  while (!opening_prnths_positions.empty()) {
-    const size_t next_pos{expression.find_first_of("()", prev_pos + 1)};
-
-    if ('(' == expression[next_pos]) {
-      prev_pos = next_pos;
-      opening_prnths_positions.emplace(next_pos);
-      continue;
-    }
-
-    const size_t sub_expression_start{opening_prnths_positions.top() + 1};
-    const size_t sub_expression_last{next_pos};
-
-    expression.replace(
-        opening_prnths_positions.top(),
-        sub_expression_last - opening_prnths_positions.top() + 1,
-        to_string(evaluate_simple_math_expression(move(
-            expression.substr(sub_expression_start,
-                              sub_expression_last - sub_expression_start)))));
-    opening_prnths_positions.pop();
-    prev_pos = sub_expression_start;
-
-    if (opening_prnths_positions.empty() &&
-        string::npos != expression.find('(', prev_pos + 1)) {
-      prev_pos = expression.find('(', prev_pos + 1);
-      opening_prnths_positions.emplace(prev_pos);
+      if (operation::divides == operations[i]) {
+        sub_expression_results[i] /= sub_expression_results[i + 1];
+        sub_expression_results.erase(begin(sub_expression_results) + i + 1);
+        operations.erase(begin(operations) + i);
+        multiply_divide_op_count--;
+        break;
+      }
     }
   }
 
-  const auto result = evaluate_simple_math_expression(move(expression));
-  if (is_round_to_nearest_whole_number)
-    return to_string(static_cast<int64_t>(round(result)));
-  return to_string(result);
+  while (plus_minus_op_count) {
+    for (size_t i{}; i < sub_expression_results.size() - 1; i++) {
+      if (operation::plus == operations[i]) {
+        sub_expression_results[i] += sub_expression_results[i + 1];
+        sub_expression_results.erase(begin(sub_expression_results) + i + 1);
+        operations.erase(begin(operations) + i);
+        plus_minus_op_count--;
+        break;
+      }
+
+      if (operation::minus == operations[i]) {
+        sub_expression_results[i] -= sub_expression_results[i + 1];
+        sub_expression_results.erase(begin(sub_expression_results) + i + 1);
+        operations.erase(begin(operations) + i);
+        plus_minus_op_count--;
+        break;
+      }
+    }
+  }
+
+  return sub_expression_results[0];
 }
 
 string calculator(string str) {
-  str = remove_unnecessary_white_space_characters(move(str));
+  str = trim(str);
+
+  const size_t operation_pos{str.find_first_of("+-*/")};
+
+  const size_t number_start_pos{str.find_first_of("0123456789")};
+
+  size_t number_end_pos{string::npos};
+
+  if (string::npos != number_start_pos)
+    number_end_pos = str.find_first_not_of("0123456789", number_start_pos + 1);
+
+  const size_t next_number_start_pos{
+      number_end_pos != string::npos
+          ? str.find_first_of("0123456789", number_end_pos + 1)
+          : string::npos};
+
+  if (string::npos == operation_pos) {
+    if (string::npos == number_start_pos)
+      return "0";
+
+    if (string::npos == number_end_pos)
+      return str.substr(number_start_pos);
+
+    return str.substr(number_start_pos, number_end_pos - number_start_pos);
+
+  } else if (string::npos != number_start_pos &&
+             string::npos == next_number_start_pos) {
+    int number_value{
+        stoi(str.substr(number_start_pos, number_end_pos - number_start_pos))};
+
+    for (size_t i{}; i < number_start_pos; i++) {
+      if ('-' == str[i])
+        number_value = -number_value;
+    }
+
+    return to_string(number_value);
+  }
+
   insert_missing_multiplication_symbols(str);
-  return evaluate_math_expression(move(str), true);
+
+  return to_string(evaluate_expression_in_parenthesis(move(str)));
 }
 
 int main() {
