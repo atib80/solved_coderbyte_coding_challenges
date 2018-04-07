@@ -31,7 +31,6 @@ Output: "100010001"
 #include <cctype>
 #include <cmath>
 #include <iostream>
-// #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -53,10 +52,11 @@ string trim(const string& input) {
   return output;
 }
 
+template <typename T>
 class rref_matrix {
  public:
   explicit rref_matrix(string* str_arr, const size_t str_arr_size) {
-    vector<int> row{};
+    vector<T> row{};
 
     for (size_t i{}; i < str_arr_size; i++) {
       str_arr[i] = trim(str_arr[i]);
@@ -74,7 +74,7 @@ class rref_matrix {
       matrix_.emplace_back(row);
   }
 
-  vector<int> multiply_vector(const size_t row_index, const int factor) const {
+  vector<T> multiply_vector(const size_t row_index, const int factor) const {
     auto row = this->operator[](row_index);
 
     for (auto& element : row)
@@ -91,8 +91,8 @@ class rref_matrix {
       element *= factor;
   }
 
-  vector<int> divide_vector(const size_t row_index, const int factor) const {
-    vector<int> row{this->operator[](row_index)};
+  vector<T> divide_vector(const size_t row_index, const int factor) const {
+    vector<T> row{this->operator[](row_index)};
 
     for (auto& element : row)
       element /= factor;
@@ -108,9 +108,8 @@ class rref_matrix {
       element /= factor;
   }
 
-  vector<int> add_vectors(const size_t row_index,
-                          const vector<int>& src) const {
-    vector<int> row{this->operator[](row_index)};
+  vector<T> add_vectors(const size_t row_index, const vector<T>& src) const {
+    vector<T> row{this->operator[](row_index)};
     const size_t src_size{src.size()};
 
     if (row.size() != src_size)
@@ -122,7 +121,7 @@ class rref_matrix {
     return row;
   }
 
-  void add_vectors_in_place(const size_t row_index, const vector<int>& src) {
+  void add_vectors_in_place(const size_t row_index, const vector<T>& src) {
     const size_t src_size{src.size()};
 
     if (row_index >= matrix_.size())
@@ -132,7 +131,7 @@ class rref_matrix {
       matrix_[row_index][i] += src[i];
   }
 
-  int get_index_of_first_non_zero_element(const size_t row_index) {
+  T get_index_of_first_non_zero_element(const size_t row_index) {
     if (row_index >= matrix_.size())
       return -1;
 
@@ -149,7 +148,7 @@ class rref_matrix {
       return;
 
     size_t min_index{index};
-    int minimum{numeric_limits<int>::max()};
+    T minimum{numeric_limits<T>::max()};
 
     for (size_t i{index}; i < matrix_.size(); i++) {
       if (matrix_[i][index] && abs(matrix_[i][index]) < minimum) {
@@ -169,14 +168,14 @@ class rref_matrix {
       swap(matrix_[i][y], matrix_[j][y]);
   }
 
-  vector<int> operator[](const size_t index) const {
+  vector<T> operator[](const size_t index) const {
     if (index >= matrix_.size())
       throw range_error("Specified index is out of allowed range!");
 
     return matrix_[index];
   }
 
-  int operator()(const size_t i, const size_t j) const {
+  T operator()(const size_t i, const size_t j) const {
     if (i >= matrix_.size()) {
       ostringstream oss{};
       oss << "Specified row index (i = " << i << ") is out of bounds!";
@@ -229,10 +228,11 @@ class rref_matrix {
   friend ostream& operator<<(ostream&, const rref_matrix&);
 
  private:
-  vector<vector<int>> matrix_;
+  vector<vector<T>> matrix_;
 };
 
-ostream& operator<<(ostream& ostr, const rref_matrix& m) {
+template <typename T>
+ostream& operator<<(ostream& ostr, const rref_matrix<T>& m) {
   for (const auto& row : m.matrix_) {
     for (const auto& element : row)
       ostr << element;
@@ -241,10 +241,11 @@ ostream& operator<<(ostream& ostr, const rref_matrix& m) {
   return ostr;
 }
 
-istream& operator>>(istream& istr, rref_matrix& m) {
+template <typename T>
+istream& operator>>(istream& istr, rref_matrix<T>& m) {
   m.matrix_.clear();
 
-  vector<int> row{};
+  vector<T> row{};
 
   string line{};
 
@@ -266,8 +267,58 @@ istream& operator>>(istream& istr, rref_matrix& m) {
   return istr;
 }
 
+template <typename T>
+vector<T> operator+(const vector<T>& lhs, const vector<T>& rhs) {
+  vector<T> result{lhs};
+  const size_t lhs_size{lhs.size()};
+  const size_t rhs_size{rhs.size()};
+
+  if (lhs_size != rhs_size)
+    result.resize(max(lhs_size, rhs_size));
+
+  for (size_t i{}; i < min(lhs_size, rhs_size); i++)
+    result[i] += rhs[i];
+
+  return result;
+}
+
+template <typename T>
+vector<T> operator-(const vector<T>& lhs, const vector<T>& rhs) {
+  vector<T> result{lhs};
+  const size_t lhs_size{lhs.size()};
+  const size_t rhs_size{rhs.size()};
+
+  if (lhs_size != rhs_size)
+    result.resize(max(lhs_size, rhs_size));
+
+  for (size_t i{}; i < min(lhs_size, rhs_size); i++)
+    result[i] -= rhs[i];
+
+  return result;
+}
+
+template <typename T>
+vector<T> operator*(const vector<T>& lhs, const int rhs) {
+  vector<T> result{lhs};
+
+  for (auto& element : result)
+    element *= rhs;
+
+  return result;
+}
+
+template <typename T>
+vector<T> operator/(const vector<T>& lhs, const int rhs) {
+  vector<T> result{lhs};
+
+  for (auto& element : result)
+    element /= rhs;
+
+  return result;
+}
+
 string RREFMatrix(string* str_arr, const size_t str_arr_size) {
-  rref_matrix matrix{str_arr, str_arr_size};
+  rref_matrix<int> matrix{str_arr, str_arr_size};
 
   for (int i{}; i < matrix.get_row_count(); i++) {
     if (i >= matrix.get_col_count(i))
