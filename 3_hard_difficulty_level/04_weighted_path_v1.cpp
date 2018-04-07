@@ -1,7 +1,7 @@
 /*
 Coderbyte coding challenge: Weighted Path v1
 
-(iterative solution using queue)
+(optimized iterative solution using queue)
 
 Using the C++ language, have the function WeightedPath(strArr) take strArr which
 will be an array of strings which models a non-looping weighted Graph. The
@@ -192,8 +192,7 @@ string weighted_path_v1(string* str_arr, const size_t str_arr_size) {
   list<path_segment> visited_node_data{};
   list<path_segment>::iterator list_iter{visited_node_data.insert(
       end(visited_node_data),
-      move(path_segment(vertices.front(), vertices.front(), {vertices.front()},
-                        0)))};
+      path_segment(vertices.front(), vertices.front(), {vertices.front()}, 0))};
   queue<list<path_segment>::iterator> q{{list_iter}};
 
   while (!q.empty()) {
@@ -214,7 +213,7 @@ string weighted_path_v1(string* str_arr, const size_t str_arr_size) {
       shortest_path = list_iter->travelled_path + "-" + vertices.back();
     }
 
-    for (const pair<string, size_t>& neighbor_vertex :
+    for (const auto& neighbor_vertex :
          adjacent_vertices_and_their_weights[list_iter->current_vertex]) {
       if (list_iter->visited_vertices.find(neighbor_vertex.first) !=
           end(list_iter->visited_vertices))
@@ -228,11 +227,11 @@ string weighted_path_v1(string* str_arr, const size_t str_arr_size) {
 
       list<path_segment>::iterator iter{visited_node_data.insert(
           end(visited_node_data),
-          move(path_segment(
+          path_segment(
               neighbor_vertex.first,
               move(list_iter->travelled_path + "-" + neighbor_vertex.first),
               list_iter->visited_vertices,
-              list_iter->path_weight + neighbor_vertex.second)))};
+              list_iter->path_weight + neighbor_vertex.second))};
       q.emplace(iter);
       list_iter->visited_vertices.erase(neighbor_vertex.first);
     }
