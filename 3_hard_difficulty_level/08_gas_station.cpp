@@ -29,6 +29,7 @@ Input:  "4","0:1","2:2","1:2","3:1"
 Output: "4"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <string>
@@ -36,136 +37,68 @@ Output: "4"
 
 using namespace std;
 
-string trim(const string& str)
-{
-	const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-	if (!str_len)
-		return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-	size_t first{}, last{str_len - 1};
-
-	for (; first <= last; ++first)
-	{
-		if (!isspace(str[first]))
-			break;
-	}
-
-	if (first > last)
-		return string{};
-
-	for (; last > first; --last)
-	{
-		if (!isspace(str[last]))
-			break;
-	}
-
-	return str.substr(first, last - first + 1);
+  return output;
 }
 
-vector<string> split(const string& source,
-                     const char* needle,
-                     size_t const max_count = string::npos)
-{
-	vector<string> parts{};
+string GasStation(string* str_arr, const size_t str_arr_size) {
+  const size_t N{stoul(trim(*str_arr))};
 
-	string needle_st{needle};
+  vector<pair<int, int>> gas_stations{};
 
-	const size_t source_len{source.length()};
+  for (size_t i{1}; i < str_arr_size; i++) {
+    str_arr[i] = trim(str_arr[i]);
 
-	const size_t needle_len{needle_st.size()};
+    const size_t sep_pos{str_arr[i].find(':')};
 
-	if ((0u == source_len) || (0u == needle_len))
-		return parts;
+    gas_stations.emplace_back(stoi(str_arr[i].substr(0, sep_pos)),
+                              stoi(str_arr[i].substr(sep_pos + 1)));
+  }
 
-	size_t number_of_parts{}, prev{};
+  for (size_t i{}; i < N; i++) {
+    size_t ci{i};
+    int gallons{};
 
-	while (true)
-	{
-		const size_t current{source.find(needle_st, prev)};
+    while (true) {
+      gallons += gas_stations[ci].first;
 
-		if (string::npos == current)
-			break;
+      if (gas_stations[ci].second > gallons)
+        break;
 
-		number_of_parts++;
+      gallons -= gas_stations[ci].second;
 
-		if ((string::npos != max_count) && (parts.size() == max_count))
-			break;
+      ci = ci + 1 == N ? 0 : ci + 1;
 
-		if ((current - prev) > 0)
-			parts.emplace_back(source.substr(prev, current - prev));
+      if (ci == i)
+        return to_string(i + 1);
+    }
+  }
 
-		prev = current + needle_len;
-
-		if (prev >= source_len)
-			break;
-	}
-
-	if (prev < source_len)
-	{
-		if (string::npos == max_count)
-			parts.emplace_back(source.substr(prev));
-
-		else if ((string::npos != max_count) && (parts.size() < max_count))
-			parts.emplace_back(source.substr(prev));
-	}
-
-	return parts;
+  return "impossible";
 }
 
-string GasStation(string* str_arr, const size_t str_arr_size)
-{
-	const size_t N{stoul(trim(*str_arr))};
+int main() {
+  // string A[] = gets(stdin);
+  // cout << GasStation(A, sizeof(A)/sizeof(*A));
+  string B[] = {"4", "3:1", "2:2", "1:2", "0:1"};
+  cout << GasStation(B, sizeof(B) / sizeof(*B))
+       << '\n';  // expected output: "1"
+  string C[] = {"4", "1:1", "2:2", "1:2", "0:1"};
+  cout << GasStation(C, sizeof(C) / sizeof(*C))
+       << '\n';  // expected output: "impossible"
+  string D[] = {"4", "0:1", "2:2", "1:2", "3:1"};
+  cout << GasStation(D, sizeof(D) / sizeof(*D))
+       << '\n';  // expected output: "4"
 
-	vector<pair<int, int>> gas_stations(N);
-
-	for (size_t i{1u}; i < str_arr_size; i++)
-	{
-		if (i > N)
-			break;
-
-		str_arr[i] = trim(str_arr[i]);
-
-		auto g_c_parts = split(str_arr[i], ":", 2);
-
-		gas_stations[i - 1] = make_pair(stoi(g_c_parts[0]), stoi(g_c_parts[1]));
-	}
-
-	for (size_t i{}; i < N; i++)
-	{
-		size_t ci{i};
-
-		int gallons{};
-
-		while (true)
-		{
-			gallons += gas_stations[ci].first;
-
-			if (gas_stations[ci].second > gallons)
-				break;
-
-			gallons -= gas_stations[ci].second;
-
-			ci = (ci + 1 >= N) ? 0 : ci + 1;
-
-			if (ci == i)
-				return to_string(i + 1);
-		}
-	}
-
-	return "impossible";
-}
-
-int main()
-{
-	// string A[] = gets(stdin);
-	// cout << GasStation(A, sizeof(A)/sizeof(*A));
-	string B[] = {"4", "3:1", "2:2", "1:2", "0:1"};
-	cout << GasStation(B, sizeof(B) / sizeof(*B)) << '\n'; // expected output: "1"
-	string C[] = {"4", "1:1", "2:2", "1:2", "0:1"};
-	cout << GasStation(C, sizeof(C) / sizeof(*C)) << '\n'; // expected output: "impossible"
-	string D[] = {"4", "0:1", "2:2", "1:2", "3:1"};
-	cout << GasStation(D, sizeof(D) / sizeof(*D)) << '\n'; // expected output: "4"
-
-	return 0;
+  return 0;
 }
