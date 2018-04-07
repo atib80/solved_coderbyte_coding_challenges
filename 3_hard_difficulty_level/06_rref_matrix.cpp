@@ -27,13 +27,11 @@ Input:  "2","2","4","<>","1","1","8","<>","7","6","5"
 Output: "100010001"
 */
 
-// clang-format cb_rref_matrix_ex2.cpp -style=Google -i
-// clang cb_rref_matrix_ex2.cpp -Wall -Wextra -pedantic -std=c++17 -O3 -Ofast -o test
-
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <iostream>
-#include <limits>
+// #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -41,24 +39,18 @@ Output: "100010001"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len) return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first])) break;
-  }
-
-  if (first > last) return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last])) break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
 class rref_matrix {
@@ -78,60 +70,103 @@ class rref_matrix {
       }
     }
 
-    matrix_.emplace_back(row);
+    if (!row.empty())
+      matrix_.emplace_back(row);
   }
 
   vector<int> multiply_vector(const size_t row_index, const int factor) const {
     auto row = this->operator[](row_index);
 
-    for (auto& element : row) element *= factor;
+    for (auto& element : row)
+      element *= factor;
+
+    return row;
+  }
+
+  void multiply_vector_in_place(const size_t row_index, const int factor) {
+    if (row_index >= matrix_.size())
+      throw range_error("Specified row index is out of allowed range!");
+
+    for (auto& element : matrix_[row_index])
+      element *= factor;
+  }
+
+  vector<int> divide_vector(const size_t row_index, const int factor) const {
+    vector<int> row{this->operator[](row_index)};
+
+    for (auto& element : row)
+      element /= factor;
 
     return row;
   }
 
   void divide_vector_in_place(const size_t row_index, const int factor) {
-    if (row_index >= matrix_.size()) return;
+    if (row_index >= matrix_.size())
+      throw range_error("Specified row index is out of allowed range!");
 
-    for (auto& element : matrix_[row_index]) element /= factor;
+    for (auto& element : matrix_[row_index])
+      element /= factor;
+  }
+
+  vector<int> add_vectors(const size_t row_index,
+                          const vector<int>& src) const {
+    vector<int> row{this->operator[](row_index)};
+    const size_t src_size{src.size()};
+
+    if (row.size() != src_size)
+      row.resize(max(row.size(), src_size));
+
+    for (size_t i{}; i < min(row.size(), src_size); i++)
+      row[i] += src[i];
+
+    return row;
   }
 
   void add_vectors_in_place(const size_t row_index, const vector<int>& src) {
     const size_t src_size{src.size()};
 
-    if (row_index >= matrix_.size()) return;
+    if (row_index >= matrix_.size())
+      throw range_error("Specified row index is out of allowed range!");
 
-    if (matrix_[row_index].size() != src_size) return;
-
-    for (size_t i{}; i < src_size; i++) matrix_[row_index][i] += src[i];
+    for (size_t i{}; i < min(matrix_[row_index].size(), src_size); i++)
+      matrix_[row_index][i] += src[i];
   }
 
   int get_index_of_first_non_zero_element(const size_t row_index) {
-    if (row_index >= matrix_.size()) return -1;
+    if (row_index >= matrix_.size())
+      return -1;
 
     for (size_t i{}; i < matrix_[row_index].size(); i++) {
-      if (matrix_[row_index][i]) return i;
+      if (matrix_[row_index][i])
+        return i;
     }
 
     return -1;
   }
 
   void swap_matrix_rows(const size_t index) {
-    if (index >= matrix_[0].size()) return;
+    if (index >= matrix_.size() || index >= matrix_[0].size())
+      return;
 
     size_t min_index{index};
     int minimum{numeric_limits<int>::max()};
 
     for (size_t i{index}; i < matrix_.size(); i++) {
-      if (matrix_[i][index] && (abs(matrix_[i][index]) < minimum)) {
+      if (matrix_[i][index] && abs(matrix_[i][index]) < minimum) {
         minimum = abs(matrix_[i][index]);
-
         min_index = i;
       }
     }
 
-    const auto matrix_row = matrix_[min_index];
-    matrix_[min_index] = matrix_[index];
-    matrix_[index] = matrix_row;
+    swap_matrix_row_elements(min_index, index);
+  }
+
+  void swap_matrix_row_elements(const size_t i, const size_t j) noexcept {
+    if (i >= matrix_.size() || j >= matrix_.size())
+      return;
+
+    for (size_t y{}; y < min(matrix_[i].size(), matrix_[j].size()); y++)
+      swap(matrix_[i][y], matrix_[j][y]);
   }
 
   vector<int> operator[](const size_t index) const {
@@ -162,7 +197,8 @@ class rref_matrix {
   }
 
   int get_col_count(const size_t row_index) const noexcept {
-    if (row_index >= matrix_.size()) return 0;
+    if (row_index >= matrix_.size())
+      return 0;
 
     return static_cast<int>(matrix_[row_index].size());
   }
@@ -171,7 +207,8 @@ class rref_matrix {
     ostringstream ss{};
 
     for (const auto& row : matrix_) {
-      for (const auto& element : row) ss << element;
+      for (const auto& element : row)
+        ss << element;
     }
 
     return ss.str();
@@ -181,7 +218,8 @@ class rref_matrix {
     ostringstream ss{};
 
     for (const auto& row : matrix_) {
-      for (const auto& element : row) ss << element;
+      for (const auto& element : row)
+        ss << element;
     }
 
     return ss.str();
@@ -196,7 +234,8 @@ class rref_matrix {
 
 ostream& operator<<(ostream& ostr, const rref_matrix& m) {
   for (const auto& row : m.matrix_) {
-    for (const auto& element : row) ostr << element;
+    for (const auto& element : row)
+      ostr << element;
   }
 
   return ostr;
@@ -220,7 +259,8 @@ istream& operator>>(istream& istr, rref_matrix& m) {
       row.clear();
     }
 
-    m.matrix_.emplace_back(row);
+    if (!row.empty())
+      m.matrix_.emplace_back(row);
   }
 
   return istr;
@@ -230,11 +270,13 @@ string RREFMatrix(string* str_arr, const size_t str_arr_size) {
   rref_matrix matrix{str_arr, str_arr_size};
 
   for (int i{}; i < matrix.get_row_count(); i++) {
-    if (i >= matrix.get_col_count(i)) continue;
+    if (i >= matrix.get_col_count(i))
+      continue;
 
     matrix.swap_matrix_rows(i);
 
-    if (!matrix(i, i)) continue;
+    if (!matrix(i, i))
+      continue;
 
     matrix.divide_vector_in_place(i, matrix[i][i]);
 
@@ -248,7 +290,8 @@ string RREFMatrix(string* str_arr, const size_t str_arr_size) {
   for (int i{matrix.get_row_count() - 1}; i >= 0; i--) {
     const int index{matrix.get_index_of_first_non_zero_element(i)};
 
-    if (index < 0) continue;
+    if (index < 0)
+      continue;
 
     matrix.divide_vector_in_place(i, matrix[i][index]);
 
@@ -259,11 +302,7 @@ string RREFMatrix(string* str_arr, const size_t str_arr_size) {
     }
   }
 
-  // return matrix; // implicitly invokes 'operator string() const'
-  // return static_cast<string>(matrix); // explicitly invokes 'explicit operator string() const' on matrix
-
   return matrix.to_string();
-
 }
 
 int main() {
