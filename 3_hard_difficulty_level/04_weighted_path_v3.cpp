@@ -192,13 +192,15 @@ string weighted_path_v3(string* str_arr, const size_t str_arr_size) {
 
     bool is_path_connected{true};
 
-    for (size_t i{}; i < vertices.length() - 1; i++) {
-      current_edge.assign({vertices[i], vertices[i + 1]});
+    for (size_t i{}; i < vertices.length() - 1; i++) {      
 
       if (visited_nodes.find(vertices[i + 1]) != end(visited_nodes)) {
         is_path_connected = false;
         break;
       }
+      
+      current_edge[0] = vertices[i];
+      current_edge[1] = vertices[i + 1];
 
       if (graph_edge_weight.find(current_edge) == end(graph_edge_weight)) {
         is_path_connected = false;
