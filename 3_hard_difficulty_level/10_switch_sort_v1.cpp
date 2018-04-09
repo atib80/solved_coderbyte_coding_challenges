@@ -1,8 +1,7 @@
 /*
 Coderbyte coding challenge: Switch Sort v1
 
-(solution implemented by using recursion with a few optimizations applied
-to program's code)
+(recursive solution)
 
 Using the C++ language, have the function SwitchSort(arr) take arr which will be
 an an array consisting of integers 1...size(arr) and determine what the fewest
@@ -91,7 +90,7 @@ void find_min_number_of_iterations(vector<int>& numbers,
   }
 }
 
-int SwitchSort(const int* arr, const int arr_size) {
+int SwitchSort_v1(const int* arr, const int arr_size) {
   vector<int> numbers(arr, arr + arr_size);
 
   if (is_sorted(begin(numbers), end(numbers))) {
@@ -111,27 +110,37 @@ int SwitchSort(const int* arr, const int arr_size) {
 
 int main() {
   // int A[] = gets(stdin);
-  // cout << SwitchSort(A, sizeof(A)/sizeof(*A));
+  // cout << SwitchSort_v1(A, sizeof(A)/sizeof(*A));
   const int B[] = {1, 3, 4, 2};
-  cout << SwitchSort(B, sizeof(B) / sizeof(*B)) << '\n';  // expected output: 2
+  cout << SwitchSort_v1(B, sizeof(B) / sizeof(*B))
+       << '\n';  // expected output: 2
   const int C[] = {3, 1, 2};
-  cout << SwitchSort(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: 2
+  cout << SwitchSort_v1(C, sizeof(C) / sizeof(*C))
+       << '\n';  // expected output: 2
   const int D[] = {1, 3, 4, 2};
-  cout << SwitchSort(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: 2
+  cout << SwitchSort_v1(D, sizeof(D) / sizeof(*D))
+       << '\n';  // expected output: 2
   const int E[] = {3, 4, 2, 1};
-  cout << SwitchSort(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output: 3
+  cout << SwitchSort_v1(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 3
   const int F[] = {4, 3, 2, 1};
-  cout << SwitchSort(F, sizeof(F) / sizeof(*F)) << '\n';  // expected output: 2
+  cout << SwitchSort_v1(F, sizeof(F) / sizeof(*F))
+       << '\n';  // expected output: 2
   const int G[] = {3, 4, 2, 1};
-  cout << SwitchSort(G, sizeof(G) / sizeof(*G)) << '\n';  // expected output: 3
+  cout << SwitchSort_v1(G, sizeof(G) / sizeof(*G))
+       << '\n';  // expected output: 3
   const int H[] = {4, 3, 2, 1};
-  cout << SwitchSort(H, sizeof(H) / sizeof(*H)) << '\n';  // expected output: 2
+  cout << SwitchSort_v1(H, sizeof(H) / sizeof(*H))
+       << '\n';  // expected output: 2
   const int I[] = {5, 4, 3, 2, 1};
-  cout << SwitchSort(I, sizeof(I) / sizeof(*I)) << '\n';  // expected output: 2
+  cout << SwitchSort_v1(I, sizeof(I) / sizeof(*I))
+       << '\n';  // expected output: 2
   const int J[] = {5, 3, 4, 1, 2};
-  cout << SwitchSort(J, sizeof(J) / sizeof(*J)) << '\n';  // expected output: 4
+  cout << SwitchSort_v1(J, sizeof(J) / sizeof(*J))
+       << '\n';  // expected output: 4
   const int K[] = {5, 4, 3, 1, 2};
-  cout << SwitchSort(K, sizeof(K) / sizeof(*K)) << '\n';  // expected output: 3
+  cout << SwitchSort_v1(K, sizeof(K) / sizeof(*K))
+       << '\n';  // expected output: 3
 
   return 0;
 }
