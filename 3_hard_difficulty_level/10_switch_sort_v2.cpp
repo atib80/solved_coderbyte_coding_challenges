@@ -1,5 +1,7 @@
 /*
-Coderbyte coding challenge: Switch Sort
+Coderbyte coding challenge: Switch Sort v2
+
+(iterative solution implemented by using queue)
 
 Using the C++ language, have the function SwitchSort(arr) take arr which will be
 an an array consisting of integers 1...size(arr) and determine what the fewest
@@ -30,85 +32,141 @@ Output: 2
 
 #include <algorithm>
 #include <iostream>
-#include <string>
+#include <limits>
+#include <queue>
+#include <sstream>
+#include <tuple>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
-int SwitchSort(const size_t* arr, const size_t arr_size) {
-  vector<size_t> numbers(arr, arr + arr_size);
+int find_min_number_of_iterations(vector<int> numbers) {
+  int min_number_of_iterations{numeric_limits<int>::max()};
+  const int numbers_size = numbers.size();
+  queue<tuple<int, int, vector<int>>> q{{make_tuple(1, 0, move(numbers))}};
 
-  if (is_sorted(begin(numbers), end(numbers)))
-    return 0;
+  unordered_set<string> previously_visited{};
 
-  vector<size_t> numbers_reversed{numbers};
-  reverse(begin(numbers_reversed), end(numbers_reversed));
-  if (is_sorted(begin(numbers_reversed), end(numbers_reversed)))
-    return arr_size / 2;
+  while (!q.empty()) {
+    const int si{get<0>(q.front())};
+    const int iter{get<1>(q.front())};
+    vector<int> numbers_next{move(get<2>(q.front()))};
+    q.pop();
 
-  vector<pair<size_t, size_t>> indices{};
-  // indices = { (0,1), (0,2), (0,N-1) ... (N-2,N-2), (N-2,N-1) }
-
-  for (size_t i{}; i < arr_size - 1; i++) {
-    for (size_t j{i + 1}; j < arr_size; j++)
-      indices.emplace_back(make_pair(i, j));
-  }
-
-  sort(begin(indices), end(indices));
-
-  size_t min_number_of_iterations{string::npos};
-
-  do {
-    size_t iter{};
-
-    for (const pair<size_t, size_t>& pi : indices) {
-      if (pi.first + 1 == numbers[pi.first])
-        continue;
-      if (pi.second + 1 == numbers[pi.second])
-        continue;
-      swap(numbers[pi.first], numbers[pi.second]);
-      iter++;
-      if (iter >= min_number_of_iterations)
-        break;
-
-      if (is_sorted(begin(numbers), end(numbers))) {
-        min_number_of_iterations = iter;
-        break;
-      }
+    if (iter + 1 >= min_number_of_iterations) {
+      continue;
     }
 
-    numbers.assign(arr, arr + arr_size);
-  } while (next_permutation(begin(indices), end(indices)));
+    for (int i{si}; i <= numbers_size; i++) {
+      if (i == numbers_next[i - 1]) {
+        continue;
+      }
 
-  if (string::npos != min_number_of_iterations)
+      for (int j{1}; j < numbers_size; j++) {
+        const int li{i - j <= 0 ? numbers_size - (j - i) : i - j};
+
+        if (li != numbers_next[li - 1]) {
+          swap(numbers_next[i - 1], numbers_next[li - 1]);
+          if (is_sorted(begin(numbers_next), end(numbers_next))) {
+            if (iter + 1 < min_number_of_iterations) {
+              min_number_of_iterations = iter + 1;
+            }
+            swap(numbers_next[i - 1], numbers_next[li - 1]);
+          }
+
+          ostringstream oss{};
+          oss << i + 1 << iter + 1;
+          for (const auto n : numbers_next) {
+            oss << n;
+          }
+
+          if (previously_visited.find(oss.str()) == end(previously_visited)) {
+            q.emplace(make_tuple(i + 1, iter + 1, numbers_next));
+            previously_visited.insert(oss.str());
+          }
+
+          swap(numbers_next[i - 1], numbers_next[li - 1]);
+        }
+
+        const int ri{i + j > numbers_size ? i + j - numbers_size : i + j};
+
+        if (ri != numbers_next[ri - 1]) {
+          swap(numbers_next[i - 1], numbers_next[ri - 1]);
+          if (is_sorted(begin(numbers_next), end(numbers_next))) {
+            if (iter + 1 < min_number_of_iterations) {
+              min_number_of_iterations = iter + 1;
+            }
+            swap(numbers_next[i - 1], numbers_next[ri - 1]);
+          }
+
+          ostringstream oss{};
+          oss << i + 1 << iter + 1;
+          for (const auto n : numbers_next) {
+            oss << n;
+          }
+
+          if (previously_visited.find(oss.str()) == end(previously_visited)) {
+            q.emplace(make_tuple(i + 1, iter + 1, numbers_next));
+            previously_visited.insert(oss.str());
+          }
+
+          swap(numbers_next[i - 1], numbers_next[ri - 1]);
+        }
+      }
+    }
+  }
+
+  if (numeric_limits<int>::max() != min_number_of_iterations) {
     return min_number_of_iterations;
+  }
 
   return -1;
 }
 
+int SwitchSort_v2(const int* arr, const int arr_size) {
+  vector<int> numbers(arr, arr + arr_size);
+
+  if (is_sorted(begin(numbers), end(numbers))) {
+    return 0;
+  }
+
+  return find_min_number_of_iterations(move(numbers));
+}
+
 int main() {
-  // const size_t A[] = gets(stdin);
-  // cout << SwitchSort(A, sizeof(A)/sizeof(*A));
-  const size_t B[] = {1, 3, 4, 2};
-  cout << SwitchSort(B, sizeof(B) / sizeof(*B)) << '\n';  // expected output: 2
-  const size_t C[] = {3, 1, 2};
-  cout << SwitchSort(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: 2
-  const size_t D[] = {1, 3, 4, 2};
-  cout << SwitchSort(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: 2
-  const size_t E[] = {3, 4, 2, 1};
-  cout << SwitchSort(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output: 3
-  const size_t F[] = {4, 3, 2, 1};
-  cout << SwitchSort(F, sizeof(F) / sizeof(*F)) << '\n';  // expected output: 2
-  const size_t G[] = {3, 4, 2, 1};
-  cout << SwitchSort(G, sizeof(G) / sizeof(*G)) << '\n';  // expected output: 3
-  const size_t H[] = {4, 3, 2, 1};
-  cout << SwitchSort(H, sizeof(H) / sizeof(*H)) << '\n';  // expected output: 2
-  const size_t I[] = {5, 4, 3, 2, 1};
-  cout << SwitchSort(I, sizeof(I) / sizeof(*I)) << '\n';  // expected output: 2
-  const size_t J[] = {5, 3, 4, 1, 2};
-  cout << SwitchSort(J, sizeof(J) / sizeof(*J)) << '\n';  // expected output: 4
-  const size_t K[] = {5, 4, 3, 1, 2};
-  cout << SwitchSort(K, sizeof(K) / sizeof(*K)) << '\n';  // expected output: 3
+  // int A[] = gets(stdin);
+  // cout << SwitchSort_v2(A, sizeof(A)/sizeof(*A));
+  const int B[] = {1, 3, 4, 2};
+  cout << SwitchSort_v2(B, sizeof(B) / sizeof(*B))
+       << '\n';  // expected output: 2
+  const int C[] = {3, 1, 2};
+  cout << SwitchSort_v2(C, sizeof(C) / sizeof(*C))
+       << '\n';  // expected output: 2
+  const int D[] = {1, 3, 4, 2};
+  cout << SwitchSort_v2(D, sizeof(D) / sizeof(*D))
+       << '\n';  // expected output: 2
+  const int E[] = {3, 4, 2, 1};
+  cout << SwitchSort_v2(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: 3
+  const int F[] = {4, 3, 2, 1};
+  cout << SwitchSort_v2(F, sizeof(F) / sizeof(*F))
+       << '\n';  // expected output: 2
+  const int G[] = {3, 4, 2, 1};
+  cout << SwitchSort_v2(G, sizeof(G) / sizeof(*G))
+       << '\n';  // expected output: 3
+  const int H[] = {4, 3, 2, 1};
+  cout << SwitchSort_v2(H, sizeof(H) / sizeof(*H))
+       << '\n';  // expected output: 2
+  const int I[] = {5, 4, 3, 2, 1};
+  cout << SwitchSort_v2(I, sizeof(I) / sizeof(*I))
+       << '\n';  // expected output: 2
+  const int J[] = {5, 3, 4, 1, 2};
+  cout << SwitchSort_v2(J, sizeof(J) / sizeof(*J))
+       << '\n';  // expected output: 4
+  const int K[] = {5, 4, 3, 1, 2};
+  cout << SwitchSort_v2(K, sizeof(K) / sizeof(*K))
+       << '\n';  // expected output: 3
 
   return 0;
 }
