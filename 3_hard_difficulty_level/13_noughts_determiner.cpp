@@ -154,7 +154,7 @@ class tic_tac_toe {
           "matrix)!"};
   }
 
-  size_t get_dimension() const noexcept { return matrix_.size(); }
+  inline size_t get_dimension() const noexcept { return matrix_.size(); }
 
   static vector<vector<tic_tac_toe_player>> transpose(
       const vector<vector<tic_tac_toe_player>>& matrix) {
@@ -279,8 +279,7 @@ class tic_tac_toe {
               t(x, y) = tic_tac_toe_player::X;
               if (check_if_player_won_tic_tac_toe_game(t.get_matrix_contents(),
                                                        tic_tac_toe_player::X))
-                return calculate_correct_position_index(
-                    t, x * get_dimension() + y);
+                return calculate_correct_position_index(t, x * dim + y);
             }
 
             if (does_player_have_identical_tic_tac_toe_neighbor(
@@ -288,8 +287,7 @@ class tic_tac_toe {
               t(x, y) = tic_tac_toe_player::O;
               if (check_if_player_won_tic_tac_toe_game(t.get_matrix_contents(),
                                                        tic_tac_toe_player::O))
-                return calculate_correct_position_index(
-                    t, x * get_dimension() + y);
+                return calculate_correct_position_index(t, x * dim + y);
             }
             t(x, y) = tic_tac_toe_player::EMPTY;
           }
@@ -304,8 +302,7 @@ class tic_tac_toe {
             t(x, y) = tic_tac_toe_player::X;
             if (check_if_player_won_tic_tac_toe_game(t.get_matrix_contents(),
                                                      tic_tac_toe_player::X))
-              return calculate_correct_position_index(t,
-                                                      x * get_dimension() + y);
+              return calculate_correct_position_index(t, x * dim + y);
 
             t(x, y) = tic_tac_toe_player::EMPTY;
           }
@@ -320,8 +317,7 @@ class tic_tac_toe {
             t(x, y) = tic_tac_toe_player::O;
             if (check_if_player_won_tic_tac_toe_game(t.get_matrix_contents(),
                                                      tic_tac_toe_player::O))
-              return calculate_correct_position_index(t,
-                                                      x * get_dimension() + y);
+              return calculate_correct_position_index(t, x * dim + y);
             t(x, y) = tic_tac_toe_player::EMPTY;
           }
         }
