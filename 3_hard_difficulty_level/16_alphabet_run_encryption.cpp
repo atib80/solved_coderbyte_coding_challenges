@@ -201,7 +201,6 @@ string AlphabetRunEncryption(string str) {
 
           decoded_str.push_back(seq[start - 1]);
           previous_simple_seq_char = seq[start - 1];
-
           break;
 
         case 'S':
