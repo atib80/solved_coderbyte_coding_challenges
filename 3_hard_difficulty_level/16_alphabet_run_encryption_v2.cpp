@@ -49,12 +49,18 @@ Output: "abaac"
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 using namespace std;
 
 template <typename T>
 class AlphabetRunEncryptionDecoder {
+  static_assert(is_same<T, string>::value || is_same<T, wstring>::value ||
+                    is_same<T, u16string>::value ||
+                    is_same<T, u32string>::value,
+                "T must be a valid C++ STL string type!");
+
   T enc_msg_;
   T dec_msg_;
   bool msg_decoded_;
