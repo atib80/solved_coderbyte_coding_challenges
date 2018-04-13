@@ -97,6 +97,12 @@ int SwitchSort_v1(const int* arr, const int arr_size) {
     return 0;
   }
 
+  reverse(begin(numbers), end(numbers));
+  if (is_sorted(begin(numbers), end(numbers)))
+    return arr_size / 2;
+
+  reverse(begin(numbers), end(numbers));
+
   size_t min_number_of_iterations{string::npos};
 
   find_min_number_of_iterations(numbers, numbers.size(), 1,
