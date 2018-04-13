@@ -117,14 +117,14 @@ string decode_alphabet_run_encoded_message(string str) {
         case 'L':
           next_seq_start--;
           if (prev_seq_start == next_seq_start) {
-            if (get_next_char(str[next_seq_start]) ==
-                previous_simple_seq_char) {
-              decoded_str.push_back(get_prev_char(str[next_seq_start]));
+            const char nc{get_next_char(str[next_seq_start])};
+            const char pc{get_prev_char(str[next_seq_start])};
+            if (nc == previous_simple_seq_char) {
+              decoded_str.push_back(pc);
             } else {
-              decoded_str.append({get_next_char(str[next_seq_start]),
-                                  get_prev_char(str[next_seq_start])});
+              decoded_str.append({nc, pc});
             }
-            previous_simple_seq_char = get_prev_char(str[next_seq_start]);
+            previous_simple_seq_char = pc;
             prev_seq_start = next_seq_start + 2;
             is_tail_element_processed = true;
           }
@@ -133,14 +133,14 @@ string decode_alphabet_run_encoded_message(string str) {
         case 'R':
           next_seq_start--;
           if (prev_seq_start == next_seq_start) {
-            if (get_prev_char(str[next_seq_start]) ==
-                previous_simple_seq_char) {
-              decoded_str.push_back(get_next_char(str[next_seq_start]));
+            const char nc{get_next_char(str[next_seq_start])};
+            const char pc{get_prev_char(str[next_seq_start])};
+            if (pc == previous_simple_seq_char) {
+              decoded_str.push_back(nc);
             } else {
-              decoded_str.append({get_prev_char(str[next_seq_start]),
-                                  get_next_char(str[next_seq_start])});
+              decoded_str.append({pc, nc});
             }
-            previous_simple_seq_char = get_next_char(str[next_seq_start]);
+            previous_simple_seq_char = nc;
             prev_seq_start = next_seq_start + 2;
             is_tail_element_processed = true;
           }
@@ -149,7 +149,6 @@ string decode_alphabet_run_encoded_message(string str) {
         default:
           break;
       }
-
     } else
       next_seq_start = str.length();
 
@@ -168,40 +167,40 @@ string decode_alphabet_run_encoded_message(string str) {
             if (!is_prev_decoded_char_seq) {
               is_prev_decoded_char_seq = true;
               if (is_dir_forward) {
+                const char nc{get_next_char(str[i])};
                 if (get_prev_char(fc) == previous_simple_seq_char) {
-                  decoded_str.push_back(get_next_char(str[i]));
-                  previous_simple_seq_char = get_next_char(str[i]);
+                  decoded_str.push_back(nc);
+                  previous_simple_seq_char = nc;
                 } else {
-                  decoded_str.append(
-                      {get_prev_char(fc), get_next_char(str[i])});
-                  previous_simple_seq_char = get_next_char(str[i]);
+                  decoded_str.append({get_prev_char(fc), nc});
+                  previous_simple_seq_char = nc;
                 }
               } else {
+                const char pc{get_prev_char(str[i])};
                 if (get_next_char(fc) == previous_simple_seq_char) {
-                  decoded_str.push_back(get_prev_char(str[i]));
-                  previous_simple_seq_char = get_prev_char(str[i]);
+                  decoded_str.push_back(pc);
+                  previous_simple_seq_char = pc;
                 } else {
-                  decoded_str.append(
-                      {get_next_char(fc), get_prev_char(str[i])});
-                  previous_simple_seq_char = get_prev_char(str[i]);
+                  decoded_str.append({get_next_char(fc), pc});
+                  previous_simple_seq_char = pc;
                 }
               }
             } else {
               if (is_dir_forward) {
                 if (abs(str[i] - str[i - 1]) > 1) {
                   decoded_str.push_back(get_next_char(str[i - 1]));
-                  previous_simple_seq_char = get_next_char(str[i - 1]);
+                  previous_simple_seq_char = decoded_str.back();
                 } else {
                   decoded_str.push_back(get_next_char(str[i]));
-                  previous_simple_seq_char = get_next_char(str[i]);
+                  previous_simple_seq_char = decoded_str.back();
                 }
               } else {
                 if (abs(str[i] - str[i - 1]) > 1) {
                   decoded_str.push_back(get_prev_char(str[i - 1]));
-                  previous_simple_seq_char = get_prev_char(str[i - 1]);
+                  previous_simple_seq_char = decoded_str.back();
                 } else {
                   decoded_str.push_back(get_prev_char(str[i]));
-                  previous_simple_seq_char = get_prev_char(str[i]);
+                  previous_simple_seq_char = decoded_str.back();
                 }
               }
             }
