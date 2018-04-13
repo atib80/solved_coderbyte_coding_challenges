@@ -65,7 +65,7 @@ class AlphabetRunEncryptionDecoder {
     static const T needle{"LNRS"};
 
     T decoded_str{};
-    char previous_simple_seq_char{};
+    char_type previous_simple_seq_char{};
     size_t prev_seq_start{};
 
     while (prev_seq_start < str.length()) {
@@ -143,7 +143,7 @@ class AlphabetRunEncryptionDecoder {
         bool is_prev_decoded_char_seq{};
 
         while (index < next_seq_start - 1) {
-          const char fc{str[index]};
+          const char_type fc{str[index]};
           const bool is_dir_forward{str[index + 1] > str[index]};
 
           for (size_t i{index + 1}; i < next_seq_start; i++) {
@@ -220,9 +220,9 @@ class AlphabetRunEncryptionDecoder {
     return dec_msg_;
   }
 
-  static char get_next_char(const char ch) { return ch + 1; }
+  static char_type get_next_char(const char_type ch) { return ch + 1; }
 
-  static char get_prev_char(const char ch) { return ch - 1; }
+  static char_type get_prev_char(const char_type ch) { return ch - 1; }
 
   static T trim(const T& input) {
     T output{input};
