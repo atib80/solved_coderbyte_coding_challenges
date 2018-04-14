@@ -44,15 +44,13 @@ string trim(const string& input) {
 pair<int, int> parse_coordinate_pair_values(string str) {
   str.erase(begin(str));
   str.erase(--end(str));
-  // const int x{stoi(str.substr(0, 1))};
-  // const int y{stoi(str.substr(2, 1))};
   return make_pair(stoi(str.substr(0, 1)), stoi(str.substr(2, 1)));
 }
 
 string KnightJumps(string str) {
   str = trim(str);
 
-  const auto coord = parse_coordinate_pair_values(move(str));
+  const pair<int, int> coord{parse_coordinate_pair_values(move(str))};
 
   if ((1 == coord.first && 1 == coord.second) ||
       (1 == coord.first && 8 == coord.second) ||
