@@ -211,7 +211,7 @@ class AlphabetRunEncryptionDecoder {
 
  public:
   AlphabetRunEncryptionDecoder(T&& msg)
-      : enc_msg_{std::forward<T>(trim(msg))}, msg_decoded_{false} {}
+      : enc_msg_{std::forward<T>(trim(msg))}, msg_decoded_{} {}
 
   void set_encoded_message(T&& msg) {
     enc_msg_ = std::forward<T>(msg);
