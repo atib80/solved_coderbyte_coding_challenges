@@ -110,11 +110,8 @@ vector<string> split(const string& source,
 }
 
 template <typename ContainerType, typename CharacterPointerType>
-basic_string<typename remove_const<
-    typename remove_pointer<CharacterPointerType>::type>::type>
-join(const ContainerType& items, CharacterPointerType needle) {
-  using char_type = typename remove_const<
-      typename remove_pointer<CharacterPointerType>::type>::type;
+auto join(const ContainerType& items, CharacterPointerType needle) {
+  using char_type = remove_const_t<remove_pointer_t<CharacterPointerType>>;
 
   basic_ostringstream<char_type> oss{};
 
