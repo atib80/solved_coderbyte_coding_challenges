@@ -109,9 +109,55 @@ vector<string> split(const string& source,
   return parts;
 }
 
+template <typename ContainerType, typename NeedleType>
+auto join(const ContainerType& items, NeedleType needle) {
+  return join(items, needle,
+              typename conditional<is_class<NeedleType>::value, true_type,
+                                   false_type>::type{});
+}
+
+template <typename ContainerType, typename StringType>
+auto join(const ContainerType& items, const StringType& needle, true_type) {
+  static_assert(is_same<string, StringType>::value ||
+                    is_same<wstring, StringType>::value ||
+                    is_same<u16string, StringType>::value ||
+                    is_same<u32string, StringType>::value,
+                "StringType must correspond to one of the existing C++ "
+                "basic_string<T> types!");
+
+  using char_type = typename StringType::value_type;
+
+  basic_ostringstream<char_type> oss{};
+
+  auto start = begin(items);
+
+  const auto last = end(items);
+
+  while (start != last) {
+    oss << *start << needle;
+    ++start;
+  }
+
+  const size_t needle_len{needle.length()};
+
+  basic_string<char_type> result{oss.str()};
+
+  result.erase(result.length() - needle_len, needle_len);
+
+  return result;
+}
+
 template <typename ContainerType, typename CharacterPointerType>
-auto join(const ContainerType& items, CharacterPointerType needle) {
-  using char_type = remove_const_t<remove_pointer_t<CharacterPointerType>>;
+auto join(const ContainerType& items, CharacterPointerType needle, false_type) {
+  using char_type =
+      remove_const<remove_pointer<CharacterPointerType>::type>::type;
+
+  static_assert(is_same<const char*, CharacterPointerType>::value ||
+                    is_same<const wchar_t*, CharacterPointerType>::value ||
+                    is_same<const char16_t*, CharacterPointerType>::value ||
+                    is_same<const char32_t*, CharacterPointerType>::value,
+                "CharacterPointerType must correspond to one of the existing "
+                "const character pointer types!");
 
   basic_ostringstream<char_type> oss{};
 
