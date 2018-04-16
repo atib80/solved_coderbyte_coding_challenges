@@ -75,7 +75,7 @@ class rref_matrix {
   }
 
   vector<T> multiply_vector(const size_t row_index, const int factor) const {
-    auto row = this->operator[](row_index);
+    auto row = (*this)[row_index];
 
     for (auto& element : row)
       element *= factor;
@@ -92,7 +92,7 @@ class rref_matrix {
   }
 
   vector<T> divide_vector(const size_t row_index, const int factor) const {
-    vector<T> row{this->operator[](row_index)};
+    vector<T> row{(*this)[row_index]};
 
     for (auto& element : row)
       element /= factor;
@@ -109,7 +109,7 @@ class rref_matrix {
   }
 
   vector<T> add_vectors(const size_t row_index, const vector<T>& src) const {
-    vector<T> row{this->operator[](row_index)};
+    vector<T> row{(*this)[row_index]};
     const size_t src_size{src.size()};
 
     if (row.size() != src_size)
@@ -161,7 +161,7 @@ class rref_matrix {
   }
 
   void swap_matrix_row_elements(const size_t i, const size_t j) noexcept {
-    if (i >= matrix_.size() || j >= matrix_.size())
+    if (i >= matrix_.size() || j >= matrix_.size() || i == j)
       return;
 
     for (size_t y{}; y < min(matrix_[i].size(), matrix_[j].size()); y++)
