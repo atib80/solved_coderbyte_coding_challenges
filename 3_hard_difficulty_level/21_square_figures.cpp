@@ -26,7 +26,7 @@ Output: 0
 
 using namespace std;
 
-int64_t find_minimum_number_for_specified_length(
+int64_t find_smallest_number_for_specified_length(
     const int64_t current_number,
     const size_t target_number_len) {
   int64_t next_number{current_number};
@@ -72,9 +72,7 @@ int64_t find_minimum_number_for_specified_length(
 }
 
 int64_t SquareFigures(const size_t target_number_len) {
-  const static unordered_map<size_t, int64_t> predefined_results{
-      {1, 0LL},   {2, 4LL},    {3, 10LL},   {4, 32LL},    {5, 100LL},
-      {6, 317LL}, {7, 1000LL}, {8, 3163LL}, {9, 10000LL}, {10, 31623LL}};
+  static unordered_map<size_t, int64_t> predefined_results{{1, 0LL}};
 
   if (predefined_results.find(target_number_len) != end(predefined_results))
     return predefined_results.find(target_number_len)->second;
@@ -89,9 +87,12 @@ int64_t SquareFigures(const size_t target_number_len) {
 
     const size_t current_number_len{current_number_str.length()};
 
-    if (target_number_len == current_number_len)
-      return find_minimum_number_for_specified_length(current_number,
-                                                      target_number_len);
+    if (target_number_len == current_number_len) {
+      const int64_t smallest_number{find_smallest_number_for_specified_length(
+          current_number, target_number_len)};
+      predefined_results.insert(make_pair(target_number_len, smallest_number));
+      return smallest_number;
+    }
 
     if (target_number_len < current_number_len)
       upper_bound = current_number;
