@@ -120,42 +120,43 @@ bool is_there_a_winning_sequence_of_discs_at_specified_position(
 
   size_t count{1};
 
-  for (int x{position.first - 1}; x >= 0; x--) {
-    if (player_disc != game_board[x][position.second])
-      break;
+  int xu{position.first - 1};
+
+  while (xu >= 0 && player_disc == game_board[xu][position.second]) {
     count++;
+    xu--;
   }
 
   if (count >= 4)
     return true;
 
-  for (int x{position.first + 1}; x <= 5; x++) {
-    if (player_disc != game_board[x][position.second])
-      break;
+  int xd{position.first + 1};
+
+  while (xd <= 5 && player_disc == game_board[xd][position.second]) {
     count++;
+    xd++;
   }
 
   if (count >= 4)
     return true;
-
-  // 2. check horizontal direction for >= 4 player discs of same disc color
-  // (cf::red_disc or cf::yellow_disc)
 
   count = 1;
 
-  for (int y{position.second - 1}; y >= 0; y--) {
-    if (player_disc != game_board[position.first][y])
-      break;
+  int yl{position.second - 1};
+
+  while (yl >= 0 && player_disc == game_board[position.first][yl]) {
     count++;
+    yl--;
   }
 
   if (count >= 4)
     return true;
 
-  for (int y{position.second + 1}; y <= 6; y++) {
-    if (player_disc != game_board[position.first][y])
-      break;
+  int yr{position.second + 1};
+
+  while (yr <= 6 && player_disc == game_board[position.first][yr]) {
     count++;
+    yr++;
   }
 
   if (count >= 4)
