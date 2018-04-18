@@ -72,17 +72,8 @@ void find_minimum_number_of_jumps(int* numbers,
 }
 
 int ArrayJumping(int* arr, const int arr_size) {
-  const int target_pos = [&]() {
-    int current_max{INT_MIN};
-    int max_element_pos{};
-    for (int i{}; i < arr_size; i++) {
-      if (arr[i] > current_max) {
-        current_max = arr[i];
-        max_element_pos = i;
-      }
-    }
-    return max_element_pos;
-  }();
+
+  const int target_pos = static_cast<ptrdiff_t>(max_element(arr, arr + arr_size) - arr);;
 
   size_t min_number_of_jumps{string::npos};
 
