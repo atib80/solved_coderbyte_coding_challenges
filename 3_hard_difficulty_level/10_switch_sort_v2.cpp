@@ -44,6 +44,17 @@ using namespace std;
 int find_min_number_of_iterations(vector<int> numbers) {
   int min_number_of_iterations{numeric_limits<int>::max()};
   const int numbers_size = numbers.size();
+
+  if (is_sorted(begin(numbers), end(numbers))) {
+    return 0;
+  }
+
+  reverse(begin(numbers), end(numbers));
+  if (is_sorted(begin(numbers), end(numbers)))
+    return numbers_size / 2;
+
+  reverse(begin(numbers), end(numbers));
+
   queue<tuple<int, int, vector<int>>> q{{make_tuple(1, 0, move(numbers))}};
 
   unordered_set<string> previously_visited{};
@@ -126,10 +137,6 @@ int find_min_number_of_iterations(vector<int> numbers) {
 
 int SwitchSort_v2(const int* arr, const int arr_size) {
   vector<int> numbers(arr, arr + arr_size);
-
-  if (is_sorted(begin(numbers), end(numbers))) {
-    return 0;
-  }
 
   return find_min_number_of_iterations(move(numbers));
 }

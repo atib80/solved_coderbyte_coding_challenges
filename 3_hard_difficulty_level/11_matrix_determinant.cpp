@@ -320,13 +320,13 @@ ostream& operator<<(ostream& ostr, const matrix<U>& m) {
 
   for (size_t x{}; x < matrix_contents.size() - 1; x++) {
     for (size_t y{}; y < matrix_contents[x].size() - 1; y++)
-      ostr << matrix_contents[x][y] << sep_matrix_column_elements_;
+      ostr << matrix_contents[x][y] << m.sep_matrix_column_elements_;
     ostr << matrix_contents[x].back();
-    ostr << sep_matrix_rows_;
+    ostr << m.sep_matrix_rows_;
   }
 
   for (size_t y{}; y < matrix_contents.back().size() - 1; y++)
-    ostr << matrix_contents.back()[y] << sep_matrix_column_elements_;
+    ostr << matrix_contents.back()[y] << m.sep_matrix_column_elements_;
   ostr << matrix_contents.back().back();
 
   return ostr;
@@ -351,7 +351,7 @@ istream& operator>>(istream& istr, matrix<U>& m) {
       iss >> value;
       if (!iss.good() && !iss.eof()) {
         ostringstream oss{};
-        oss << "Input string data cannot be converted to " << typeid(T).name()
+        oss << "Input string data cannot be converted to " << typeid(U).name()
             << '!';
         throw invalid_argument{oss.str()};
       }

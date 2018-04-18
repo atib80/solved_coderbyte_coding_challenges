@@ -68,7 +68,7 @@ void find_min_number_of_iterations(vector<int>& numbers,
         swap(numbers[i - 1], numbers[li - 1]);
       }
 
-      const int ri{(i + j) > numbers_size ? i + j - numbers_size : i + j};
+      const int ri{i + j > numbers_size ? i + j - numbers_size : i + j};
 
       if (ri != numbers[ri - 1]) {
         swap(numbers[i - 1], numbers[ri - 1]);
