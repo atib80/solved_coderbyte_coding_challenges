@@ -27,8 +27,8 @@ Output: 2
 */
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
+#include <limits>
 #include <queue>
 #include <tuple>
 #include <unordered_set>
@@ -38,7 +38,7 @@ using namespace std;
 int find_minimum_number_of_jumps(const int* numbers,
                                  const int numbers_size,
                                  const int target_pos) {
-  int min_number_of_jumps{INT_MAX};
+  int min_number_of_jumps{numeric_limits<int>::max()};
   queue<tuple<int, int, unordered_set<int>>> q{
       {make_tuple(target_pos, 0, unordered_set<int>{})}};
 
@@ -55,7 +55,7 @@ int find_minimum_number_of_jumps(const int* numbers,
       continue;
     }
 
-    if (number_of_jumps >= min_number_of_jumps)
+    if (number_of_jumps + 1 >= min_number_of_jumps)
       continue;
 
     const int max_steps{numbers[current_pos] % numbers_size};
@@ -81,7 +81,7 @@ int find_minimum_number_of_jumps(const int* numbers,
     }
   }
 
-  if (INT_MAX == min_number_of_jumps)
+  if (numeric_limits<int>::max() == min_number_of_jumps)
     return -1;
 
   return min_number_of_jumps;
