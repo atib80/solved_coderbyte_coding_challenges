@@ -276,9 +276,6 @@ string evaluate_math_expression(
   }
 
   if (!open_prnths_count && !close_prnths_count) {
-    // if there are no () symbols present in the input math expression, we
-    // simply evaluate it without breaking it up into subexpression delimited by
-    // ( and ) characters
     const auto result = evaluate_simple_math_expression(move(expression));
     if (is_round_to_nearest_whole_number)
       return to_string(static_cast<int64_t>(round(result)));
@@ -286,10 +283,7 @@ string evaluate_math_expression(
   }
   if (open_prnths_count != close_prnths_count ||
       !is_math_expression_correctly_formatted(expression))
-    // if the input math expression doesn't contain an equal number of '(' and
-    // ')' characters or if it's not formatted correctly, we throw a runtime
-    // exception
-    throw runtime_error(
+    throw invalid_argument(
         "Input math expression string isn't correctly formatted!");
 
   stack<size_t> opening_prnths_positions{{expression.find('(')}};
@@ -305,17 +299,14 @@ string evaluate_math_expression(
       continue;
     }
 
-    const size_t sub_expression_start{opening_prnths_positions.top() + 1};
-    const size_t sub_expression_last{next_pos};
-
-    expression.replace(
-        opening_prnths_positions.top(),
-        sub_expression_last - opening_prnths_positions.top() + 1,
-        to_string(evaluate_simple_math_expression(move(
-            expression.substr(sub_expression_start,
-                              sub_expression_last - sub_expression_start)))));
+    string sub_expression_result{to_string(evaluate_simple_math_expression(move(
+        expression.substr(opening_prnths_positions.top() + 1,
+                          next_pos - (opening_prnths_positions.top() + 1)))))};
+    prev_pos = opening_prnths_positions.top() + sub_expression_result.length();
+    expression.replace(opening_prnths_positions.top(),
+                       next_pos - opening_prnths_positions.top() + 1,
+                       move(sub_expression_result));
     opening_prnths_positions.pop();
-    prev_pos = sub_expression_start;
 
     if (opening_prnths_positions.empty() &&
         string::npos != expression.find('(', prev_pos + 1)) {
