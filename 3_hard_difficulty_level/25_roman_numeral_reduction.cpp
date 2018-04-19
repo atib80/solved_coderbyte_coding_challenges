@@ -102,8 +102,8 @@ string find_least_number_of_roman_numeral_characters_that_represent_number(
           roman_numerals.find(values[j])};
 
       if (itr == end(roman_numerals) ||
-          string::npos != min_length &&
-              number_str.length() + factor >= min_length) {
+          (string::npos != min_length &&
+           number_str.length() + factor >= min_length)) {
         skip_iteration = true;
         break;
       }
