@@ -1,8 +1,8 @@
 /*
 Coderbyte coding challenge: Calculator v2
 
-(alternative iterative solution for the Calculator coding challenge
-(simple math expression parser) implemented by using stack)
+{alternative iterative solution for the Calculator coding challenge
+(simple math expression parser) implemented by using stack}
 
 Using the C++ language, have the function Calculator(str) take the str parameter
 being passed and evaluate the mathematical expression within in. For example, if
@@ -276,9 +276,9 @@ string evaluate_math_expression(
   }
 
   if (!open_prnths_count && !close_prnths_count) {
-    // if there's no () symbols present in the input math expression, we simply
-    // evaluate it without breaking it up into subexpression delimited by ( and
-    // ) characters
+    // if there are no () symbols present in the input math expression, we
+    // simply evaluate it without breaking it up into subexpression delimited by
+    // ( and ) characters
     const auto result = evaluate_simple_math_expression(move(expression));
     if (is_round_to_nearest_whole_number)
       return to_string(static_cast<int64_t>(round(result)));
@@ -286,8 +286,8 @@ string evaluate_math_expression(
   }
   if (open_prnths_count != close_prnths_count ||
       !is_math_expression_correctly_formatted(expression))
-    // if input math expression doesn't contain an equal number of '(' and ')'
-    // characters or if it's not formatted correctly, we throw a runtime
+    // if the input math expression doesn't contain an equal number of '(' and
+    // ')' characters or if it's not formatted correctly, we throw a runtime
     // exception
     throw runtime_error(
         "Input math expression string isn't correctly formatted!");
