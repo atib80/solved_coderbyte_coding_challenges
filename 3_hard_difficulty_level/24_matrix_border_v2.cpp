@@ -1,7 +1,7 @@
 /*
-Coderbyte coding challenge: Matrix Border
+Coderbyte coding challenge: Matrix Border v2
 
-(solution implemented by using recursion)
+(solution implemented by using iterative method)
 
 Using the C++ language, have the function MatrixBorder(strArr) read the strArr
 parameter being passed which will represent an NxN matrix filled with 1's and
