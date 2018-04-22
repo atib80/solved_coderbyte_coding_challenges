@@ -29,98 +29,126 @@ Output: 3
 
 using namespace std;
 
-string trim(const string &str)
-{
-    const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-    if (!str_len)
-        return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-    size_t first{}, last{str_len - 1};
-
-    for (; first <= last; ++first)
-    {
-        if (!isspace(str[first]))
-            break;
-    }
-
-    if (first > last)
-        return string{};
-
-    for (; last > first; --last)
-    {
-        if (!isspace(str[last]))
-            break;
-    }
-
-    return str.substr(first, last - first + 1);
+  return output;
 }
 
-size_t find_longest_common_sequence(const vector<string> &strings)
-{
+size_t find_longest_common_sequence(const string& left_str,
+                                    const string& right_str) {
+  size_t lcs{};
 
-    string left{strings[0]};
-    string right{strings[1]};
-    size_t longest{};
+  for (size_t i{}; i < left_str.length(); i++) {
+    if (left_str.length() - i <= lcs)
+      break;
 
-    for (size_t k{}; k < left.length(); k++)
-    {
-        size_t count{};
+    size_t prev_char_pos{};
 
-        for (int i{}; i < left.length(); i++)
-        {
-            for (int j{}; j < right.length(); j++)
-            {
-                if (left[i] == right[j])
-                {
-                    count++;
-                    left = left.substr(i + 1);
-                    right = right.substr(j + 1);
-                    i = -1;
-                    break;
-                }
-            }
-        }
+    size_t current_lcs{};
 
-        if (count > longest)
-            longest = count;
+    for (size_t j{i}; j < left_str.length(); j++) {
+      prev_char_pos = right_str.find(left_str[j], prev_char_pos);
 
-        left = strings[0].substr(k);
-        right = strings[1];
+      if (string::npos == prev_char_pos)
+        break;
+
+      prev_char_pos++;
+
+      current_lcs++;
     }
 
-    return longest;
+    if (current_lcs > lcs)
+      lcs = current_lcs;
+  }
+
+  return lcs;
 }
 
-string LCS(string *str_arr, const size_t str_arr_size)
-{
+string LCS_v1(string* str_arr, const size_t str_arr_size) {
+  if (!str_arr || str_arr_size < 2)
+    return "not possible";
 
-    for (size_t i{}; i < str_arr_size; i++)
-        str_arr[i] = trim(str_arr[i]);
+  str_arr[0] = trim(str_arr[0]);
+  str_arr[1] = trim(str_arr[1]);
 
-    vector<string> strings(str_arr, str_arr + str_arr_size);
+  if (str_arr[0].empty() || str_arr[1].empty())
+    return "not possible";
 
-    const size_t max_lcs_len1{find_longest_common_sequence(strings)};
+  const size_t max_lcs_len1{
+      find_longest_common_sequence(str_arr[0], str_arr[1])};
 
-    swap(strings[0], strings[1]);
+  const size_t max_lcs_len2{
+      find_longest_common_sequence(str_arr[1], str_arr[0])};
 
-    const size_t max_lcs_len2{find_longest_common_sequence(strings)};
-
-    return (max_lcs_len1 > max_lcs_len2 ? to_string(max_lcs_len1)
-                                        : to_string(max_lcs_len2));
+  return max_lcs_len1 > max_lcs_len2 ? to_string(max_lcs_len1)
+                                     : to_string(max_lcs_len2);
 }
 
-int main()
-{
+void find_longest_common_sequence_v2(const string& left_str,
+                                     const size_t left_str_len,
+                                     const size_t pos,
+                                     const string& right_str,
+                                     size_t& lcs,
+                                     size_t prev_char_pos,
+                                     const size_t current_lcs = 0) {
+  for (size_t i{pos}; i < left_str_len; i++) {
+    if (left_str_len - i + current_lcs <= lcs)
+      return;
 
-    // string A[] = gets(stdin);
-    // cout << LCS(A, sizeof(A)/sizeof(*A));
-    string B[] = {"abcabb", "bacb"};
-    cout << LCS(B, sizeof(B) / sizeof(*B)) << '\n'; // expected output: "3"
-    string C[] = {"abc", "cb"};
-    cout << LCS(C, sizeof(C) / sizeof(*C)) << '\n'; // expected output: "1"
-    string D[] = {"bcacb", "aacabb"};
-    cout << LCS(D, sizeof(D) / sizeof(*D)) << '\n'; // expected output: "3"
+    const size_t next_char_pos{right_str.find(left_str[i], prev_char_pos)};
 
-    return 0;
+    if (string::npos != next_char_pos) {
+      if (i + 1 < left_str_len)
+        find_longest_common_sequence_v2(left_str, left_str_len, i + 1,
+                                        right_str, lcs, next_char_pos + 1,
+                                        current_lcs + 1);
+    }
+  }
+
+  if (current_lcs > lcs)
+    lcs = current_lcs;
+}
+
+string LCS_v2(string* str_arr, const size_t str_arr_size) {
+  if (!str_arr || str_arr_size < 2)
+    return "not possible";
+
+  str_arr[0] = trim(str_arr[0]);
+  str_arr[1] = trim(str_arr[1]);
+
+  if (str_arr[0].empty() || str_arr[1].empty())
+    return "not possible";
+
+  size_t max_lcs_len1{};
+  find_longest_common_sequence_v2(str_arr[0], str_arr[0].length(), 0,
+                                  str_arr[1], max_lcs_len1, 0, 0);
+
+  size_t max_lcs_len2{};
+  find_longest_common_sequence_v2(str_arr[1], str_arr[1].length(), 0,
+                                  str_arr[0], max_lcs_len2, 0, 0);
+
+  return max_lcs_len1 > max_lcs_len2 ? to_string(max_lcs_len1)
+                                     : to_string(max_lcs_len2);
+}
+
+int main() {
+  // string A[] = gets(stdin);
+  // cout << LCS_v2(A, sizeof(A)/sizeof(*A));
+  string B[] = {"abcabb", "bacb"};
+  cout << LCS_v2(B, sizeof(B) / sizeof(*B)) << '\n';  // expected output: "3"
+  string C[] = {"abc", "cb"};
+  cout << LCS_v2(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: "1"
+  string D[] = {"bcacb", "aacabb"};
+  cout << LCS_v2(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: "3"
+
+  return 0;
 }
