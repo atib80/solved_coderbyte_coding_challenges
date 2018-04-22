@@ -111,6 +111,9 @@ void find_longest_common_sequence_v2(const string& left_str,
         find_longest_common_sequence_v2(left_str, left_str_len, i + 1,
                                         right_str, lcs, next_char_pos + 1,
                                         current_lcs + 1);
+
+      else if (current_lcs + 1 > lcs)
+        lcs = current_lcs + 1;
     }
   }
 
@@ -149,6 +152,8 @@ int main() {
   cout << LCS_v2(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: "1"
   string D[] = {"bcacb", "aacabb"};
   cout << LCS_v2(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: "3"
+  string E[] = {"a", "a"};
+  cout << LCS_v2(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output: "1"
 
   return 0;
 }
