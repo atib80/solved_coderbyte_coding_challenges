@@ -116,14 +116,12 @@ vector<string> split(const string& source,
 }
 
 vector<vector<int>> parse_matrix_values(const string* str_arr,
-                                        const size_t str_arr_size) {
-  const size_t dim{str_arr_size};
-
+                                        const size_t dim) {
   vector<vector<int>> matrix(dim, vector<int>(dim));
 
   size_t i{};
 
-  for_each(str_arr, str_arr + str_arr_size, [&](const string& str) {
+  for_each(str_arr, str_arr + dim, [&](const string& str) {
     string line{trim(str)};
     line.erase(begin(line));
     line.erase(--end(line));
@@ -148,19 +146,21 @@ vector<vector<int>> parse_matrix_values(const string* str_arr,
 void find_missing_matrix_connections(vector<vector<int>> matrix,
                                      unordered_set<size_t> connections,
                                      set<size_t>& missing_connections) {
+  const size_t dim{matrix.size()};
+
 START:
-  for (size_t i{}; i < matrix.size(); i++) {
-    for (size_t j{}; j < matrix.size(); j++) {
+  for (size_t i{}; i < dim; i++) {
+    for (size_t j{}; j < dim; j++) {
       if (i == j || !matrix[i][j])
         continue;
 
-      for (size_t k{}; k < matrix.size(); k++) {
+      for (size_t k{}; k < dim; k++) {
         if (j == k || i == k || !matrix[j][k])
           continue;
 
-        const size_t translated_index{i * matrix.size() + k};
+        const size_t translated_index{i * dim + k};
 
-        if (connections.find(translated_index) == end(connections)) {
+        if (!connections.count(translated_index)) {
           connections.insert(translated_index);
           missing_connections.insert(translated_index);
           matrix[i][k] = 1;
@@ -174,16 +174,16 @@ START:
 string TransitivityRelations(string* str_arr, const size_t str_arr_size) {
   vector<vector<int>> matrix{parse_matrix_values(str_arr, str_arr_size)};
 
-  const size_t N{matrix.size()};
+  const size_t dim{matrix.size()};
 
   unordered_set<size_t> connections{};
 
-  for (size_t i{}; i < N; i++) {
-    for (size_t j{}; j < N; j++) {
+  for (size_t i{}; i < dim; i++) {
+    for (size_t j{}; j < dim; j++) {
       if (i == j || !matrix[i][j])
         continue;
 
-      connections.insert(i * N + j);
+      connections.insert(i * dim + j);
     }
   }
 
@@ -198,7 +198,7 @@ string TransitivityRelations(string* str_arr, const size_t str_arr_size) {
   ostringstream oss{};
 
   for (const size_t index_pair : missing_connections)
-    oss << '(' << index_pair / N << ',' << index_pair % N << ')' << '-';
+    oss << '(' << index_pair / dim << ',' << index_pair % dim << ')' << '-';
 
   string result{oss.str()};
   result.erase(--end(result));
