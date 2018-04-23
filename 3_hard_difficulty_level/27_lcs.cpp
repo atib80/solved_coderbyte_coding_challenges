@@ -45,12 +45,12 @@ string trim(const string& input) {
   return output;
 }
 
-size_t find_longest_common_sequence(const string& left_str,
-                                    const string& right_str) {
-  size_t lcs{};
+size_t find_longest_common_sequence_v1(const string& left_str,
+                                       const string& right_str) {
+  size_t lcs1{};
 
   for (size_t i{}; i < left_str.length(); i++) {
-    if (left_str.length() - i <= lcs)
+    if (left_str.length() - i <= lcs1)
 
       break;
 
@@ -69,11 +69,37 @@ size_t find_longest_common_sequence(const string& left_str,
       current_lcs++;
     }
 
-    if (current_lcs > lcs)
-      lcs = current_lcs;
+    if (current_lcs > lcs1)
+      lcs1 = current_lcs;
   }
 
-  return lcs;
+  size_t lcs2{};
+
+  for (size_t i{}; i < right_str.length(); i++) {
+    if (right_str.length() - i <= lcs2)
+
+      break;
+
+    size_t prev_char_pos{};
+
+    size_t current_lcs{};
+
+    for (size_t j{i}; j < right_str.length(); j++) {
+      prev_char_pos = left_str.find(right_str[j], prev_char_pos);
+
+      if (string::npos == prev_char_pos)
+        break;
+
+      prev_char_pos++;
+
+      current_lcs++;
+    }
+
+    if (current_lcs > lcs2)
+      lcs2 = current_lcs;
+  }
+
+  return lcs1 > lcs2 ? lcs1 : lcs2;
 }
 
 string LCS_v1(string* str_arr, const size_t str_arr_size) {
@@ -86,14 +112,7 @@ string LCS_v1(string* str_arr, const size_t str_arr_size) {
   if (str_arr[0].empty() || str_arr[1].empty())
     return "not possible";
 
-  const size_t max_lcs_len1{
-      find_longest_common_sequence(str_arr[0], str_arr[1])};
-
-  const size_t max_lcs_len2{
-      find_longest_common_sequence(str_arr[1], str_arr[0])};
-
-  return max_lcs_len1 > max_lcs_len2 ? to_string(max_lcs_len1)
-                                     : to_string(max_lcs_len2);
+  return to_string(find_longest_common_sequence_v1(str_arr[0], str_arr[1]));
 }
 
 void find_longest_common_sequence_v2(const string& left_str,
@@ -146,7 +165,7 @@ size_t find_longest_common_sequence_v3(const string& left_str,
                                        const string& right_str) {
   queue<tuple<size_t, size_t, size_t>> q{{make_tuple(0, 0, 0)}};
   const size_t left_str_len{left_str.length()};
-  size_t max_lcs1{};
+  size_t lcs1{};
 
   while (!q.empty()) {
     const size_t pos{get<0>(q.front())};
@@ -155,22 +174,22 @@ size_t find_longest_common_sequence_v3(const string& left_str,
     q.pop();
 
     for (size_t i{pos}; i < left_str_len; i++) {
-      if (left_str_len - i + current_lcs <= max_lcs1)
+      if (left_str_len - i + current_lcs <= lcs1)
         break;
       const size_t next_char_pos{right_str.find(left_str[i], prev_char_pos)};
 
       if (string::npos != next_char_pos) {
         if (i + 1 < left_str_len)
           q.emplace(make_tuple(i + 1, current_lcs + 1, next_char_pos + 1));
-        else if (current_lcs + 1 > max_lcs1)
-          max_lcs1 = current_lcs + 1;
+        else if (current_lcs + 1 > lcs1)
+          lcs1 = current_lcs + 1;
       }
     }
   }
 
   q.emplace(make_tuple(0, 0, 0));
   const size_t right_str_len{right_str.length()};
-  size_t max_lcs2{};
+  size_t lcs2{};
 
   while (!q.empty()) {
     const size_t pos{get<0>(q.front())};
@@ -179,20 +198,20 @@ size_t find_longest_common_sequence_v3(const string& left_str,
     q.pop();
 
     for (size_t i{pos}; i < right_str_len; i++) {
-      if (right_str_len - i + current_lcs <= max_lcs2)
+      if (right_str_len - i + current_lcs <= lcs2)
         break;
       const size_t next_char_pos{left_str.find(right_str[i], prev_char_pos)};
 
       if (string::npos != next_char_pos) {
         if (i + 1 < left_str_len)
           q.emplace(make_tuple(i + 1, current_lcs + 1, next_char_pos + 1));
-        else if (current_lcs + 1 > max_lcs2)
-          max_lcs2 = current_lcs + 1;
+        else if (current_lcs + 1 > lcs2)
+          lcs2 = current_lcs + 1;
       }
     }
   }
 
-  return max_lcs1 > max_lcs2 ? max_lcs1 : max_lcs2;
+  return lcs1 > lcs2 ? lcs1 : lcs2;
 }
 
 string LCS_v3(string* str_arr, const size_t str_arr_size) {
