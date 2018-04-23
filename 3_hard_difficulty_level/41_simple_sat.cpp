@@ -1,13 +1,13 @@
 /*
-Coderbyte coding challenge: Simple SAT 
+Coderbyte coding challenge: Simple SAT
 
-(I must admit, that it is not so simple after all :), 
+(I must admit, that it is not so simple after all :),
 although it's not the hardest coding challenge I've faced so far either.
 The solution to this coding challenge is based upon my earlier submitted
-solution for the 'Calculator' coding challenge. This program uses one of 
-'Calculator's most significat functions (evaluate_expression_in_parenthesis) 
+solution for the 'Calculator' coding challenge. This program uses one of
+'Calculator's most significat functions (evaluate_expression_in_parenthesis)
 with a few small changes made to its code and a couple of additional
-useful functions added to it to make it work with boolean expressions correctly 
+useful functions added to it to make it work with boolean expressions correctly
 for this coding challenge.)
 
 
@@ -40,34 +40,26 @@ Output: "no"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <set>
+#include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
 enum class operation { bool_and, bool_or, bool_not };
@@ -204,33 +196,34 @@ void process_negation_unary_operations(string& expression) {
   }
 }
 
-void replace_var_letter_with_numeric_digit(string& expression,
-                                           const char var_letter,
-                                           const char digit) {
-  for (size_t i{}; i < expression.length(); i++) {
-    if (var_letter == expression[i]) {
-      if ((0 != i) && isalnum(expression[i - 1]))
-        continue;
-      if ((expression.length() - 1 != i) && isalnum(expression[i + 1]))
-        continue;
-      expression[i] = digit;
-    }
-  }
+void replace_var_letter_with_numeric_digit(
+    string& expression,
+    unordered_map<char, char> var_value) {
+  for (const pair<char, char>& vv : var_value)
+    replace(begin(expression), end(expression), vv.first, vv.second);
 }
 
 string SimpleSAT(string str) {
   str = trim(str);
 
-  set<char> variable_names{};
+  unordered_set<char> variable_names{};
+
+  bool is_prev_var_char{};
 
   for (const char ch : str) {
-    if (isalpha(ch))
+    if (isalpha(ch)) {
+      if (is_prev_var_char)
+        throw invalid_argument{
+            "Input boolean expression's syntax is not valid!"};
       variable_names.insert(ch);
+      is_prev_var_char = true;
+    } else
+      is_prev_var_char = false;
   }
 
   const size_t operation_pos{str.find_first_of("~&|")};
 
-  if (((string::npos == operation_pos) || ('~' == str[operation_pos])) &&
+  if ((string::npos == operation_pos || '~' == str[operation_pos]) &&
       (1 == variable_names.size()))
     return "yes";
 
@@ -241,17 +234,19 @@ string SimpleSAT(string str) {
 
     size_t current_sequence{i};
 
+    unordered_map<char, char> var_value{};
+
     for (const char ch : variable_names) {
-      const char value{current_sequence & 1 ? '1' : '0'};
-
+      var_value.insert(make_pair(ch, current_sequence & 1 ? '1' : '0'));
       current_sequence >>= 1;
-
-      replace_var_letter_with_numeric_digit(expression, ch, value);
     }
+
+    replace_var_letter_with_numeric_digit(expression, move(var_value));
 
     process_negation_unary_operations(expression);
 
-    const bool result{evaluate_boolean_expression_in_parenthesis(expression)};
+    const bool result{
+        evaluate_boolean_expression_in_parenthesis(move(expression))};
 
     if (result)
       return "yes";
@@ -261,13 +256,10 @@ string SimpleSAT(string str) {
 }
 
 int main() {
-  // cout << SimpleSAT(move(string{gets(stdin)}));	
-  cout << SimpleSAT(move(string{"(a&b)|c"})) 
-       << '\n';  // expected output: "yes"
-  cout << SimpleSAT(move(string{"(a&b&c)|~a"}))
-       << '\n';  // expected output: "yes"
-  cout << SimpleSAT(move(string{"a&(b|c)&~b&~c"}))
-       << '\n';  // expected output: "no"
+  // cout << SimpleSAT(string{gets(stdin)});
+  cout << SimpleSAT(string{"(a&b)|c"}) << '\n';        // expected output: "yes"
+  cout << SimpleSAT(string{"(a&b&c)|~a"}) << '\n';     // expected output: "yes"
+  cout << SimpleSAT(string{"a&(b|c)&~b&~c"}) << '\n';  // expected output: "no"
 
   return 0;
 }
