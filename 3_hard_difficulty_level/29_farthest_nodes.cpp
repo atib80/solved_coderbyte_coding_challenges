@@ -23,6 +23,7 @@ Input:  "b-a","c-e","b-c","d-c"
 Output: 3
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <set>
@@ -32,114 +33,91 @@ Output: 3
 
 using namespace std;
 
-string trim(const string &str)
-{
-    const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-    if (!str_len)
-        return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-    size_t first{}, last{str_len - 1};
-
-    for (; first <= last; ++first)
-    {
-        if (!isspace(str[first]))
-            break;
-    }
-
-    if (first > last)
-        return string{};
-
-    for (; last > first; --last)
-    {
-        if (!isspace(str[last]))
-            break;
-    }
-
-    return str.substr(first, last - first + 1);
+  return output;
 }
 
 vector<string> get_available_paths_from_input_string_array(
-    const string *str_arr,
-    const size_t str_arr_size)
-{
-    set<string> paths{};
+    string* str_arr,
+    const size_t str_arr_size) {
+  set<string> paths{};
 
-    for (size_t i{}; i != str_arr_size; i++)
-    {
-        string path{trim(str_arr[i])};
-        for (auto &ch : path)
-            ch = tolower(ch);
-        path.erase(1, 1);
-        paths.insert(path);
-        swap(path[0], path[1]);
-        paths.insert(path);
-    }
+  for (size_t i{}; i < str_arr_size; i++) {
+    if (str_arr[i].length() < 3)
+      continue;
+    str_arr[i].erase(1, 1);
+    str_arr[i][0] = static_cast<char>(tolower(str_arr[i][0]));
+    str_arr[i][1] = static_cast<char>(tolower(str_arr[i][1]));
+    paths.insert(str_arr[i]);
+    swap(str_arr[i][0], str_arr[i][1]);
+    paths.insert(str_arr[i]);
+  }
 
-    return vector<string>(begin(paths), end(paths));
+  return vector<string>(begin(paths), end(paths));
 }
 
-void find_max_path_length(vector<string> &paths,
+void find_max_path_length(const vector<string>& paths,
                           const size_t current_path_index,
-                          unordered_set<char> &visited_nodes,
-                          size_t &max_path_length,
-                          const size_t iter_count)
-{
-    const string current_path{paths[current_path_index]};
-    paths[current_path_index] = "-1";
+                          unordered_set<char>& visited_nodes,
+                          size_t& max_path_length,
+                          const size_t iter_count) {
 
-    for (size_t i{}; i < paths.size(); i++)
-    {
-        if (current_path_index == i || "-1" == paths[i])
-            continue;
+  for (size_t i{}; i < paths.size(); i++) {
+    if (i == current_path_index || visited_nodes.count(paths[i][0]))
+      continue;
 
-        if ((paths[i][0] == current_path[1]) && (paths[i][1] != current_path[0]) &&
-            (visited_nodes.find(paths[i][0]) == end(visited_nodes)))
-        {
-            visited_nodes.insert(paths[i][0]);
-            find_max_path_length(paths, i, visited_nodes, max_path_length,
-                                 iter_count + 1);
-            visited_nodes.erase(paths[i][0]);
-        }
+    if (paths[current_path_index][1] == paths[i][0] &&
+        paths[current_path_index][0] != paths[i][1]) {
+      visited_nodes.insert(paths[i][0]);
+      find_max_path_length(paths, i, visited_nodes, max_path_length,
+                           iter_count + 1);
+      visited_nodes.erase(paths[i][0]);
     }
+  }
 
-    if (iter_count > max_path_length)
-        max_path_length = iter_count;
+  if (iter_count > max_path_length)
+    max_path_length = iter_count;
 
-    paths[current_path_index] = current_path;
 }
 
-string FarthestNodes(const string *str_arr, const size_t str_arr_size)
-{
-    vector<string> paths{
-        get_available_paths_from_input_string_array(str_arr, str_arr_size)};
+string FarthestNodes(string* str_arr, const size_t str_arr_size) {
+  const vector<string> paths{
+      get_available_paths_from_input_string_array(str_arr, str_arr_size)};
 
-    size_t max_path_length{};
-    unordered_set<char> visited_nodes{};
+  size_t max_path_length{};
+  unordered_set<char> visited_nodes{};
 
-    for (size_t i{}; i < paths.size(); i++)
-    {
-        visited_nodes.insert(paths[i][0]);
-        find_max_path_length(paths, i, visited_nodes, max_path_length, 1);
-        visited_nodes.erase(paths[i][0]);
-    }
+  for (size_t i{}; i < paths.size(); i++) {
+    visited_nodes.insert(paths[i][0]);
+    find_max_path_length(paths, i, visited_nodes, max_path_length, 1);
+    visited_nodes.erase(paths[i][0]);
+  }
 
-    return to_string(max_path_length);
+  return to_string(max_path_length);
 }
 
-int main()
-{
-    // const string A[] = gets(stdin);
-    // cout << FarthestNodes(A, sizeof(A)/sizeof(*A));
-    const string B[] = {"a-b", "b-c", "b-d"};
-    cout << FarthestNodes(B, sizeof(B) / sizeof(*B))
-         << '\n'; // expected output: "2"
-    const string C[] = {"b-e", "b-c", "c-d", "a-b", "e-f"};
-    cout << FarthestNodes(C, sizeof(C) / sizeof(*C))
-         << '\n'; // expected output: "4"
-    const string D[] = {"b-a", "c-e", "b-c", "d-c"};
-    cout << FarthestNodes(D, sizeof(D) / sizeof(*D))
-         << '\n'; // expected output: "3"
+int main() {
+  // string A[] = gets(stdin);
+  // cout << FarthestNodes(A, sizeof(A)/sizeof(*A));
+  string B[] = {"a-b", "b-c", "b-d"};
+  cout << FarthestNodes(B, sizeof(B) / sizeof(*B))
+       << '\n';  // expected output: "2"
+  string C[] = {"b-e", "b-c", "c-d", "a-b", "e-f"};
+  cout << FarthestNodes(C, sizeof(C) / sizeof(*C))
+       << '\n';  // expected output: "4"
+  string D[] = {"b-a", "c-e", "b-c", "d-c"};
+  cout << FarthestNodes(D, sizeof(D) / sizeof(*D))
+       << '\n';  // expected output: "3"
 
-    return 0;
+  return 0;
 }
