@@ -26,8 +26,10 @@ Output: 3
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <queue>
 #include <set>
 #include <string>
+#include <tuple>
 #include <unordered_set>
 #include <vector>
 
@@ -58,6 +60,8 @@ vector<string> get_available_paths_from_input_string_array(
     str_arr[i].erase(1, 1);
     str_arr[i][0] = static_cast<char>(tolower(str_arr[i][0]));
     str_arr[i][1] = static_cast<char>(tolower(str_arr[i][1]));
+    if (str_arr[i][0] == str_arr[i][1])
+      continue;
     paths.insert(str_arr[i]);
     swap(str_arr[i][0], str_arr[i][1]);
     paths.insert(str_arr[i]);
@@ -71,7 +75,6 @@ void find_max_path_length(const vector<string>& paths,
                           unordered_set<char>& visited_nodes,
                           size_t& max_path_length,
                           const size_t iter_count) {
-
   for (size_t i{}; i < paths.size(); i++) {
     if (i == current_path_index || visited_nodes.count(paths[i][0]))
       continue;
@@ -87,7 +90,6 @@ void find_max_path_length(const vector<string>& paths,
 
   if (iter_count > max_path_length)
     max_path_length = iter_count;
-
 }
 
 string FarthestNodes(string* str_arr, const size_t str_arr_size) {
@@ -95,15 +97,65 @@ string FarthestNodes(string* str_arr, const size_t str_arr_size) {
       get_available_paths_from_input_string_array(str_arr, str_arr_size)};
 
   size_t max_path_length{};
+  unordered_set<char> visited_start_nodes{};
   unordered_set<char> visited_nodes{};
 
   for (size_t i{}; i < paths.size(); i++) {
+    if (visited_start_nodes.count(paths[i][0]))
+      continue;
+    visited_start_nodes.insert(paths[i][0]);
     visited_nodes.insert(paths[i][0]);
     find_max_path_length(paths, i, visited_nodes, max_path_length, 1);
     visited_nodes.erase(paths[i][0]);
   }
 
   return to_string(max_path_length);
+}
+
+size_t find_max_path_length_v2(vector<string> paths) {
+  const size_t paths_size{paths.size()};
+  size_t max_path_length{};
+  unordered_set<char> visited_start_nodes{};
+
+  for (size_t i{}; i < paths.size(); i++) {
+    if (visited_start_nodes.count(paths[i][0]))
+      continue;
+    visited_start_nodes.insert(paths[i][0]);
+
+    queue<tuple<size_t, size_t, unordered_set<char>>> q{
+        {make_tuple(i, 1, unordered_set<char>{paths[i][0]})}};
+
+    while (!q.empty()) {
+      const size_t current_path_index{get<0>(q.front())};
+      const size_t iter_count{get<1>(q.front())};
+      unordered_set<char> visited_nodes{move(get<2>(q.front()))};
+      q.pop();
+
+      for (size_t j{}; j < paths_size; j++) {
+        if (j == current_path_index || visited_nodes.count(paths[j][0]))
+          continue;
+
+        if (paths[current_path_index][1] == paths[j][0] &&
+            paths[current_path_index][0] != paths[j][1]) {
+          visited_nodes.insert(paths[j][0]);
+          q.emplace(make_tuple(j, iter_count + 1, visited_nodes));
+          visited_nodes.erase(paths[j][0]);
+        }
+      }
+
+      if (iter_count > max_path_length)
+        max_path_length = iter_count;
+    }
+  }
+
+  return max_path_length;
+}
+
+string FarthestNodes_v2(string* str_arr, const size_t str_arr_size) {
+  vector<string> paths{
+      get_available_paths_from_input_string_array(str_arr, str_arr_size)};
+
+  return to_string(find_max_path_length_v2(move(paths)));
 }
 
 int main() {
