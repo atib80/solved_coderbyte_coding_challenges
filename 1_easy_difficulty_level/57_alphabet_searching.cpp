@@ -115,17 +115,14 @@ string AlphabetSearching_v1(string str) {
 string AlphabetSearching_v2(string str) {
   str = trim(str);
 
-  for (char& ch : str)
-    ch = static_cast<char>(tolower(ch));
-
   unordered_map<char, size_t> dict{};
 
   for (char start{'a'}; start <= 'z'; start++)
     dict.insert(make_pair(start, 0));
 
   for (const char ch : str) {
-    if (dict.count(ch))
-      dict[ch]++;
+    ch = static_cast<char>(tolower(ch));
+    if (dict.find(ch) != end(dict)) dict[ch]++;
   }
 
   for (const auto& char_freq : dict) {
