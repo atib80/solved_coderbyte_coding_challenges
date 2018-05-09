@@ -124,11 +124,11 @@ string AlphabetSearching_v2(string str) {
     dict.insert(make_pair(start, 0));
 
   for (const char ch : str) {
-    if (dict.find(ch) != end(dict))
+    if (dict.count(ch))
       dict[ch]++;
   }
 
-  for (const pair<char, size_t>& char_freq : dict) {
+  for (const auto& char_freq : dict) {
     if (!char_freq.second)
       return "false";
   }
@@ -141,19 +141,18 @@ string AlphabetSearching_v3(string str) {
   sort(begin(str), end(str));
   const size_t first_char_pos{str.find_first_of("abcdefghijklmnopqrstuvwxyz")};
   const size_t last_char_pos{str.find_last_of("abcdefghijklmnopqrstuvwxyz")};
-  unordered_set<char> unique_characters(begin(str) + first_char_pos,
-                                        begin(str) + last_char_pos + 1);
-  return (26 == unique_characters.size() ? "true" : "false");
+  const string::iterator seq_end{
+      unique(begin(str) + first_char_pos, begin(str) + last_char_pos + 1)};
+  return 26 == seq_end - (begin(str) + first_char_pos) ? "true" : "false";
 }
 
 int main() {
-  // cout << AlphabetSearching_v3(move(string{gets(stdin)}));
-  cout << AlphabetSearching_v3(move(string{"zacxyjbbkfgtbhdaielqrm45pnsowtuv"}))
+  // cout << AlphabetSearching_v3(string{gets(stdin)});
+  cout << AlphabetSearching_v3(string{"zacxyjbbkfgtbhdaielqrm45pnsowtuv"})
        << '\n';  // "true"
-  cout << AlphabetSearching_v3(move(string{"abcdefghijklmnopqrstuvwxyyyy"}))
-       << '\n';  // "false"
-  cout << AlphabetSearching_v3(move(string{"abc123456kmo"}))
-       << '\n';  // "false"
+  cout << AlphabetSearching_v3(string{"abcdefghijklmnopqrstuvwxyyyy"})
+       << '\n';                                                  // "false"
+  cout << AlphabetSearching_v3(string{"abc123456kmo"}) << '\n';  // "false"
 
   return 0;
 }
