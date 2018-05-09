@@ -30,6 +30,7 @@ Output: 3
 #include <set>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -51,8 +52,10 @@ string trim(const string& input) {
 
 vector<string> get_available_paths_from_input_string_array(
     string* str_arr,
-    const size_t str_arr_size) {
+    const size_t str_arr_size,
+    size_t& nodes_count) {
   set<string> paths{};
+  unordered_set<char> all_nodes{};
 
   for (size_t i{}; i < str_arr_size; i++) {
     if (str_arr[i].length() < 3)
@@ -62,11 +65,14 @@ vector<string> get_available_paths_from_input_string_array(
     str_arr[i][1] = static_cast<char>(tolower(str_arr[i][1]));
     if (str_arr[i][0] == str_arr[i][1])
       continue;
+    all_nodes.insert(str_arr[i][0]);
+    all_nodes.insert(str_arr[i][1]);
     paths.insert(str_arr[i]);
     swap(str_arr[i][0], str_arr[i][1]);
     paths.insert(str_arr[i]);
   }
 
+  nodes_count = all_nodes.size();
   return vector<string>(begin(paths), end(paths));
 }
 
@@ -93,8 +99,9 @@ void find_max_path_length(const vector<string>& paths,
 }
 
 string FarthestNodes(string* str_arr, const size_t str_arr_size) {
-  const vector<string> paths{
-      get_available_paths_from_input_string_array(str_arr, str_arr_size)};
+  size_t nodes_count{};
+  const vector<string> paths{get_available_paths_from_input_string_array(
+      str_arr, str_arr_size, nodes_count)};
 
   size_t max_path_length{};
   unordered_set<char> visited_start_nodes{};
@@ -112,7 +119,7 @@ string FarthestNodes(string* str_arr, const size_t str_arr_size) {
   return to_string(max_path_length);
 }
 
-size_t find_max_path_length_v2(vector<string> paths) {
+size_t find_max_path_length_v2(vector<string> paths, const size_t nodes_count) {
   const size_t paths_size{paths.size()};
   size_t max_path_length{};
   unordered_set<char> visited_start_nodes{};
@@ -131,8 +138,12 @@ size_t find_max_path_length_v2(vector<string> paths) {
       unordered_set<char> visited_nodes{move(get<2>(q.front()))};
       q.pop();
 
+      if (iter_count + nodes_count - visited_nodes.size() - 1 <=
+          max_path_length)
+        continue;
+
       for (size_t j{}; j < paths_size; j++) {
-        if (j == current_path_index || visited_nodes.count(paths[j][0]))
+        if (visited_nodes.count(paths[j][0]) || j == current_path_index)
           continue;
 
         if (paths[current_path_index][1] == paths[j][0] &&
@@ -152,23 +163,24 @@ size_t find_max_path_length_v2(vector<string> paths) {
 }
 
 string FarthestNodes_v2(string* str_arr, const size_t str_arr_size) {
-  vector<string> paths{
-      get_available_paths_from_input_string_array(str_arr, str_arr_size)};
+  size_t nodes_count{};
+  vector<string> paths{get_available_paths_from_input_string_array(
+      str_arr, str_arr_size, nodes_count)};
 
-  return to_string(find_max_path_length_v2(move(paths)));
+  return to_string(find_max_path_length_v2(move(paths), nodes_count));
 }
 
 int main() {
   // string A[] = gets(stdin);
-  // cout << FarthestNodes(A, sizeof(A)/sizeof(*A));
+  // cout << FarthestNodes_v2(A, sizeof(A)/sizeof(*A));
   string B[] = {"a-b", "b-c", "b-d"};
-  cout << FarthestNodes(B, sizeof(B) / sizeof(*B))
+  cout << FarthestNodes_v2(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: "2"
   string C[] = {"b-e", "b-c", "c-d", "a-b", "e-f"};
-  cout << FarthestNodes(C, sizeof(C) / sizeof(*C))
+  cout << FarthestNodes_v2(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: "4"
   string D[] = {"b-a", "c-e", "b-c", "d-c"};
-  cout << FarthestNodes(D, sizeof(D) / sizeof(*D))
+  cout << FarthestNodes_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: "3"
 
   return 0;
