@@ -42,28 +42,18 @@ Output: "yes"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+string trim(const string& input) {
+  string output{input};
+  output.erase(begin(output),
+               find_if(begin(output), end(output),
+                       [](const char ch) { return !isspace(ch); }));
 
-  if (!str_len)
-    return string{};
+  output.erase(find_if(output.rbegin(), output.rend(),
+                       [](const char ch) { return !isspace(ch); })
+                   .base(),
+               end(output));
 
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return output;
 }
 
 vector<string> split(const string& source,
@@ -75,7 +65,7 @@ vector<string> split(const string& source,
 
   const size_t source_len{source.length()};
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{needle_st.length()};
 
   if (!source_len)
     return parts;
@@ -97,10 +87,10 @@ vector<string> split(const string& source,
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (string::npos != max_count && parts.size() == max_count)
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
@@ -113,31 +103,18 @@ vector<string> split(const string& source,
     if (string::npos == max_count)
       parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count))
+    else if (parts.size() < max_count)
       parts.emplace_back(source.substr(prev));
   }
 
   return parts;
 }
 
-unordered_set<char> get_graph_vertices(const string& str) {
-  unordered_set<char> vertices{};
-
-  auto vertices_str = split(str, ",");
-  for (auto& vertex : vertices_str) {
-    vertex = trim(vertex);
-    if (!vertex.empty())
-      vertices.insert(vertex[0]);
-  }
-
-  return vertices;
-}
-
 vector<string> get_graph_edges(const string& str) {
   vector<string> edges{};
 
-  auto paths = split(str, ",");
-  for (auto& path : paths) {
+  vector<string> paths{split(str, ",")};
+  for (string& path : paths) {
     path = trim(path);
     edges.emplace_back(path);
   }
@@ -148,8 +125,8 @@ vector<string> get_graph_edges(const string& str) {
 unordered_set<char> get_target_vertices(const string& str) {
   unordered_set<char> vertices{};
 
-  auto vertices_str = split(str, ",");
-  for (auto& vertex : vertices_str) {
+  vector<string> vertices_str{split(str, ",")};
+  for (string& vertex : vertices_str) {
     vertex = trim(vertex);
     if (!vertex.empty())
       vertices.insert(vertex[0]);
@@ -159,16 +136,7 @@ unordered_set<char> get_target_vertices(const string& str) {
 }
 
 string VertexCovering(string* str_arr, const size_t str_arr_size) {
-  if (str_arr_size < 3u)
-    return "not possible";
-
-  str_arr[0] = trim(str_arr[0]);
-  str_arr[0].erase(begin(str_arr[0]));
-  str_arr[0].erase(--end(str_arr[0]));
-
-  const unordered_set<char> graph_vertices{get_graph_vertices(str_arr[0])};
-
-  if (graph_vertices.size() < 2u)
+  if (str_arr_size < 3)
     return "not possible";
 
   str_arr[1] = trim(str_arr[1]);
@@ -193,8 +161,8 @@ string VertexCovering(string* str_arr, const size_t str_arr_size) {
   bool is_found_not_connected_vertex{};
 
   for (size_t i{}; i < edges_count; i++) {
-    if (target_vertices.find(graph_edges[i][0]) != end(target_vertices) ||
-        target_vertices.find(graph_edges[i][2]) != end(target_vertices))
+    if (target_vertices.count(graph_edges[i][0]) ||
+        target_vertices.count(graph_edges[i][2]))
       continue;
 
     is_found_not_connected_vertex = true;
@@ -210,17 +178,20 @@ string VertexCovering(string* str_arr, const size_t str_arr_size) {
 }
 
 int main() {
-  
-  string A[] = gets(stdin);
-  cout << VertexCovering(A, sizeof(A)/sizeof(*A));
-  // string B[] = {"(A,B,C,D)", "(A-B,A-D,B-D,A-C)", "(A,B)"};
-  // cout << VertexCovering(B, sizeof(B) / sizeof(*B)) << '\n';  // expected output: "yes"
-  // string C[] = {"(A,B,C,D)", "(A-B,A-D,B-D,A-C)", "(C,B)"};
-  // cout << VertexCovering(C, sizeof(C) / sizeof(*C)) << '\n';  // expected output: "(A,D)"
-  // string D[] = {"(A,B,C,D)", "(A-B,A-D,B-D,A-C)", "(C)"};
-  // cout << VertexCovering(D, sizeof(D) / sizeof(*D)) << '\n';  // expected output: "(A-B,A-D,B-D)"
-  // string E[] = {"(X,Y,Z,Q)", "(X-Y,Y-Q,Y-Z)", "(Z,Y,Q)"};
-  // cout << VertexCovering(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output: "yes"
+  // string A[] = gets(stdin);
+  // cout << VertexCovering(A, sizeof(A) / sizeof(*A));
+  string B[] = {"(A,B,C,D)", "(A-B,A-D,B-D,A-C)", "(A,B)"};
+  cout << VertexCovering(B, sizeof(B) / sizeof(*B))
+       << '\n';  // expected output: "yes"
+  string C[] = {"(A,B,C,D)", "(A-B,A-D,B-D,A-C)", "(C,B)"};
+  cout << VertexCovering(C, sizeof(C) / sizeof(*C))
+       << '\n';  // expected output: "(A,D)"
+  string D[] = {"(A,B,C,D)", "(A-B,A-D,B-D,A-C)", "(C)"};
+  cout << VertexCovering(D, sizeof(D) / sizeof(*D))
+       << '\n';  // expected output: "(A-B,A-D,B-D)"
+  string E[] = {"(X,Y,Z,Q)", "(X-Y,Y-Q,Y-Z)", "(Z,Y,Q)"};
+  cout << VertexCovering(E, sizeof(E) / sizeof(*E))
+       << '\n';  // expected output: "yes"
 
   return 0;
 }
