@@ -20,13 +20,11 @@ Output: 3
 */
 
 #include <iostream>
-#include <string>
 
 using namespace std;
 
 size_t find_number_of_combinations(const size_t number_of_stairs,
                                    const size_t current_steps_count = 0) {
-  
   if (number_of_stairs == current_steps_count)
     return 1;
 
@@ -43,8 +41,8 @@ size_t find_number_of_combinations(const size_t number_of_stairs,
   return combinations;
 }
 
-size_t StepWalking(const size_t num) {
-  const size_t combinations{find_number_of_combinations(num)};
+size_t StepWalking(const size_t number_of_steps) {
+  const size_t combinations{find_number_of_combinations(number_of_steps)};
 
   return combinations;
 }
