@@ -46,13 +46,13 @@ int evaluate_simple_math_expression(const int first_number,
                                     const char operation) {
   switch (operation) {
     case '+':
-      return (first_number + second_number);
+      return first_number + second_number;
 
     case '-':
-      return (first_number - second_number);
+      return first_number - second_number;
 
     case '*':
-      return (first_number * second_number);
+      return first_number * second_number;
 
     case '/':
       if (!second_number)
@@ -83,9 +83,9 @@ string evaluate_reverse_polish_notation_math_expression(string expression) {
         throw runtime_error{
             "Input math expression is not formatted correctly according to the "
             "rules imposed by the reverse polish notation!"};
-      const int first_number{result.top()};
-      result.pop();
       const int second_number{result.top()};
+      result.pop();
+      const int first_number{result.top()};
       result.pop();
       result.emplace(evaluate_simple_math_expression(
           first_number, second_number, expression[current_pos]));
