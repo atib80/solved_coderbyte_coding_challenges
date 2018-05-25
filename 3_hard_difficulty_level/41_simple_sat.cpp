@@ -67,7 +67,7 @@ enum class operation { bool_and, bool_or, bool_not };
 bool evaluate_boolean_expression_in_parenthesis(string expression) {
   vector<operation> operations{};
   vector<bool> sub_expression_results{};
-  int boolean_and_or_op_count{};
+  int boolean_and_or_operation_count{};
 
   while (true) {
     size_t operation_pos{expression.find_first_of("&|")};
@@ -84,8 +84,8 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
     if (string::npos != begin_prnths_pos)
       end_prnths_pos = expression.find(')', begin_prnths_pos + 1);
 
-    if ((string::npos != begin_prnths_pos) &&
-        (string::npos != end_prnths_pos) && (begin_prnths_pos < number_pos)) {
+    if (string::npos != begin_prnths_pos && string::npos != end_prnths_pos &&
+        begin_prnths_pos < number_pos) {
       string sub_expression_str{expression.substr(
           begin_prnths_pos + 1, end_prnths_pos - (begin_prnths_pos + 1))};
 
@@ -96,9 +96,9 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
 
       operation_pos = expression.find_first_of("&|", end_prnths_pos + 1);
 
-      begin_prnths_pos = expression.find('(', end_prnths_pos + 1);
+      // begin_prnths_pos = expression.find('(', end_prnths_pos + 1);
 
-      number_pos = expression.find_first_of("01", end_prnths_pos + 1);
+      number_pos = expression.find_first_of("01(", end_prnths_pos + 1);
 
       if (string::npos == operation_pos || string::npos == number_pos)
         break;
@@ -106,42 +106,39 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
       switch (expression[operation_pos]) {
         case '&':
           operations.emplace_back(operation::bool_and);
-          boolean_and_or_op_count++;
+          boolean_and_or_operation_count++;
           break;
 
         case '|':
           operations.emplace_back(operation::bool_or);
-          boolean_and_or_op_count++;
+          boolean_and_or_operation_count++;
           break;
 
         default:
           break;
       }
 
-      expression.erase(begin(expression),
-                       begin(expression) + min(begin_prnths_pos, number_pos));
+      expression.erase(begin(expression), begin(expression) + number_pos);
 
       continue;
     }
 
     const bool logical_value{'0' != expression[number_pos] ? true : false};
 
-    if (string::npos == operation_pos) {
-      sub_expression_results.push_back(logical_value);
-      break;
-    }
-
     sub_expression_results.push_back(logical_value);
+
+    if (string::npos == operation_pos)
+      break;
 
     switch (expression[operation_pos]) {
       case '&':
         operations.emplace_back(operation::bool_and);
-        boolean_and_or_op_count++;
+        boolean_and_or_operation_count++;
         break;
 
       case '|':
         operations.emplace_back(operation::bool_or);
-        boolean_and_or_op_count++;
+        boolean_and_or_operation_count++;
         break;
 
       default:
@@ -155,14 +152,14 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
                      begin(expression) + right_side_start_offset);
   }
 
-  while (boolean_and_or_op_count) {
+  while (boolean_and_or_operation_count) {
     for (size_t i{}; i < sub_expression_results.size() - 1; i++) {
       if (operation::bool_and == operations[i]) {
         sub_expression_results[i] =
             sub_expression_results[i] && sub_expression_results[i + 1];
         sub_expression_results.erase(begin(sub_expression_results) + i + 1);
         operations.erase(begin(operations) + i);
-        boolean_and_or_op_count--;
+        boolean_and_or_operation_count--;
         break;
       }
 
@@ -171,7 +168,7 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
             sub_expression_results[i] || sub_expression_results[i + 1];
         sub_expression_results.erase(begin(sub_expression_results) + i + 1);
         operations.erase(begin(operations) + i);
-        boolean_and_or_op_count--;
+        boolean_and_or_operation_count--;
         break;
       }
     }
@@ -181,17 +178,15 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
 }
 
 void process_negation_unary_operations(string& expression) {
+  if ('~' == expression.back())
+    expression.pop_back();
   size_t start{};
 
-  while ((start = expression.find("~0", start)) != string::npos) {
-    expression.replace(start, 2, 1, '1');
-    start++;
-  }
-
-  start = 0;
-
-  while ((start = expression.find("~1", start)) != string::npos) {
-    expression.replace(start, 2, 1, '0');
+  while ((start = expression.find('~', start)) != string::npos) {
+    if ('0' == expression[start + 1])
+      expression.replace(start, 2, 1, '1');
+    else if ('1' == expression[start + 1])
+      expression.replace(start, 2, 1, '0');
     start++;
   }
 }
@@ -208,23 +203,15 @@ string SimpleSAT(string str) {
 
   unordered_set<char> variable_names{};
 
-  bool is_prev_var_char{};
-
   for (const char ch : str) {
-    if (isalpha(ch)) {
-      if (is_prev_var_char)
-        throw invalid_argument{
-            "Input boolean expression's syntax is not valid!"};
+    if (isalpha(ch) && !variable_names.count(ch))
       variable_names.insert(ch);
-      is_prev_var_char = true;
-    } else
-      is_prev_var_char = false;
   }
 
   const size_t operation_pos{str.find_first_of("~&|")};
 
   if ((string::npos == operation_pos || '~' == str[operation_pos]) &&
-      (1 == variable_names.size()))
+      1 == variable_names.size())
     return "yes";
 
   const size_t combinations{1u << variable_names.size()};
