@@ -33,7 +33,7 @@ Output: "yes"
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 using namespace std;
 
@@ -41,36 +41,40 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
   if (1 == arr_size % 2)
     return "not possible";
 
-  vector<int> numbers(arr, arr + arr_size);
-
+  unordered_set<size_t> visited_indices{};
+  size_t i{};
   ostringstream oss{};
+  bool found_missing_pair{};
 
-  while (!numbers.empty()) {
-    const pair<int, int> couple{make_pair(numbers[0], numbers[1])};
-    numbers.erase(begin(numbers), begin(numbers) + 2);
-    if (numbers.empty()) {
-      oss << couple.first << ',' << couple.second;
-      break;
+  while (i < arr_size - 1) {
+    if (visited_indices.count(i)) {
+      i += 2;
+      continue;
     }
 
     bool found{};
-    for (size_t j{}; j < numbers.size() - 1; j += 2) {
-      if ((couple.first == numbers[j + 1]) && (couple.second == numbers[j])) {
+    for (size_t j{i + 2}; j < arr_size - 1; j += 2) {
+      if (arr[j + 1] == arr[i] && arr[j] == arr[i + 1] &&
+          !visited_indices.count(j)) {
+        visited_indices.insert(j);
         found = true;
-        numbers.erase(begin(numbers) + j, begin(numbers) + j + 2);
         break;
       }
     }
 
     if (!found) {
-      oss << couple.first << ',' << couple.second << ',';
+      found_missing_pair = true;
+      oss << arr[i] << ',' << arr[i + 1] << ',';
     }
-
-    else if (numbers.empty())
-      return "yes";
+    i += 2;
   }
 
-  return oss.str();
+  if (!found_missing_pair)
+    return "yes";
+
+  string result{oss.str()};
+  result.erase(--end(result));
+  return result;
 }
 
 int main() {
