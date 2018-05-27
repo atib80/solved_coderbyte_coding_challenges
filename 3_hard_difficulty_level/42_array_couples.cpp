@@ -31,7 +31,6 @@ Output: "yes"
 */
 
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <unordered_set>
 
@@ -43,8 +42,9 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
 
   unordered_set<size_t> visited_indices{};
   size_t i{};
-  ostringstream oss{};
-  bool found_missing_pair{};
+  bool already_found_missing_pair{};
+  string result{};
+  result.reserve(10 * arr_size);
 
   while (i < arr_size - 1) {
     if (visited_indices.count(i)) {
@@ -63,17 +63,20 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
     }
 
     if (!found) {
-      found_missing_pair = true;
-      oss << arr[i] << ',' << arr[i + 1] << ',';
+      if (already_found_missing_pair)
+        result.push_back(',');
+      else
+        already_found_missing_pair = true;
+      result.append(to_string(arr[i]));
+      result.push_back(',');
+      result.append(to_string(arr[i + 1]));
     }
     i += 2;
   }
 
-  if (!found_missing_pair)
+  if (!already_found_missing_pair)
     return "yes";
 
-  string result{oss.str()};
-  result.erase(--end(result));
   return result;
 }
 
