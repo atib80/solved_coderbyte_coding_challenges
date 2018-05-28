@@ -67,17 +67,18 @@ enum class operation { bool_and, bool_or, bool_not };
 bool evaluate_boolean_expression_in_parenthesis(string expression) {
   vector<operation> operations{};
   vector<bool> sub_expression_results{};
-  int boolean_and_or_operation_count{};
+
+  size_t offset{};
 
   while (true) {
-    size_t operation_pos{expression.find_first_of("&|")};
+    size_t operation_pos{expression.find_first_of("&|", offset)};
 
-    size_t number_pos{expression.find_first_of("01")};
+    size_t number_pos{expression.find_first_of("01", offset)};
 
     if (string::npos == number_pos)
       break;
 
-    size_t begin_prnths_pos{expression.find('(')};
+    size_t begin_prnths_pos{expression.find('(', offset)};
 
     size_t end_prnths_pos{string::npos};
 
@@ -96,8 +97,6 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
 
       operation_pos = expression.find_first_of("&|", end_prnths_pos + 1);
 
-      // begin_prnths_pos = expression.find('(', end_prnths_pos + 1);
-
       number_pos = expression.find_first_of("01(", end_prnths_pos + 1);
 
       if (string::npos == operation_pos || string::npos == number_pos)
@@ -106,20 +105,17 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
       switch (expression[operation_pos]) {
         case '&':
           operations.emplace_back(operation::bool_and);
-          boolean_and_or_operation_count++;
           break;
 
         case '|':
           operations.emplace_back(operation::bool_or);
-          boolean_and_or_operation_count++;
           break;
 
         default:
           break;
       }
 
-      expression.erase(begin(expression), begin(expression) + number_pos);
-
+      offset = number_pos;
       continue;
     }
 
@@ -133,48 +129,38 @@ bool evaluate_boolean_expression_in_parenthesis(string expression) {
     switch (expression[operation_pos]) {
       case '&':
         operations.emplace_back(operation::bool_and);
-        boolean_and_or_operation_count++;
         break;
 
       case '|':
         operations.emplace_back(operation::bool_or);
-        boolean_and_or_operation_count++;
         break;
 
       default:
         break;
     }
 
-    const size_t right_side_start_offset{
-        expression.find_first_of("&|()01", operation_pos + 1)};
-
-    expression.erase(begin(expression),
-                     begin(expression) + right_side_start_offset);
+    offset = expression.find_first_of("&|()01", operation_pos + 1);
   }
 
-  while (boolean_and_or_operation_count) {
-    for (size_t i{}; i < sub_expression_results.size() - 1; i++) {
-      if (operation::bool_and == operations[i]) {
-        sub_expression_results[i] =
-            sub_expression_results[i] && sub_expression_results[i + 1];
-        sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-        operations.erase(begin(operations) + i);
-        boolean_and_or_operation_count--;
-        break;
-      }
+  bool result{};
 
-      if (operation::bool_or == operations[i]) {
-        sub_expression_results[i] =
-            sub_expression_results[i] || sub_expression_results[i + 1];
-        sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-        operations.erase(begin(operations) + i);
-        boolean_and_or_operation_count--;
-        break;
-      }
+  for (size_t i{}; i < operations.size(); i++) {
+    if (operation::bool_and == operations[i]) {
+      sub_expression_results[i + 1] = sub_expression_results[i] =
+          sub_expression_results[i] && sub_expression_results[i + 1];
+      result = sub_expression_results[i];
     }
   }
 
-  return sub_expression_results[0];
+  for (size_t i{}; i < operations.size(); i++) {
+    if (operation::bool_or == operations[i]) {
+      sub_expression_results[i + 1] = sub_expression_results[i] =
+          sub_expression_results[i] || sub_expression_results[i + 1];
+      result = sub_expression_results[i];
+    }
+  }
+
+  return result;
 }
 
 void process_negation_unary_operations(string& expression) {
