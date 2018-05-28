@@ -60,29 +60,20 @@ string join(const _Container& items, const string& needle = "") {
   return result;
 }
 
-bool rotate_array_elements(deque<int>& arr, int k) {
-  if (k < 1)
+bool rotate_array_elements(deque<int>& deq, const size_t k) {
+  if (!k || deq.size() < 2)
     return false;
 
-  const int arr_size{static_cast<int>(arr.size())};
-
-  if (arr_size < 2 || arr_size == k)
-    return false;
-
-  if (k > arr_size)
-    k %= arr_size;
-
-  for (int i{}; i < k; i++) {
-    const auto number = arr.front();
-    arr.pop_front();
-    arr.emplace_back(number);
+  for (size_t i{}; i < k; i++) {
+    const int number{deq.front()};
+    deq.pop_front();
+    deq.emplace_back(number);
   }
 
   return true;
 }
 
 string ArrayRotation(const int* arr, const size_t arr_size) {
-  
   deque<int> numbers(arr, arr + arr_size);
 
   const size_t number_of_shifts{numbers[0] % numbers.size()};

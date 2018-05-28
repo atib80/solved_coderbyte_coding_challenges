@@ -37,8 +37,9 @@ Output: "yes"
 using namespace std;
 
 string ArrayCouples(const int* arr, const size_t arr_size) {
-  if (1 == arr_size % 2)
+  if (1 == arr_size % 2) {
     return "not possible";
+}
 
   unordered_set<size_t> visited_indices{};
   size_t i{};
@@ -47,7 +48,7 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
   result.reserve(10 * arr_size);
 
   while (i < arr_size - 1) {
-    if (visited_indices.count(i)) {
+    if (visited_indices.count(i) != 0u) {
       i += 2;
       continue;
     }
@@ -55,7 +56,7 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
     bool found{};
     for (size_t j{i + 2}; j < arr_size - 1; j += 2) {
       if (arr[j + 1] == arr[i] && arr[j] == arr[i + 1] &&
-          !visited_indices.count(j)) {
+          (visited_indices.count(j) == 0u)) {
         visited_indices.insert(j);
         found = true;
         break;
@@ -63,10 +64,11 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
     }
 
     if (!found) {
-      if (already_found_missing_pair)
+      if (already_found_missing_pair) {
         result.push_back(',');
-      else
+      } else {
         already_found_missing_pair = true;
+}
       result.append(to_string(arr[i]));
       result.push_back(',');
       result.append(to_string(arr[i + 1]));
@@ -74,8 +76,9 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
     i += 2;
   }
 
-  if (!already_found_missing_pair)
+  if (!already_found_missing_pair) {
     return "yes";
+}
 
   return result;
 }
