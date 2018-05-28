@@ -30,7 +30,6 @@ Output: "no"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
