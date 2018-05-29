@@ -140,12 +140,11 @@ string CountingAnagrams(string sentence) {
 
 int main() {
   // cout << CountingAnagrams(move(string{ gets(stdin) }));
-  cout << CountingAnagrams(
-              move(string{"cars are very cool so are arcs and my os"}))
+  cout << CountingAnagrams(string{"cars are very cool so are arcs and my os"})
        << '\n';  // expected output: "2"
-  cout << CountingAnagrams(move(string{"aa aa odg dog gdo"}))
+  cout << CountingAnagrams(string{"aa aa odg dog gdo"})
        << '\n';  // expected output: "2"
-  cout << CountingAnagrams(move(string{"a c b c run urn urn"}))
+  cout << CountingAnagrams(string{"a c b c run urn urn"})
        << '\n';  // expected output: "1"
 
   return 0;
