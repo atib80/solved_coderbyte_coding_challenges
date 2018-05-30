@@ -34,72 +34,39 @@ Output: 2
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (!str_len)
-    return string{};
-
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
-}
-
 void find_max_cardinality(const vector<string>& edges,
                           const size_t pos,
                           unordered_set<char>& lhs_visited_nodes,
                           unordered_set<char>& rhs_visited_nodes,
                           size_t& max_cardinality,
                           const size_t cardinality = 0) {
-  if (pos >= edges.size()) {
+  if (pos == edges.size()) {
     if (cardinality > max_cardinality)
       max_cardinality = cardinality;
     return;
   }
 
   for (size_t j{}; j < edges.size(); j++) {
-    if ((lhs_visited_nodes.find(edges[j][0]) == end(lhs_visited_nodes)) &&
-        (rhs_visited_nodes.find(edges[j][1]) == end(rhs_visited_nodes))) {
+    if (!lhs_visited_nodes.count(edges[j][0]) &&
+        !rhs_visited_nodes.count(edges[j][3])) {
       lhs_visited_nodes.insert(edges[j][0]);
-      rhs_visited_nodes.insert(edges[j][1]);
-
+      rhs_visited_nodes.insert(edges[j][3]);
       find_max_cardinality(edges, j + 1, lhs_visited_nodes, rhs_visited_nodes,
                            max_cardinality, cardinality + 1);
-
       lhs_visited_nodes.erase(edges[j][0]);
-      rhs_visited_nodes.erase(edges[j][1]);
+      rhs_visited_nodes.erase(edges[j][3]);
     }
   }
 }
 
 string BipartiteMatching(const string* str_arr, const size_t str_arr_size) {
-  vector<string> edges(str_arr, str_arr + str_arr_size);
-
-  for (auto& edge : edges) {
-    edge = trim(edge);
-    edge.erase(1, 2);
-  }
-
+  const vector<string> edges(str_arr, str_arr + str_arr_size);
   unordered_set<char> lhs_visited_nodes{};
   unordered_set<char> rhs_visited_nodes{};
   size_t max_cardinality{1};
 
   find_max_cardinality(edges, 0, lhs_visited_nodes, rhs_visited_nodes,
                        max_cardinality);
-
   return to_string(max_cardinality);
 }
 
