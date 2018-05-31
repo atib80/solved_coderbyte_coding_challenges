@@ -97,7 +97,7 @@ vector<string> split(const string& source,
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (string::npos != max_count && parts.size() == max_count)
       break;
 
     if (current - prev > 0)
@@ -121,9 +121,8 @@ vector<string> split(const string& source,
 }
 
 struct node {
-  explicit node(const int id, vector<int>&& neighboring_node_ids)
-      : node_id{id}, neighbors{neighboring_node_ids} {}
-
+  explicit node(const int id, vector<int> neighboring_node_ids)
+      : node_id{id}, neighbors{move(neighboring_node_ids)} {}
   int node_id;
   vector<int> neighbors;
 };
@@ -131,23 +130,18 @@ struct node {
 int find_max_traffic_for_graph_node(const map<int, node>& graph,
                                     const int node_id,
                                     unordered_set<int>& visited_nodes) {
-  if (graph.find(node_id) == end(graph))
+  if (!graph.count(node_id))
     return 0;
 
+  const vector<int>& current_node_neighbors{graph.at(node_id).neighbors};
   int max_traffic{node_id};
 
-  const vector<int>& current_node_neighbors{
-      graph.find(node_id)->second.neighbors};
-
   for (const int next_neighbor_node_id : current_node_neighbors) {
-    if (visited_nodes.find(next_neighbor_node_id) != end(visited_nodes))
+    if (visited_nodes.count(next_neighbor_node_id))
       continue;
-
     visited_nodes.insert(next_neighbor_node_id);
-
     max_traffic += find_max_traffic_for_graph_node(graph, next_neighbor_node_id,
                                                    visited_nodes);
-
     visited_nodes.erase(next_neighbor_node_id);
   }
 
@@ -161,14 +155,14 @@ map<int, node> create_city_graph_from_input_string_array(
 
   for (size_t i{}; i < str_arr_size; i++) {
     str_arr[i] = trim(str_arr[i]);
-    auto parts = split(str_arr[i], ":[");
-    if (parts.size() < 2u)
+    vector<string> parts{split(str_arr[i], ":[")};
+    if (parts.size() < 2)
       continue;
     parts[1].erase(--end(parts[1]));
-    auto neighbor_parts = split(parts[1], ",");
+    const vector<string> neighbor_parts{split(parts[1], ",")};
     vector<int> neighbor_ids{};
-    for (const auto& np : neighbor_parts)
-      neighbor_ids.emplace_back(stoi(np));
+    for (const string& node_id_str : neighbor_parts)
+      neighbor_ids.emplace_back(stoi(node_id_str));
     city_graph.insert(
         make_pair(stoi(parts[0]), node{stoi(parts[0]), move(neighbor_ids)}));
   }
@@ -181,9 +175,8 @@ string find_maximum_traffic_for_all_city_nodes(
   unordered_set<int> visited_nodes{};
   ostringstream oss{};
 
-  for (const auto& current_node : city_graph) {
+  for (const pair<int, node>& current_node : city_graph) {
     visited_nodes.insert(current_node.first);
-
     int max_traffic_for_current_node{};
 
     for (const int neighbor_node_id : current_node.second.neighbors) {
@@ -205,14 +198,13 @@ string find_maximum_traffic_for_all_city_nodes(
   }
 
   string output{oss.str()};
-  output.erase(output.length() - 1, 1);
+  output.erase(--end(output));
   return output;
 }
 
 string CityTraffic(string* str_arr, const size_t str_arr_size) {
   const map<int, node> city_graph{
       create_city_graph_from_input_string_array(str_arr, str_arr_size)};
-
   return find_maximum_traffic_for_all_city_nodes(city_graph);
 }
 
