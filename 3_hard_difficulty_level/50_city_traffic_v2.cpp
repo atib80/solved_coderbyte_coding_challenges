@@ -1,5 +1,7 @@
 /*
-Coderbyte coding challenge: City Traffic v1
+Coderbyte coding challenge: City Traffic v2
+
+(iterative solution implemented by using queue<T>)
 
 Using the C++ language, have the function CityTraffic(strArr) read strArr which
 will be a representation of an undirected graph in a form similar to an
@@ -105,7 +107,7 @@ vector<string> split(const string& source,
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (string::npos != max_count && parts.size() == max_count)
       break;
 
     if (current - prev > 0)
@@ -129,9 +131,8 @@ vector<string> split(const string& source,
 }
 
 struct node {
-  explicit node(const int id, vector<int>&& neighboring_node_ids)
-      : node_id{id}, neighbors{neighboring_node_ids} {}
-
+  explicit node(const int id, vector<int> neighboring_node_ids)
+      : node_id{id}, neighbors{move(neighboring_node_ids)} {}
   int node_id;
   vector<int> neighbors;
 };
@@ -143,14 +144,14 @@ map<int, node> create_city_graph_from_input_string_array(
 
   for (size_t i{}; i < str_arr_size; i++) {
     str_arr[i] = trim(str_arr[i]);
-    auto parts = split(str_arr[i], ":[");
+    vector<string> parts{split(str_arr[i], ":[")};
     if (parts.size() < 2)
       continue;
     parts[1].erase(--end(parts[1]));
-    auto neighbor_parts = split(parts[1], ",");
+    const vector<string> neighbor_parts{split(parts[1], ",")};
     vector<int> neighbor_ids{};
-    for (const auto& np : neighbor_parts)
-      neighbor_ids.emplace_back(stoi(np));
+    for (const string& node_id_str : neighbor_parts)
+      neighbor_ids.emplace_back(stoi(node_id_str));
     city_graph.insert(
         make_pair(stoi(parts[0]), node{stoi(parts[0]), move(neighbor_ids)}));
   }
@@ -161,12 +162,10 @@ map<int, node> create_city_graph_from_input_string_array(
 string find_maximum_traffic_for_all_city_nodes(
     const map<int, node>& city_graph) {
   queue<int> q{};
-
   ostringstream oss{};
 
-  for (const auto& current_node : city_graph) {
+  for (const pair<int, node>& current_node : city_graph) {
     unordered_set<int> visited_nodes{current_node.first};
-
     int max_traffic_for_current_node{};
 
     for (const int neighbor_node_id : current_node.second.neighbors) {
@@ -183,16 +182,14 @@ string find_maximum_traffic_for_all_city_nodes(
         current_neighbor_node_max_traffic += q.front();
 
         const vector<int>& next_neighbor_nodes{
-            city_graph.find(q.front())->second.neighbors};
+            city_graph.at(q.front()).neighbors};
 
         q.pop();
 
         for (const int next_node_id : next_neighbor_nodes) {
-          if (visited_nodes.find(next_node_id) != end(visited_nodes))
+          if (visited_nodes.count(next_node_id))
             continue;
-
           visited_nodes.insert(next_node_id);
-
           q.emplace(next_node_id);
         }
       }
@@ -205,14 +202,13 @@ string find_maximum_traffic_for_all_city_nodes(
   }
 
   string output{oss.str()};
-  output.erase(output.length() - 1, 1);
+  output.erase(--end(output));
   return output;
 }
 
 string CityTraffic(string* str_arr, const size_t str_arr_size) {
   const map<int, node> city_graph{
       create_city_graph_from_input_string_array(str_arr, str_arr_size)};
-
   return find_maximum_traffic_for_all_city_nodes(city_graph);
 }
 
