@@ -69,11 +69,11 @@ class LRU_Cache : public Cache {
     auto current = head;
 
     while (current) {
-      auto const next = current->next;
-
-      delete current;
+      auto const next = current->next;     
 
       cache_.erase(current->value);
+
+      delete current;
 
       current = next;
     }
