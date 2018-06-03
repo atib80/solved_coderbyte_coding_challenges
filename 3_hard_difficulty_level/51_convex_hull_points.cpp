@@ -33,26 +33,26 @@ struct Point {
   int y;
 };
 
-Point next_to_top(const vector<Point>& v) {
+inline Point next_to_top(const vector<Point>& v) {
   return v[v.size() - 2];
 }
 
-void swap(Point& p1, Point& p2) noexcept {
+inline void swap(Point& p1, Point& p2) noexcept {
   std::swap(p1.x, p2.x);
   std::swap(p1.y, p2.y);
 }
 
-int distance(const Point& p1, const Point& p2) {
+inline int distance(const Point& p1, const Point& p2) {
   return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
 }
 
-int orientation(const Point& p, const Point& q, const Point& r) {
+inline int orientation(const Point& p, const Point& q, const Point& r) {
   const int orientation{(q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)};
 
   if (!orientation)
     return 0;
 
-  return (orientation > 0) ? 1 : 2;
+  return orientation > 0 ? 1 : 2;
 }
 
 size_t find_convex_hull(vector<Point>& points) {
