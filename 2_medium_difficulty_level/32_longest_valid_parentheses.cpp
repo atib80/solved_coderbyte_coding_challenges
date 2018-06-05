@@ -89,18 +89,21 @@ class Solution {
     const size_t str_len{str.length()};
     if (str_len < 2)
       return 0;
-    size_t start{};
+    int start{};
     while (')' == str[start])
       start++;
-    size_t last = str_len - 1;
+    int last = str_len - 1;
     while ('(' == str[last])
       last--;
+
+    if (last < 1)
+      return 0;
 
     stack<size_t> s{};
     vector<int> is_parenthesis_pair_closed(last - start + 1);
     size_t index{};
 
-    for (size_t i{start}; i <= last; i++) {
+    for (int i{start}; i <= last; i++) {
       if ('(' == str[i])
         s.emplace(index++);
       else if (')' == str[i]) {
