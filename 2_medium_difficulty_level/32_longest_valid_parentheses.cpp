@@ -38,17 +38,17 @@ class Solution {
   int longestValidParentheses_v1(string str) {
     if (str.length() < 2)
       return 0;
-    int start{};
+    size_t start{};
     while (')' == str[start])
       start++;
-    int last = str.length() - 1;
+    size_t last = str.length() - 1;
     while ('(' == str[last])
       last--;
 
     stack<size_t> s{};
     map<size_t, bool> is_parenthesis_pair_closed{};
 
-    for (int i{start}; i <= last; i++) {
+    for (size_t i{start}; i <= last; i++) {
       if ('(' == str[i]) {
         s.emplace(i);
         is_parenthesis_pair_closed[i] = false;
@@ -57,9 +57,8 @@ class Solution {
           const size_t prnths_start_index{s.top()};
           s.pop();
           is_parenthesis_pair_closed[prnths_start_index] = true;
-        } else {
+        } else
           is_parenthesis_pair_closed[i] = false;
-        }
       }
     }
 
@@ -90,10 +89,10 @@ class Solution {
     const size_t str_len{str.length()};
     if (str_len < 2)
       return 0;
-    int start{};
+    size_t start{};
     while (')' == str[start])
       start++;
-    int last = str_len - 1;
+    size_t last = str_len - 1;
     while ('(' == str[last])
       last--;
 
@@ -101,16 +100,15 @@ class Solution {
     vector<int> is_parenthesis_pair_closed(last - start + 1);
     size_t index{};
 
-    for (int i{start}; i <= last; i++) {
-      if ('(' == str[i]) {
+    for (size_t i{start}; i <= last; i++) {
+      if ('(' == str[i])
         s.emplace(index++);
-      } else if (')' == str[i]) {
+      else if (')' == str[i]) {
         if (!s.empty()) {
           is_parenthesis_pair_closed[s.top()] = 1;
           s.pop();
-        } else {
+        } else
           index++;
-        }
       }
     }
 
