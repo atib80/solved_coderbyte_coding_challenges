@@ -28,13 +28,14 @@ using namespace std;
 
 string LookSaySequence_v1(const int num) {
   string num_str{to_string(num)};
+  const size_t num_str_len{num_str.length()};
 
   ostringstream oss{};
 
-  for (size_t i{}; i < num_str.length(); i++) {
+  for (size_t i{}; i < num_str_len; i++) {
     size_t count{1};
 
-    while ((i < num_str.length() - 1) && (num_str[i] == num_str[i + 1])) {
+    while (i < num_str_len - 1 && num_str[i] == num_str[i + 1]) {
       count++;
       i++;
     }
