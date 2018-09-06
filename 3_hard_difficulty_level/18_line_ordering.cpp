@@ -66,13 +66,15 @@ string LineOrdering(const string* str_arr, const size_t str_arr_size) {
     else
       continue;
 
-    if (!people.count(r[0]))
-      people.insert(r[0]);
-    if (!people.count(r[2]))
+    // if (!people.count(r[0]))
+    // if (people.find(r[0]) == end(people))
+      people.insert(r[0]); // 'A'
+    // if (!people.count(r[2]))
+    // if (people.find(r[2]) == end(people))
       people.insert(r[2]);
   }
 
-  string line(begin(people), end(people));
+  string line(begin(people), end(people)); // ABCZ
 
   sort(begin(line), end(line));
 

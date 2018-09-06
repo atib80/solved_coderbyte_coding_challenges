@@ -71,7 +71,7 @@ vector<string> split(const string& source,
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (string::npos != max_count && parts.size() == max_count)
       break;
 
     if (current - prev > 0)
