@@ -50,7 +50,18 @@ string trim(const string& input) {
 string Wildcards(string str) {
   str = trim(str);
   const size_t sep_char_pos{str.find(' ')};
-  const string pattern{str.substr(0, sep_char_pos)};
+  string pattern{str.substr(0, sep_char_pos)};
+
+  // Uncommect the following code block if you intend to submit this code solution on coderbyte.
+  /* 
+  for (size_t i{}; i < pattern.length(); i++) {
+    if ('$' == pattern[i]) {
+      pattern.insert(i, 1, '$');
+      i++;
+    }
+  }
+  */
+
   const size_t pattern_len{pattern.length()};
   const string text{str.substr(sep_char_pos + 1)};
   const size_t text_len{text.length()};
