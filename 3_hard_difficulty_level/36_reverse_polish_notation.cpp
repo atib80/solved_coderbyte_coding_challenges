@@ -65,11 +65,10 @@ int evaluate_simple_math_expression(const int first_number,
 }
 
 string evaluate_reverse_polish_notation_math_expression(string expression) {
-  const size_t expression_len{expression.length()};
   size_t current_pos{};
   stack<int> result{};
 
-  while (current_pos < expression_len) {
+  while (current_pos < expression.length()) {
     current_pos = expression.find_first_of("-+*/1234567890", current_pos);
 
     if (string::npos == current_pos)
@@ -77,7 +76,7 @@ string evaluate_reverse_polish_notation_math_expression(string expression) {
 
     if (('-' == expression[current_pos] || '+' == expression[current_pos] ||
          '*' == expression[current_pos] || '/' == expression[current_pos]) &&
-        (current_pos + 1 == expression_len ||
+        (current_pos + 1 == expression.length() ||
          ' ' == expression[current_pos + 1])) {
       if (result.size() < 2)
         throw runtime_error{
@@ -87,9 +86,14 @@ string evaluate_reverse_polish_notation_math_expression(string expression) {
       result.pop();
       const int first_number{result.top()};
       result.pop();
-      result.emplace(evaluate_simple_math_expression(
-          first_number, second_number, expression[current_pos]));
-      current_pos++;
+      try {
+        result.emplace(evaluate_simple_math_expression(
+            first_number, second_number, expression[current_pos]));
+        current_pos++;
+      } catch (exception& e) {
+        cerr << "Exception: " << e.what() << '\n';
+        throw;
+      }
 
     } else {
       const size_t next_pos{expression.find(' ', current_pos + 1)};
@@ -99,7 +103,7 @@ string evaluate_reverse_polish_notation_math_expression(string expression) {
     }
   }
 
-  if (result.size() > 1)
+  if (result.empty() || result.size() > 1)
     throw runtime_error{
         "Input math expression is not formatted correctly according to the "
         "rules imposed by the reverse polish notation!"};
@@ -113,12 +117,12 @@ string ReversePolishNotation(string str) {
 }
 
 int main() {
-  // cout << ReversePolishNotation(move(string{gets(stdin)}));
-  cout << ReversePolishNotation(move(string{"1 2 + 3 *"}))
+  // cout << ReversePolishNotation(string{gets(stdin)});
+  cout << ReversePolishNotation(string{"1 2 + 3 *"})
        << '\n';  // expected output: 9
-  cout << ReversePolishNotation(move(string{"1 1 + 1 + 1 +"}))
+  cout << ReversePolishNotation(string{"1 1 + 1 + 1 +"})
        << '\n';  // expected output: 4
-  cout << ReversePolishNotation(move(string{"4 5 + 2 1 + *"}))
+  cout << ReversePolishNotation(string{"4 5 + 2 1 + *"})
        << '\n';  // expected output: 27
 
   return 0;

@@ -85,13 +85,12 @@ string Wildcards(string str) {
       if (pi + 1 == pattern.find("{", pi + 1)) {
         const size_t ei{pattern.find("}", pi + 2)};
 
-        if (string::npos != ei && ei > pi + 2) {
+        if (ei > pi + 2) {
           count = stoul(pattern.substr(pi + 2, ei - (pi + 2)));
           pi = ei + 1;
         }
-      } else {
-        pi++;
-      }
+      } else pi++;
+      
 
       if (ti > text_len - count)
         return "false";

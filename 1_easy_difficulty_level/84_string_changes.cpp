@@ -28,7 +28,6 @@ string StringChanges(const string& str) {
   output.reserve(str_len);
 
   size_t i{};
-
   char prev_char{};
 
   while (i < str_len) {
