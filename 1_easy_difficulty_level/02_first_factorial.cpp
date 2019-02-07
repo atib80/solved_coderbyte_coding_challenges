@@ -20,14 +20,41 @@ Output: 40320
 
 using namespace std;
 
-int64_t FirstFactorial_v1(int64_t num) {
+template <size_t N = 20>
+struct precalculated_factorials {
+  uint64_t factorials[N + 1];
+
+  constexpr precalculated_factorials() : factorials{} {
+    factorials[0] = factorials[1] = 1;
+
+    for (size_t i{2}; i <= N; ++i)
+      factorials[i] = calculate_factorial(i);
+  }
+
+  constexpr uint64_t calculate_factorial(uint64_t n) const {
+    uint64_t result{n};
+
+    while (--n > 1)
+      result *= n;
+
+    return result;
+  }
+
+  constexpr uint64_t get_factorial_of_specified_number(const uint64_t n) const {
+    return factorials[n];
+  }
+};
+
+static constexpr precalculated_factorials<> factorials;
+
+uint64_t FirstFactorial_v1(uint64_t num) {
   if (!num)
     return 1LL;
 
   if (num < 3LL)
     return num;
 
-  int64_t result{num};
+  uint64_t result{num};
 
   while (num > 2)
     result *= --num;
@@ -35,11 +62,17 @@ int64_t FirstFactorial_v1(int64_t num) {
   return result;
 }
 
-int64_t FirstFactorial_v2(const int64_t num) {
+uint64_t FirstFactorial_v2(const uint64_t num) {
   if (num < 2LL)
     return 1LL;
 
   return num * FirstFactorial_v2(num - 1);
+}
+
+uint64_t FirstFactorial_v3(const uint64_t num) {
+  if (num <= 50)
+    return factorials.get_factorial_of_specified_number(num);
+  return FirstFactorial_v1(num);
 }
 
 int main() {
