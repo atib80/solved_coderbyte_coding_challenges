@@ -177,11 +177,11 @@ bool is_ws_char(const CharType ch) {
   static_assert(is_valid_char_type_v<CharType>,
                 "Specified character type is not supported!");
 
-// #if defined(__GNUC__)
-//   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
-// #elif defined(_MSC_VER)
-//   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
-// #endif
+  // #if defined(__GNUC__)
+  //   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
+  // #elif defined(_MSC_VER)
+  //   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
+  // #endif
 
   switch (ch) {
     case static_cast<CharType>(' '):
@@ -206,12 +206,11 @@ template <
             is_non_const_char_pointer_type_v<T> || is_valid_string_type_v<T>,
         void*>>
 size_t len(T src, const size_t max_allowed_string_length = max_string_length) {
-
-// #if defined(__GNUC__)
-//   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
-// #elif defined(_MSC_VER)
-//   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
-// #endif
+  // #if defined(__GNUC__)
+  //   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
+  // #elif defined(_MSC_VER)
+  //   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
+  // #endif
 
   if constexpr (is_valid_string_type_v<T>) {
     return src.length() > max_allowed_string_length ? max_allowed_string_length
@@ -241,12 +240,11 @@ auto trim(const StringType& src,
           add_const_pointer_to_char_type_t<typename StringType::value_type>
               chars_to_trim =
                   default_whitespace_chars_v<typename StringType::value_type>) {
-
-// #if defined(__GNUC__)
-//   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
-// #elif defined(_MSC_VER)
-//   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
-// #endif
+  // #if defined(__GNUC__)
+  //   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
+  // #elif defined(_MSC_VER)
+  //   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
+  // #endif
 
   using char_type = typename StringType::value_type;
 

@@ -49,9 +49,9 @@ static constexpr precalculated_factorials<> factorials;
 
 uint64_t FirstFactorial_v1(uint64_t num) {
   if (!num)
-    return 1LL;
+    return 1;
 
-  if (num < 3LL)
+  if (num < 3)
     return num;
 
   uint64_t result{num};

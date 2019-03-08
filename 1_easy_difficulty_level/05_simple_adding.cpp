@@ -20,10 +20,10 @@ Output: 9870
 
 using namespace std;
 
-int64_t SimpleAdding(const int64_t num) {
-  int64_t result{1LL};
+uint64_t SimpleAdding(const uint64_t num) {
+  uint64_t result{1ULL};
 
-  for (int64_t i{2LL}; i <= num; i++)
+  for (uint64_t i{2ULL}; i <= num; ++i)
     result += i;
 
   return result;

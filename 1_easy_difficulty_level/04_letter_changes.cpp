@@ -19,6 +19,7 @@ Output: "gvO Ujnft!"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <locale>
 #include <string>
 #include <unordered_set>
 
@@ -28,7 +29,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t begin_str{};
   size_t end_str{str_len - 1};
@@ -39,7 +40,7 @@ string trim(const string& str) {
   }
 
   if (begin_str > end_str)
-    return string{};
+    return {};
 
   for (; end_str > begin_str; --end_str) {
     if (!isspace(str[end_str]))
@@ -55,32 +56,29 @@ string LetterChanges(string str) {
   const unordered_set<char> vowels{'a', 'e', 'i', 'o', 'u'};
 
   for (auto& ch : str) {
-    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z')) {
+    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z'))
       ch += 1;
-    } else if (ch == 'z') {
+    else if (ch == 'z')
       ch = 'a';
-    } else if (ch == 'Z') {
+    else if (ch == 'Z')
       ch = 'A';
-    }
   }
 
-  string final_str{str};
+  const auto& f = use_facet<std::ctype<char>>(locale{});
 
-  transform(begin(str), end(str), begin(final_str), [&](const char ch) {
+  transform(cbegin(str), cend(str), begin(str), [&](const char ch) {
     if (vowels.find(ch) != end(vowels))
-      return static_cast<char>(toupper(ch));
+      return f.toupper(ch);
     return ch;
   });
 
-  return final_str;
+  return str;
 }
 
 int main() {
-  // cout << LetterChanges(move(string{gets(stdin)}));
-  cout << LetterChanges(move(string{"hello*3"}))
-       << '\n';  // expected output: "Ifmmp*3"
-  cout << LetterChanges(move(string{"fun times!"}))
-       << '\n';  // expected output: "gvO Ujnft!"
+  // cout << LetterChanges(gets(stdin));
+  cout << LetterChanges("hello*3") << '\n';     // expected output: "Ifmmp*3"
+  cout << LetterChanges("fun times!") << '\n';  // expected output: "gvO Ujnft!"
 
   return 0;
 }

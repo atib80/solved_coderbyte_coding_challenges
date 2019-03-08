@@ -25,7 +25,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t begin_str{};
   size_t end_str{str_len - 1};
@@ -36,7 +36,7 @@ string trim(const string& str) {
   }
 
   if (begin_str > end_str)
-    return string{};
+    return {};
 
   for (; end_str > begin_str; --end_str) {
     if (!isspace(str[end_str]))
@@ -61,7 +61,7 @@ string LongestWord_v1(string sen) {
       continue;
     }
 
-    if ((word_len > max_word_len) && (string::npos != start_index)) {
+    if (word_len > max_word_len && string::npos != start_index) {
       max_word_len = word_len;
       longest_first_word = sen.substr(start_index, word_len);
     } else if (!word_len)
@@ -71,9 +71,8 @@ string LongestWord_v1(string sen) {
     word_len = 0;
   }
 
-  if ((word_len > max_word_len) && (string::npos != start_index)) {
+  if (word_len > max_word_len && string::npos != start_index)
     longest_first_word = sen.substr(start_index, word_len);
-  }
 
   return longest_first_word;
 }
