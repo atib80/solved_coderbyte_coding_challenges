@@ -16,6 +16,7 @@ Output: 3
 */
 
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -52,11 +53,9 @@ vector<string> split(const string& source,
                      size_t const max_count = string::npos) {
   vector<string> parts{};
 
-  string needle_st{needle};
-
   const size_t source_len{source.length()};
 
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{strlen(needle)};
 
   if (!source_len)
     return parts;
@@ -71,17 +70,17 @@ vector<string> split(const string& source,
   size_t number_of_parts{}, prev{};
 
   while (true) {
-    const size_t current{source.find(needle_st, prev)};
+    const size_t current{source.find(needle, prev)};
 
     if (string::npos == current)
       break;
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (string::npos != max_count && parts.size() == max_count)
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
@@ -94,7 +93,7 @@ vector<string> split(const string& source,
     if (string::npos == max_count)
       parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count))
+    else if (parts.size() < max_count)
       parts.emplace_back(source.substr(prev));
   }
 
@@ -115,7 +114,7 @@ string word_count_v1(string str) {
     if (string::npos == start)
       break;
 
-    size_t last{str.find_first_of(" \t\n\v\f", start + 1)};
+    const size_t last{str.find_first_of(" \t\n\v\f", start + 1)};
 
     if (string::npos == last) {
       word_count++;
@@ -139,21 +138,16 @@ string word_count_v2(string str) {
 }
 
 int main() {
-  // cout << word_count_v1(move(string{gets(stdin)}));
-  cout << word_count_v1(move(string{"Never eat shredded wheat or cake"}))
-       << '\n';  // expected output: 6
-  cout << word_count_v1(move(string{"Hello World"}))
-       << '\n';  // expected output: 2
-  cout << word_count_v1(move(string{"one 22 three"}))
-       << '\n';  // expected output: 3
-  cout << word_count_v1(move(string{"Coderbyte"}))
-       << '\n';  // expected output: 1
-  cout << word_count_v1(move(string{"h333llLo"}))
-       << '\n';                                        // expected output: 1
-  cout << word_count_v1(move(string{"Yo0"})) << '\n';  // expected output: 1
-  cout << word_count_v1(move(string{"commacomma!"}))
-       << '\n';                                       // expected output: 1
-  cout << word_count_v1(move(string{"aq"})) << '\n';  // expected output: 1
+  // cout << word_count_v1(gets(stdin));
+  cout << word_count_v1("Never eat shredded wheat or cake")
+       << '\n';                                   // expected output: 6
+  cout << word_count_v1("Hello World") << '\n';   // expected output: 2
+  cout << word_count_v1("one 22 three") << '\n';  // expected output: 3
+  cout << word_count_v1("Coderbyte") << '\n';     // expected output: 1
+  cout << word_count_v1("h333llLo") << '\n';      // expected output: 1
+  cout << word_count_v1("Yo0") << '\n';           // expected output: 1
+  cout << word_count_v1("commacomma!") << '\n';   // expected output: 1
+  cout << word_count_v1("aq") << '\n';            // expected output: 1
 
   return 0;
 }

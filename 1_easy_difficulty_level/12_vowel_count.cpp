@@ -15,6 +15,7 @@ Input:  "coderbyte"
 Output: 3
 */
 
+#include <deque>
 #include <iostream>
 #include <string>
 #include <unordered_set>
@@ -46,28 +47,42 @@ string trim(const string& str) {
   return str.substr(begin_str, end_str - begin_str + 1);
 }
 
+string int2str(long long number) {
+  deque<char> buffer{};  
+  const bool is_negative{number < 0};
+
+  while (number) {
+    buffer.push_front('0' + number % 10);
+    number /= 10;
+  }
+
+  if (is_negative)
+    buffer.push_front('-');
+
+  return string{cbegin(buffer), cend(buffer)};
+}
+
 string vowel_count(string str) {
   const unordered_set<char> vowels{'A', 'E', 'I', 'O', 'U',
                                    'a', 'e', 'i', 'o', 'u'};
 
-  size_t v_count{};
-
   str = trim(str);
+  size_t v_count{};
 
   for (const auto ch : str) {
     if (vowels.find(ch) != end(vowels))
       v_count++;
   }
 
-  return to_string(v_count);
+  return int2str(v_count);
 }
 
 int main() {
   // cout << vowel_count(gets(stdin));
-  cout << vowel_count(move(string{"All cows eat grass and moo"}))
-       << '\n';                                            // expected output: 8
-  cout << vowel_count(move(string{"hello"})) << '\n';      // expected output: 2
-  cout << vowel_count(move(string{"coderbyte"})) << '\n';  // expected output: 3
+  cout << vowel_count("All cows eat grass and moo")
+       << '\n';                              // expected output: 8
+  cout << vowel_count("hello") << '\n';      // expected output: 2
+  cout << vowel_count("coderbyte") << '\n';  // expected output: 3
 
   return 0;
 }

@@ -28,7 +28,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t first{}, last{str_len - 1};
 
@@ -38,7 +38,7 @@ string trim(const string& str) {
   }
 
   if (first > last)
-    return string{};
+    return {};
 
   for (; last > first; --last) {
     if (!isspace(str[last]))
@@ -48,7 +48,7 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
-string palindrome(string str) {
+string palindrome_v1(string str) {
   str = trim(str);
 
   stack<char> s{};
@@ -62,7 +62,7 @@ string palindrome(string str) {
     q.emplace(ch);
   }
 
-  while (!s.empty() && !q.empty()) {
+  while (!s.empty()) {
     if (s.top() != q.front())
       return "false";
     s.pop();
@@ -88,7 +88,7 @@ string palindrome_v2(string str) {
       continue;
     }
 
-    if (!isalnum(str[j])) {
+    if (!isalpha(str[j])) {
       j--;
       continue;
     }
@@ -104,13 +104,11 @@ string palindrome_v2(string str) {
 }
 
 int main() {
-  // cout << palindrome_v2(move(string{gets(stdin)}));
-  cout << palindrome_v2(move(string{"racecar"}))
-       << '\n';  // expected output: "true"
-  cout << palindrome_v2(move(string{"never odd or even"}))
-       << '\n';  // expected output: "true"
-  cout << palindrome_v2(move(string{"eye"}))
-       << '\n';  // expected output: "true"
+  // cout << palindrome_v2(gets(stdin));
+  cout << palindrome_v2("racecar") << '\n';  // expected output: "true"
+  cout << palindrome_v2("never odd or even")
+       << '\n';                          // expected output: "true"
+  cout << palindrome_v2("eye") << '\n';  // expected output: "true"
 
   return 0;
 }

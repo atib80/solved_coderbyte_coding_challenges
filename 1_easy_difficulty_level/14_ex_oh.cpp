@@ -47,23 +47,38 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
-string ex_oh(string str) {
+string ex_oh_v1(string str) {
   str = trim(str);
 
-  const auto o_count = count(begin(str), end(str), 'o');
-  const auto x_count = count(begin(str), end(str), 'x');
+  const auto o_count{count(cbegin(str), cend(str), 'o')};
+  const auto x_count{count(cbegin(str), cend(str), 'x')};
 
   if (o_count == x_count)
     return "true";
   return "false";
 }
 
+string ex_oh_v2(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  if (!str_len || str_len % 2 == 1)
+    return "false";
+
+  sort(begin(str), end(str));
+
+  if (str[str_len / 2 - 1] != 'o' && str[str_len / 2] != 'x')
+    return "false";
+
+  return "true";
+}
+
 int main() {
-  // cout << ex_oh(move(string{gets(stdin)}));
-  cout << ex_oh(move(string{"xooxxxxooxo"}))
-       << '\n';                                   // expected output: "false"
-  cout << ex_oh(move(string{"xooxxo"})) << '\n';  // expected output: "true"
-  cout << ex_oh(move(string{"x"})) << '\n';       // expected output: "false"
+  // cout << ex_oh_v2(gets(stdin));
+  cout << ex_oh_v2("xooxxxxooxo") << '\n';  // expected output: "false"
+  cout << ex_oh_v2("xooxxo") << '\n';       // expected output: "true"
+  cout << ex_oh_v2("x") << '\n';            // expected output: "false"
 
   return 0;
 }

@@ -21,10 +21,20 @@
 using namespace std;
 
 string TimeConvert(const size_t minutes) {
-  if (minutes < 60)
-    return string{"0:"} + to_string(minutes);
+  if (minutes < 60) {
+  	char buffer[5]{"0:"};
+  	if (minutes < 10) {
+  		buffer.push_back('0' + minutes);
+  		return buffer;
+  	}
 
-  return to_string(minutes / 60) + string{":"} + to_string(minutes % 60);
+  	buffer.push_back('0' + minutes / 10);
+  	minutes %= 10;
+  	buffer.push_back('0' + minutes);
+    return buffer;
+  }
+
+  return to_string(minutes / 60) + ":" + to_string(minutes % 60);
 }
 
 int main() {

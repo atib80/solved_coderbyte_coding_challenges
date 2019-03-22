@@ -33,8 +33,7 @@ struct is_anyone_of<T, First, Rest...>
                                  is_anyone_of<T, Rest...>::value> {};
 
 template <typename T, typename First, typename... Rest>
-static inline constexpr bool is_anyone_of_v =
-    is_anyone_of<T, First, Rest...>::value;
+constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
 
 template <typename CharType>
 struct default_whitespace_chars {};
@@ -60,7 +59,7 @@ struct default_whitespace_chars<char32_t> {
 };
 
 template <typename CharType>
-static constexpr const CharType* default_whitespace_chars_v =
+constexpr const CharType* default_whitespace_chars_v =
     default_whitespace_chars<CharType>::value;
 
 template <typename T>
@@ -79,7 +78,7 @@ struct is_valid_char_type {
 };
 
 template <typename T>
-static constexpr const bool is_valid_char_type_v = is_valid_char_type<T>::value;
+constexpr const bool is_valid_char_type_v = is_valid_char_type<T>::value;
 
 template <typename T>
 struct is_non_const_char_pointer_type {
@@ -95,7 +94,7 @@ struct is_non_const_char_pointer_type {
 };
 
 template <typename T>
-static constexpr const bool is_non_const_char_pointer_type_v =
+constexpr const bool is_non_const_char_pointer_type_v =
     is_non_const_char_pointer_type<T>::value;
 
 template <typename T>
@@ -112,7 +111,7 @@ struct is_const_char_pointer_type {
 };
 
 template <typename T>
-static constexpr const bool is_const_char_pointer_type_v =
+constexpr const bool is_const_char_pointer_type_v =
     is_const_char_pointer_type<T>::value;
 
 template <typename T>
@@ -122,7 +121,7 @@ struct is_non_const_char_array_type {
 };
 
 template <typename T>
-static constexpr const bool is_non_const_char_array_type_v =
+constexpr const bool is_non_const_char_array_type_v =
     is_non_const_char_array_type<T>::value;
 
 template <typename T>
@@ -132,7 +131,7 @@ struct is_const_char_array_type {
 };
 
 template <typename T>
-static constexpr const bool is_const_char_array_type_v =
+constexpr const bool is_const_char_array_type_v =
     is_const_char_array_type<T>::value;
 
 template <typename T>
@@ -146,7 +145,7 @@ struct is_valid_string_type {
 };
 
 template <typename T>
-static constexpr const bool is_valid_string_type_v =
+constexpr const bool is_valid_string_type_v =
     is_valid_string_type<T>::value;
 
 template <typename T>
@@ -170,7 +169,7 @@ struct is_character_type {
 };
 
 template <typename T>
-static inline constexpr bool is_character_type_v = is_character_type<T>::value;
+constexpr bool is_character_type_v = is_character_type<T>::value;
 
 template <typename CharType>
 bool is_ws_char(const CharType ch) {
@@ -203,8 +202,7 @@ template <
     typename ConditionType = std::enable_if_t<
         is_const_char_array_type_v<T> || is_non_const_char_array_type_v<T> ||
             is_const_char_pointer_type_v<T> ||
-            is_non_const_char_pointer_type_v<T> || is_valid_string_type_v<T>,
-        void*>>
+            is_non_const_char_pointer_type_v<T> || is_valid_string_type_v<T>>>
 size_t len(T src, const size_t max_allowed_string_length = max_string_length) {
   // #if defined(__GNUC__)
   //   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
@@ -212,11 +210,10 @@ size_t len(T src, const size_t max_allowed_string_length = max_string_length) {
   //   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
   // #endif
 
-  if constexpr (is_valid_string_type_v<T>) {
-    return src.length() > max_allowed_string_length ? max_allowed_string_length
-                                                    : src.length();
-  } else {
-    if (!src)
+  if constexpr (is_valid_string_type_v<T>) 
+    return src.length() > max_allowed_string_length ? max_allowed_string_length : src.length();
+  else {
+    if (nullptr == src)
       return 0u;
 
     size_t length{};
@@ -234,7 +231,7 @@ size_t len(T src, const size_t max_allowed_string_length = max_string_length) {
 
 template <typename StringType,
           typename ConditionType =
-              std::enable_if_t<is_valid_string_type_v<StringType>, void*>>
+              std::enable_if_t<is_valid_string_type_v<StringType>>>
 
 auto trim(const StringType& src,
           add_const_pointer_to_char_type_t<typename StringType::value_type>
@@ -269,7 +266,7 @@ auto trim(const StringType& src,
                                })
                       .base()};
 
-  return StringType(first, last);
+  return StringType{first, last};
 }
 
 using namespace std;

@@ -29,24 +29,22 @@ string AlphabetSoup_v1(string str) {
 }
 
 int compare(const void* lc, const void* rc) {
-  // const int diff{*static_cast<const char*>(lc) - *static_cast<const char*>(rc)}; 
-  // if (!diff) return 0; 
-  // return diff/abs(diff);
-  return (*static_cast<const char*>(lc) - *static_cast<const char*>(rc));
+  return *static_cast<const char*>(lc) - *static_cast<const char*>(rc);
 }
 
 string AlphabetSoup_v2(string str) {
-  qsort(&str[0], str.length(), sizeof(char), &compare);
+  if (str.empty()) return {};
+  qsort(&str[0], str.length(), sizeof(str.front()), compare);
   return str;
 }
 
 int main() {
-  // cout << AlphabetSoup_v2(move(string{gets(stdin)}));
-  cout << AlphabetSoup_v2(move(string{"hello"}))
+  // cout << AlphabetSoup_v2(gets(stdin));
+  cout << AlphabetSoup_v2("hello")
        << '\n';  // expected output: ehllo
-  cout << AlphabetSoup_v2(move(string{"coderbyte"}))
+  cout << AlphabetSoup_v2("coderbyte")
        << '\n';  // expected output: bcdeeorty
-  cout << AlphabetSoup_v2(move(string{"hooplah"}))
+  cout << AlphabetSoup_v2("hooplah")
        << '\n';  // expected output: ahhloop
 
   return 0;

@@ -112,11 +112,11 @@ string LongestWord_v2(string sen) {
 
 int main() {
   // cout << LongestWord_v2(gets(stdin));
-  cout << LongestWord_v2(move(string{"fun&!! time"}))
+  cout << LongestWord_v2("fun&!! time")
        << '\n';  // expected output: "time"
-  cout << LongestWord_v2(move(string{"I love dogs"}))
+  cout << LongestWord_v2("I love dogs")
        << '\n';  // expected output: "love"
-  cout << LongestWord_v2(move(string{"I love both cats and dogs as well!"}))
+  cout << LongestWord_v2("I love both cats and dogs as well!")
        << '\n';  // expected output: "love"
 
   return 0;

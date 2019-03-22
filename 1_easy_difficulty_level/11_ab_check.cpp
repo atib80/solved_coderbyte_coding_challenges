@@ -67,10 +67,10 @@ string ABCheck_v1(string str) {
 
   for (const int a_pos : a_positions) {
     for (const int b_pos : b_positions) {
-      if ((b_pos - a_pos) == 4)
+      if (b_pos - a_pos == 4)
         return "true";
 
-      if ((b_pos - a_pos) > 4)
+      if (b_pos - a_pos > 4)
         break;
     }
   }
@@ -79,10 +79,10 @@ string ABCheck_v1(string str) {
 
   for (const int b_pos : b_positions) {
     for (const int a_pos : a_positions) {
-      if ((a_pos - b_pos) == 4)
+      if (a_pos - b_pos == 4)
         return "true";
 
-      if ((a_pos - b_pos) > 4)
+      if (a_pos - b_pos > 4)
         break;
     }
   }
@@ -106,7 +106,7 @@ string ABCheck_v2(string str) {
     if (string::npos == next_char_pos)
       return "false";
 
-    if ((prev_char != str[next_char_pos]) && (next_char_pos - start == 4))
+    if (prev_char != str[next_char_pos] && next_char_pos - start == 4)
       return "true";
 
     start = next_char_pos;
@@ -114,12 +114,12 @@ string ABCheck_v2(string str) {
 }
 
 int main() {
-  // cout << ABCheck_v2(move(string{gets(stdin)}));
-  cout << ABCheck_v2(move(string{"lane borrowed"}))
+  // cout << ABCheck_v2(gets(stdin));
+  cout << ABCheck_v2("lane borrowed")
        << '\n';  // expected output: "true"
-  cout << ABCheck_v2(move(string{"after badly"}))
+  cout << ABCheck_v2("after badly")
        << '\n';  // expected output: "false"
-  cout << ABCheck_v2(move(string{"Laura sobs"}))
+  cout << ABCheck_v2("Laura sobs")
        << '\n';  // expected output: "true"
 
   return 0;
