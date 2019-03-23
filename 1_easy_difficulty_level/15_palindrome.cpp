@@ -51,6 +51,9 @@ string trim(const string& str) {
 string palindrome_v1(string str) {
   str = trim(str);
 
+  if (str.length() < 2)
+    return "false";
+
   stack<char> s{};
   queue<char> q{};
 
