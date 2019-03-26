@@ -32,8 +32,8 @@ string array_addition_1(int* arr, const size_t arr_size) {
 
   const int maximum{arr[0]};
 
-  const auto negative_pos = find_if(arr, arr + arr_size,
-                              [](const int& n) { return n < 0; });
+  const auto negative_pos =
+      find_if(arr, arr + arr_size, [](const int n) { return n < 0; });
 
   for (size_t i{1}; i < arr_size; i++) {
     int current_sum{};
@@ -58,8 +58,8 @@ string array_addition_1(int* arr, const size_t arr_size) {
           if (csum > maximum)
             current_sum -= arr[j];
 
-        } else 
-          current_sum -= arr[j];        
+        } else
+          current_sum -= arr[j];
       }
     }
   }

@@ -26,7 +26,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t begin_str{};
   size_t end_str{str_len - 1};
@@ -37,7 +37,7 @@ string trim(const string& str) {
   }
 
   if (begin_str > end_str)
-    return string{};
+    return {};
 
   for (; end_str > begin_str; --end_str) {
     if (!isspace(str[end_str]))
@@ -70,7 +70,7 @@ string vowel_count(string str) {
   size_t v_count{};
 
   for (const auto ch : str) {
-    if (vowels.find(ch) != end(vowels))
+    if (vowels.find(ch) != cend(vowels))
       v_count++;
   }
 

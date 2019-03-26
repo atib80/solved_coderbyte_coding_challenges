@@ -41,7 +41,9 @@ struct precalculated_factorials {
   }
 
   constexpr uint64_t get_factorial_of_specified_number(const uint64_t n) const {
-    return factorials[n];
+    if (n <= N) 
+      return factorials[n];
+    return calculate_factorial(n);
   }
 };
 

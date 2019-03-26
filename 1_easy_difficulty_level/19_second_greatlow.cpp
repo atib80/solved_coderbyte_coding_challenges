@@ -33,15 +33,17 @@ string second_great_low(int* arr, const int arr_size) {
 
   int second_min_element{arr[0]};
   int second_max_element{arr[arr_size - 1]};
+  int x{};
 
   for (int i{1}; i < arr_size; i++) {
     if (arr[i] > second_min_element) {
       second_min_element = arr[i];
+      x = i;
       break;
     }
   }
 
-  for (int j{arr_size - 2}; j >= 0; j--) {
+  for (int j{arr_size - 2}; j >= x; j--) {
     if (arr[j] < second_max_element) {
       second_max_element = arr[j];
       break;

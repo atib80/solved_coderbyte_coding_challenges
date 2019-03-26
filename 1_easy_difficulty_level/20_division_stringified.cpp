@@ -29,13 +29,13 @@ string DivisionStringified(const vector<int64_t>& numbers) {
   const int64_t num2{numbers[1]};
   if (0 == num2)
     return "Not possible!";
-  const double result{static_cast<double>(num1) / num2};
-  const int64_t whole_part{static_cast<int64_t>(round(result))};
+  const int64_t whole_part{
+      static_cast<int64_t>(round(static_cast<double>(num1) / num2))};
   string whole_part_str{to_string(whole_part)};
   if (whole_part_str.length() <= 3)
     return whole_part_str;
 
-  for (int i{static_cast<int>(whole_part_str.length()) - 3}; i > 0; i -= 3)
+  for (int i = whole_part_str.length() - 3; i > 0; i -= 3)
     whole_part_str.insert(i, 1, ',');
 
   return whole_part_str;

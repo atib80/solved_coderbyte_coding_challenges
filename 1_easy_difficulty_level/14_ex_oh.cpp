@@ -27,7 +27,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t first{}, last{str_len - 1};
 
@@ -37,7 +37,7 @@ string trim(const string& str) {
   }
 
   if (first > last)
-    return string{};
+    return {};
 
   for (; last > first; --last) {
     if (!isspace(str[last]))
@@ -47,26 +47,28 @@ string trim(const string& str) {
   return str.substr(first, last - first + 1);
 }
 
+// time complexity: O(N + 2N + c) -> O(N)
 string ex_oh_v1(string str) {
   str = trim(str);
 
   const auto o_count{count(cbegin(str), cend(str), 'o')};
   const auto x_count{count(cbegin(str), cend(str), 'x')};
-
+ 
   if (o_count == x_count)
     return "true";
   return "false";
 }
 
+// time complexity: O(N + Nlog2N + C) -> O(Nlog2N)
 string ex_oh_v2(string str) {
   str = trim(str);
 
-  const size_t str_len{str.length()};
+  const size_t str_len{str.length()}; // O(N)
 
   if (!str_len || str_len % 2 == 1)
     return "false";
 
-  sort(begin(str), end(str));
+  sort(begin(str), end(str)); // NlogN
 
   if (str[str_len / 2 - 1] != 'o' && str[str_len / 2] != 'x')
     return "false";

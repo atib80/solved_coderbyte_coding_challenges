@@ -19,9 +19,11 @@ Output: -1
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
-#include <unordered_set>
+#include <string_view>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -31,7 +33,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t first{}, last{str_len - 1};
 
@@ -41,7 +43,7 @@ string trim(const string& str) {
   }
 
   if (first > last)
-    return string{};
+    return {};
 
   for (; last > first; --last) {
     if (!isspace(str[last]))
@@ -55,12 +57,8 @@ vector<string> split(const string& source,
                      const char* needle,
                      size_t const max_count = string::npos) {
   vector<string> parts{};
-
-  string needle_st{needle};
-
   const size_t source_len{source.length()};
-
-  const size_t needle_len{needle_st.size()};
+  const size_t needle_len{strlen(needle)};
 
   if (!source_len)
     return parts;
@@ -75,17 +73,17 @@ vector<string> split(const string& source,
   size_t number_of_parts{}, prev{};
 
   while (true) {
-    const size_t current{source.find(needle_st, prev)};
+    const size_t current{source.find(needle, prev)};
 
     if (string::npos == current)
       break;
 
     number_of_parts++;
 
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (string::npos != max_count && parts.size() == max_count)
       break;
 
-    if ((current - prev) > 0)
+    if (current - prev > 0)
       parts.emplace_back(source.substr(prev, current - prev));
 
     prev = current + needle_len;
@@ -98,7 +96,7 @@ vector<string> split(const string& source,
     if (string::npos == max_count)
       parts.emplace_back(source.substr(prev));
 
-    else if ((string::npos != max_count) && (parts.size() < max_count))
+    else if (parts.size() < max_count)
       parts.emplace_back(source.substr(prev));
   }
 
@@ -112,7 +110,7 @@ string LetterCountI_v1(string str) {
 
   size_t start{};
   size_t count_of_max_repeated_letters{1};
-  string word{};
+  string_view word{};
 
   while (start < str_len) {
     start = str.find_first_not_of(' ', start);
@@ -125,31 +123,28 @@ string LetterCountI_v1(string str) {
     if (string::npos == last)
       last = str_len;
 
-    unordered_set<char> visited_chars{};
+    unordered_map<char, size_t> char_count{};
+
+    for (size_t i{start}; i < last; i++)
+      char_count[str[i]]++;
+
     size_t rep_char_count{};
 
-    for (size_t i{start}; i < last; i++) {
-      if (visited_chars.count(str[i]))
-        continue;
-
-      visited_chars.insert(str[i]);
-
-      const auto ch_freq = count(begin(str) + start, begin(str) + last, str[i]);
-
-      if (ch_freq > 1)
-        rep_char_count += ch_freq;
+    for (const auto& p : char_count) {
+      if (p.second > 1)
+        rep_char_count += p.second;
     }
 
     if (rep_char_count > count_of_max_repeated_letters) {
       count_of_max_repeated_letters = rep_char_count;
-      word = str.substr(start, last - start);
+      word = string_view{str.c_str() + start, last - start};
     }
 
     start = last + 1;
   }
 
   if (count_of_max_repeated_letters > 1)
-    return word;
+    return string{word};
 
   return "-1";
 }
@@ -160,44 +155,40 @@ string LetterCountI_v2(string str) {
   const vector<string> words{split(str, " ")};
 
   size_t count_of_max_repeated_letters{1};
-  string found_word{};
+  size_t found_word_index{string::npos};
 
-  for (const auto& word : words) {
-    unordered_set<char> visited_chars{};
+  for (size_t i{}; i < words.size(); i++) {
+    unordered_map<char, size_t> char_count{};
+
+    for (const char ch : words[i])
+      char_count[ch]++;
+
     size_t rep_char_count{};
 
-    for (const char ch : word) {
-      if (visited_chars.count(ch))
-        continue;
-
-      visited_chars.insert(ch);
-
-      const auto ch_freq = count(begin(word), end(word), ch);
-
-      if (ch_freq > 1)
-        rep_char_count += ch_freq;
+    for (const auto& p : char_count) {
+      if (p.second > 1)
+        rep_char_count += p.second;
     }
 
     if (rep_char_count > count_of_max_repeated_letters) {
       count_of_max_repeated_letters = rep_char_count;
-      found_word = word;
+      found_word_index = i;
     }
   }
 
   if (count_of_max_repeated_letters > 1)
-    return found_word;
+    return words[found_word_index];
 
   return "-1";
 }
 
 int main() {
-  // cout << LetterCountI_v1(move(string{gets(stdin)}));
-  cout << LetterCountI_v1(move(string{"Today, is the greatest day ever!"}))
+  // cout << LetterCountI_v2(gets(stdin));
+  cout << LetterCountI_v2("Today, is the greatest day ever!")
        << '\n';  // expected output: "greatest"
-  cout << LetterCountI_v1(move(string{"Hello apple pie"}))
-       << '\n';  // expected output: "Hello"
-  cout << LetterCountI_v1(move(string{"No words"}))
-       << '\n';  // expected output: "-1"
+  cout << LetterCountI_v2("Hello apple pie")
+       << '\n';                                 // expected output: "Hello"
+  cout << LetterCountI_v2("No words") << '\n';  // expected output: "-1"
 
   return 0;
 }

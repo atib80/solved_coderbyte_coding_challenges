@@ -36,6 +36,7 @@ struct is_anyone_of<T, First, Rest...>
                              std::is_same_v<T, First> ||
                                  is_anyone_of<T, Rest...>::value> {};
 
+
 template <typename T, typename First, typename... Rest>
 inline constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
 
@@ -164,18 +165,19 @@ constexpr const bool is_valid_string_type_v = is_valid_string_type<T>::value;
 
 template <typename T>
 struct get_string_or_string_view_char_type {
-  static_assert(
-      is_anyone_of_v<
-          std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>,
-          std::string,
-          std::wstring,
-          std::u16string,
-          std::u32string,
-          std::string_view,
-          std::wstring_view,
-          std::u16string_view,
-          std::u32string_view>);
-  using type = typename T::value_type;
+  using type = typename std::remove_cv_t<std::remove_pointer_t<std::decay_t<T>>>::value_type;
+};
+
+template <typename T, size_t N>
+struct get_string_or_string_view_char_type<T[N]> {
+
+  using type = typename std::remove_all_extents_t<T>::value_type;
+};
+
+template <typename T>
+struct get_string_or_string_view_char_type<T[]> {
+
+  using type = typename std::remove_all_extents_t<T>::value_type;
 };
 
 template <typename T>
@@ -185,7 +187,7 @@ using get_string_or_string_view_char_type_t =
 template <typename T>
 struct is_valid_string_view_type {
   static constexpr const bool value = is_anyone_of_v<
-      std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>,
+      std::remove_cv_t<std::remove_pointer_t<std::decay_t<T>>>,
       std::string_view,
       std::wstring_view,
       std::u16string_view,
@@ -198,12 +200,7 @@ constexpr const bool is_valid_string_view_type_v =
 
 template <typename T>
 struct get_char_type {
-  using type = std::conditional_t<
-      is_valid_char_type_v<T>,
-      T,
-      std::enable_if_t<is_char_pointer_type_v<T> || is_char_array_type_v<T>,
-                       std::remove_cv_t<std::remove_pointer_t<
-                           std::remove_cv_t<std::decay_t<T>>>>>>;
+  using type = std::enable_if_t<is_valid_char_type_v<std::remove_all_extents_t<T>>, std::remove_cv_t<std::remove_all_extents_t<T>>>;
 };
 
 template <>

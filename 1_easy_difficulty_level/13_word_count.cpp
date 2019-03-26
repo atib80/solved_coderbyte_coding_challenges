@@ -27,7 +27,7 @@ string trim(const string& str) {
   const size_t str_len{str.length()};
 
   if (!str_len)
-    return string{};
+    return {};
 
   size_t begin_str{};
   size_t end_str{str_len - 1};
@@ -38,7 +38,7 @@ string trim(const string& str) {
   }
 
   if (begin_str > end_str)
-    return string{};
+    return {};
 
   for (; end_str > begin_str; --end_str) {
     if (!isspace(str[end_str]))
