@@ -20,6 +20,7 @@ Input:  2,4,16,24
 Output: "-1"
 */
 
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -30,20 +31,25 @@ string ArithGeo(const int* arr, const size_t arr_size) {
     return "-1";
 
   bool is_arithmetic{arr[1] - arr[0] != 0};
-  bool is_geometric{0 != arr[0] && 0 != arr[1]};
+  bool is_geometric{0 != arr[0] && 0 != arr[1] && arr[0] != arr[1] &&
+                    ((arr[1] > arr[0] && arr[1] % arr[0] == 0) ||
+                     (arr[0] > arr[1] && arr[0] % arr[1] == 0))};
 
   const int diff{arr[1] - arr[0]};
+  const int factor{
+      is_geometric ? (arr[1] > arr[0] ? arr[1] / arr[0] : arr[0] / arr[1]) : 1};
+  const bool is_inc_geometric{arr[1] > arr[0]};
 
-  int factor{1};
-  if (is_geometric)
-    factor = arr[1] / arr[0];
-
-  for (size_t i{1}; i < arr_size && (is_arithmetic || is_geometric); i++) {
+  for (size_t i{2}; i < arr_size && (is_arithmetic || is_geometric); i++) {
     if (is_arithmetic && diff != arr[i] - arr[i - 1])
       is_arithmetic = false;
 
-    if (is_geometric && factor != arr[i] / arr[i - 1])
-      is_geometric = false;
+    if (is_geometric) {
+      if (is_inc_geometric && factor != arr[i] / arr[i - 1])
+        is_geometric = false;
+      else if (!is_inc_geometric && factor != arr[i - 1] / arr[i])
+        is_geometric = false;
+    }
   }
 
   if (is_arithmetic)
