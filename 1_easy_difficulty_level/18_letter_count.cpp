@@ -144,7 +144,7 @@ string LetterCountI_v1(string str) {
   }
 
   if (count_of_max_repeated_letters > 1)
-    return string{word};
+    return string{word.data(), word.length()};
 
   return "-1";
 }
@@ -176,7 +176,7 @@ string LetterCountI_v2(string str) {
     }
   }
 
-  if (count_of_max_repeated_letters > 1)
+  if (count_of_max_repeated_letters > 1 && string::npos != found_word_index)
     return words[found_word_index];
 
   return "-1";
