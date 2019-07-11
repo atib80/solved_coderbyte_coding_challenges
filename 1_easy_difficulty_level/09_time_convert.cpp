@@ -18,30 +18,30 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-
-string TimeConvert(const size_t minutes) {
+std::string TimeConvert(size_t minutes) {
   if (minutes < 60) {
-  	char buffer[5]{"0:"};
-  	if (minutes < 10) {
-  		buffer.push_back('0' + minutes);
-  		return buffer;
-  	}
+    static char buffer[5]{"0:"};
+    if (minutes < 10) {
+      buffer[2] = '0' + minutes;
+      buffer[3] = 0;
+      return buffer;
+    }
 
-  	buffer.push_back('0' + minutes / 10);
-  	minutes %= 10;
-  	buffer.push_back('0' + minutes);
+    buffer[2] = '0' + minutes / 10;
+    minutes %= 10;
+    buffer[3] = '0' + minutes;
+    buffer[4] = 0;
     return buffer;
   }
 
-  return to_string(minutes / 60) + ":" + to_string(minutes % 60);
+  return std::to_string(minutes / 60) + ":" + std::to_string(minutes % 60);
 }
 
 int main() {
   // cout << TimeConvert(gets(stdin));
-  cout << TimeConvert(120) << '\n';  // expected output: "2:0"
-  cout << TimeConvert(35) << '\n';   // expected output: "0:35"
-  cout << TimeConvert(256) << '\n';  // expected output: "4:16"
+  std::cout << TimeConvert(120) << '\n';  // expected output: "2:0"
+  std::cout << TimeConvert(35) << '\n';   // expected output: "0:35"
+  std::cout << TimeConvert(256) << '\n';  // expected output: "4:16"
 
   return 0;
 }
