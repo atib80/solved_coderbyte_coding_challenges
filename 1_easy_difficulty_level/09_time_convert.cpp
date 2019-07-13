@@ -15,64 +15,56 @@
  Output: "0:45"
  */
 
+#include <array>
 #include <iostream>
+#include <utility>
 
+template <typename CharType, size_t BUFFER_LENGTH>
 class Solution {
-  static constexpr const size_t buf_len{16};
-  mutable char buffer[buf_len];
+  mutable std::array<CharType, BUFFER_LENGTH> buffer;
 
  public:
   constexpr Solution() : buffer{} {}
 
-  constexpr const char* TimeConvert(size_t minutes) const {
-    if (minutes < 60) {
-      buffer[0] = '0';
-      buffer[1] = ':';
-
-      if (minutes < 10) {
-        buffer[2] = '0' + minutes;
-        buffer[3] = 0;
-        return buffer;
-      }
-
-      buffer[2] = '0' + minutes / 10;
-      minutes %= 10;
-      buffer[3] = '0' + minutes;
-      buffer[4] = 0;
-      return buffer;
-    }
-
-    size_t hours{minutes / 60}, index{buf_len - 1};
+  constexpr const CharType* TimeConvert(size_t minutes) const {
+    size_t hours{minutes / 60}, index{};
     minutes %= 60;
 
-    while (hours > 0) {
-      buffer[index--] = '0' + hours % 10;
-      hours /= 10;
+    if (0u == minutes)
+
+      buffer[index++] = static_cast<CharType>('0');
+
+    else {
+      while (minutes > 0) {
+        buffer[index++] = static_cast<CharType>('0') + minutes % 10;
+        minutes /= 10;
+      }
     }
 
-    for (size_t i{}, j{index + 1}; j < buf_len; ++i, ++j) {
-      buffer[i] = buffer[j];
-      index = i;
+    buffer[index++] = static_cast<CharType>(':');
+
+    if (0u == hours)
+
+      buffer[index++] = static_cast<CharType>('0');
+
+    else {
+      while (hours > 0) {
+        buffer[index++] = static_cast<CharType>('0') + hours % 10;
+        hours /= 10;
+      }
     }
 
-    buffer[++index] = ':';
+    buffer[index] = static_cast<CharType>('\0');
 
-    size_t offset = minutes > 9 ? 2 : 1;
+    for (size_t i{}, j{index - 1}; i < j; ++i, --j)
+      std::swap(buffer[i], buffer[j]);
 
-    buffer[index + offset + 1] = 0;
-
-    buffer[index + offset] = '0' + minutes % 10;
-    minutes /= 10;
-    --offset;
-    if (minutes > 0)
-      buffer[index + offset] = '0' + minutes;
-
-    return buffer;
+    return buffer.data();
   }
 };
 
 int main() {
-  constexpr static Solution s{};
+  constexpr static Solution<char, 16> s{};
 
   // cout << s.TimeConvert(gets(stdin));
   std::cout << s.TimeConvert(120) << '\n';  // expected output: "2:0"
