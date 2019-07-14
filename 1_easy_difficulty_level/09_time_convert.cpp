@@ -17,47 +17,91 @@
 
 #include <array>
 #include <iostream>
+#include <type_traits>
 #include <utility>
 
-template <typename CharType, size_t BUFFER_LENGTH>
+template <typename, typename...>
+struct is_anyone_of : std::false_type {};
+
+template <typename T, typename First, typename... Rest>
+struct is_anyone_of<T, First, Rest...>
+    : std::integral_constant<bool,
+                             std::is_same_v<T, First> ||
+                                 is_anyone_of<T, Rest...>::value> {};
+
+template <typename T, typename First, typename... Rest>
+constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
+
+template <typename T>
+struct get_char_type {
+  using type = std::remove_cv_t<std::remove_pointer_t<std::decay_t<T>>>;
+  static_assert(is_anyone_of_v<type, char, wchar_t, char16_t, char32_t>);
+};
+
+template <typename T>
+using get_char_type_t = typename get_char_type<T>::type;
+
+template <typename T>
+struct is_valid_char_type {
+  static constexpr const bool value =
+      is_anyone_of_v<std::remove_cv_t<T>, char, wchar_t, char16_t, char32_t>;
+};
+
+template <typename T>
+constexpr const bool is_valid_char_type_v = is_valid_char_type<T>::value;
+
+template <typename CharType,
+          size_t BUFFER_LENGTH,
+          typename =
+              std::enable_if_t<is_valid_char_type_v<get_char_type_t<CharType>>>>
 class Solution {
   mutable std::array<CharType, BUFFER_LENGTH> buffer;
 
  public:
   constexpr Solution() : buffer{} {}
 
-  constexpr const CharType* TimeConvert(size_t minutes) const {
-    size_t hours{minutes / 60}, index{};
-    minutes %= 60;
+  template <typename T>
+  constexpr const CharType* TimeConvert(T minutes) const {
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+      T hours{minutes / 60};
+      minutes %= 60;
+      size_t index{};
 
-    if (0u == minutes)
+      if (0u == minutes)
 
-      buffer[index++] = static_cast<CharType>('0');
+        buffer.at(index++) = static_cast<CharType>('0');
 
-    else {
-      while (minutes > 0) {
-        buffer[index++] = static_cast<CharType>('0') + minutes % 10;
-        minutes /= 10;
+      else {
+        while (minutes > 0) {
+          buffer.at(index++) = static_cast<CharType>('0') + minutes % 10;
+          minutes /= 10;
+        }
       }
-    }
 
-    buffer[index++] = static_cast<CharType>(':');
+      buffer.at(index++) = static_cast<CharType>(':');
 
-    if (0u == hours)
+      if (0u == hours)
 
-      buffer[index++] = static_cast<CharType>('0');
+        buffer.at(index++) = static_cast<CharType>('0');
 
-    else {
-      while (hours > 0) {
-        buffer[index++] = static_cast<CharType>('0') + hours % 10;
-        hours /= 10;
+      else {
+        while (hours > 0) {
+          buffer.at(index++) = static_cast<CharType>('0') + hours % 10;
+          hours /= 10;
+        }
       }
+
+      buffer.at(index) = static_cast<CharType>('\0');
+
+      for (size_t i{}, j{index - 1}; i < j; ++i, --j)
+        std::swap(buffer.at(i), buffer.at(j));
+
+    } else {
+      buffer.at(0) = static_cast<CharType>('N');
+      buffer.at(1) = static_cast<CharType>('a');
+      buffer.at(2) = static_cast<CharType>('N');
+      buffer.at(2) = static_cast<CharType>('\0');
     }
-
-    buffer[index] = static_cast<CharType>('\0');
-
-    for (size_t i{}, j{index - 1}; i < j; ++i, --j)
-      std::swap(buffer[i], buffer[j]);
 
     return buffer.data();
   }
