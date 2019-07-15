@@ -61,13 +61,14 @@ class Solution {
   constexpr Solution() : buffer{} {}
 
   template <typename T>
-  constexpr const CharType* TimeConvert(T minutes) const {
+  constexpr const CharType* TimeConvert(const T time_in_minutes) const {
     if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
-      T hours{minutes / 60};
+      uint64_t minutes{static_cast<uint64_t>(time_in_minutes)};
+      uint64_t hours{minutes / 60};
       minutes %= 60;
       size_t index{};
 
-      if (0u == minutes)
+      if (0 == minutes)
 
         buffer.at(index++) = static_cast<CharType>('0');
 
@@ -80,7 +81,7 @@ class Solution {
 
       buffer.at(index++) = static_cast<CharType>(':');
 
-      if (0u == hours)
+      if (0 == hours)
 
         buffer.at(index++) = static_cast<CharType>('0');
 
