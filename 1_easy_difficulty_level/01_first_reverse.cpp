@@ -74,7 +74,7 @@ using get_char_type_t = typename get_char_type<T>::type;
 template <typename T>
 struct is_valid_char_type {
   static constexpr const bool value =
-      is_anyone_of_v<std::remove_cv_t<T, char, wchar_t, char16_t, char32_t>>;
+      is_anyone_of_v<std::remove_cv_t<T>, char, wchar_t, char16_t, char32_t>;
 };
 
 template <typename T>
@@ -145,8 +145,7 @@ struct is_valid_string_type {
 };
 
 template <typename T>
-constexpr const bool is_valid_string_type_v =
-    is_valid_string_type<T>::value;
+constexpr const bool is_valid_string_type_v = is_valid_string_type<T>::value;
 
 template <typename T>
 struct add_const_pointer_to_char_type {
@@ -201,8 +200,8 @@ template <
     typename T,
     typename ConditionType = std::enable_if_t<
         is_const_char_array_type_v<T> || is_non_const_char_array_type_v<T> ||
-            is_const_char_pointer_type_v<T> ||
-            is_non_const_char_pointer_type_v<T> || is_valid_string_type_v<T>>>
+        is_const_char_pointer_type_v<T> ||
+        is_non_const_char_pointer_type_v<T> || is_valid_string_type_v<T>>>
 size_t len(T src, const size_t max_allowed_string_length = max_string_length) {
   // #if defined(__GNUC__)
   //   printf("__PRETTY_FUNCTION__ -> %s\n", __PRETTY_FUNCTION__);
@@ -210,8 +209,9 @@ size_t len(T src, const size_t max_allowed_string_length = max_string_length) {
   //   printf("__FUNCSIG__ -> %s\n", __FUNCSIG__);
   // #endif
 
-  if constexpr (is_valid_string_type_v<T>) 
-    return src.length() > max_allowed_string_length ? max_allowed_string_length : src.length();
+  if constexpr (is_valid_string_type_v<T>)
+    return src.length() > max_allowed_string_length ? max_allowed_string_length
+                                                    : src.length();
   else {
     if (nullptr == src)
       return 0u;
