@@ -15,9 +15,11 @@ Input:  "I love dogs"
 Output: "love"
 */
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
@@ -110,13 +112,48 @@ string LongestWord_v2(string sen) {
   return longest_first_word;
 }
 
+string LongestWord_v3(string sen) {
+  const unordered_set<char> alpha_num_chars{
+      cbegin("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
+      cend("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")};
+
+  sen = trim(sen);
+  auto start = cbegin(sen);
+  const auto last = cend(sen);
+  ptrdiff_t max_word_len{};
+  string longest_first_word{};
+
+  while (start < last) {
+    start = std::find_if(start, last, [&alpha_num_chars](const char ch) {
+      return cend(alpha_num_chars) != alpha_num_chars.find(ch);
+    });
+
+    if (last == start)
+      break;
+
+    const auto tail =
+        std::find_if(start + 1, last, [&alpha_num_chars](const char ch) {
+          return cend(alpha_num_chars) == alpha_num_chars.find(ch);
+        });
+
+    const auto current_distance{std::distance(start, tail)};
+
+    if (current_distance > max_word_len) {
+      max_word_len = current_distance;
+      longest_first_word.assign(start, tail);
+    }
+
+    start = tail + 1;
+  }
+
+  return longest_first_word;
+}
+
 int main() {
   // cout << LongestWord_v2(gets(stdin));
-  cout << LongestWord_v2("fun&!! time")
-       << '\n';  // expected output: "time"
-  cout << LongestWord_v2("I love dogs")
-       << '\n';  // expected output: "love"
-  cout << LongestWord_v2("I love both cats and dogs as well!")
+  cout << LongestWord_v3("fun&!! time") << '\n';  // expected output: "time"
+  cout << LongestWord_v3("I love dogs") << '\n';  // expected output: "love"
+  cout << LongestWord_v3("I love both cats and dogs as well!")
        << '\n';  // expected output: "love"
 
   return 0;
