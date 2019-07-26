@@ -18,7 +18,9 @@ Output: "love"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <iterator>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
 
 using namespace std;
@@ -112,38 +114,99 @@ string LongestWord_v2(string sen) {
   return longest_first_word;
 }
 
+template <typename T, typename U>
+using has_find_member_function_t =
+    decltype(std::declval<T&>().find(std::declval<U>()));
+
+template <typename T, typename U, typename = void>
+struct has_find_member_function : std::false_type {};
+
+template <typename T, typename U>
+struct has_find_member_function<T,
+                                U,
+                                std::void_t<has_find_member_function_t<T, U>>>
+    : std::true_type {};
+
+template <typename T, typename U>
+constexpr const bool has_find_member_function_v =
+    has_find_member_function<T, U>::value;
+
+template <typename ForwardIterType, typename ContainerType>
+std::pair<ForwardIterType, ForwardIterType>
+find_next_consecutive_sequence_of_elements(
+    ForwardIterType start,
+    ForwardIterType last,
+    const ContainerType& allowed_elements) {
+  if (start == last)
+    return make_pair(last, last);
+
+  if constexpr (has_find_member_function_v<ContainerType,
+                                           typename std::iterator_traits<
+                                               ForwardIterType>::value_type>) {
+    const auto first{std::find_if(
+        start, last, [&allowed_elements](const auto& current_element) {
+          return std::cend(allowed_elements) !=
+                 allowed_elements.find(current_element);
+        })};
+    if (first == last)
+      return make_pair(last, last);
+    auto second{first};
+    ++second;
+    second = std::find_if(second, last,
+                          [&allowed_elements](const auto& current_element) {
+                            return std::cend(allowed_elements) ==
+                                   allowed_elements.find(current_element);
+                          });
+    return make_pair(first, second);
+
+  } else {
+    const auto first{std::find_if(
+        start, last, [&allowed_elements](const auto& current_element) {
+          return std::cend(allowed_elements) !=
+                 std::find(std::cbegin(allowed_elements),
+                           std::cend(allowed_elements), current_element);
+        })};
+    if (last == first)
+      return make_pair(last, last);
+    auto second{first};
+    ++second;
+    second = std::find_if(
+        second, last, [&allowed_elements](const auto& current_element) {
+          return std::cend(allowed_elements) ==
+                 std::find(std::cbegin(allowed_elements),
+                           std::cend(allowed_elements), current_element);
+        });
+
+    return make_pair(first, second);
+  }
+}
+
 string LongestWord_v3(string sen) {
   const unordered_set<char> alpha_num_chars{
       cbegin("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
       cend("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")};
 
   sen = trim(sen);
-  auto start = cbegin(sen);
-  const auto last = cend(sen);
+  const auto last_iter = cend(sen);
+  auto next_iter = cbegin(sen);
   ptrdiff_t max_word_len{};
   string longest_first_word{};
 
-  while (start < last) {
-    start = std::find_if(start, last, [&alpha_num_chars](const char ch) {
-      return cend(alpha_num_chars) != alpha_num_chars.find(ch);
-    });
+  while (next_iter != last_iter) {
+    const auto [first, last] = find_next_consecutive_sequence_of_elements(
+        next_iter, last_iter, alpha_num_chars);
 
-    if (last == start)
+    if (first == last)
       break;
 
-    const auto tail =
-        std::find_if(start + 1, last, [&alpha_num_chars](const char ch) {
-          return cend(alpha_num_chars) == alpha_num_chars.find(ch);
-        });
-
-    const auto current_distance{std::distance(start, tail)};
+    const auto current_distance{std::distance(first, last)};
 
     if (current_distance > max_word_len) {
       max_word_len = current_distance;
-      longest_first_word.assign(start, tail);
+      longest_first_word.assign(first, last);
     }
 
-    start = tail + 1;
+    next_iter = last;
   }
 
   return longest_first_word;
