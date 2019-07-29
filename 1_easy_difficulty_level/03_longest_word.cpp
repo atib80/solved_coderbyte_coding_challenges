@@ -115,6 +115,23 @@ string LongestWord_v2(string sen) {
 }
 
 template <typename T, typename U>
+using is_operator_less_than_defined_t =
+    decltype(std::declval<T>() < std::declval<U>());
+
+template <typename T, typename U, typename = void>
+struct is_operator_less_than_defined : std::false_type {};
+
+template <typename T, typename U>
+struct is_operator_less_than_defined<
+    T,
+    U,
+    std::void_t<is_operator_less_than_defined_t<T, U>>> : std::true_type {};
+
+template <typename T, typename U>
+constexpr const bool is_operator_less_than_defined_v =
+    is_operator_less_than_defined<T, U>::value;
+
+template <typename T, typename U>
 using has_find_member_function_t =
     decltype(std::declval<T&>().find(std::declval<U>()));
 
@@ -137,12 +154,13 @@ find_next_consecutive_sequence_of_elements(
     ForwardIterType start,
     ForwardIterType last,
     const ContainerType& allowed_elements) {
+  using T = typename std::iterator_traits<ForwardIterType>::value_type;
+  using U = typename ContainerType::value_type;
+
   if (start == last)
     return make_pair(last, last);
 
-  if constexpr (has_find_member_function_v<ContainerType,
-                                           typename std::iterator_traits<
-                                               ForwardIterType>::value_type>) {
+  if constexpr (has_find_member_function_v<ContainerType, T>) {
     const auto first{std::find_if(
         start, last, [&allowed_elements](const auto& current_element) {
           return std::cend(allowed_elements) !=
@@ -159,26 +177,47 @@ find_next_consecutive_sequence_of_elements(
                           });
     return make_pair(first, second);
 
-  } else {
-    const auto first{std::find_if(
-        start, last, [&allowed_elements](const auto& current_element) {
-          return std::cend(allowed_elements) !=
-                 std::find(std::cbegin(allowed_elements),
-                           std::cend(allowed_elements), current_element);
-        })};
-    if (last == first)
-      return make_pair(last, last);
-    auto second{first};
-    ++second;
-    second = std::find_if(
-        second, last, [&allowed_elements](const auto& current_element) {
-          return std::cend(allowed_elements) ==
-                 std::find(std::cbegin(allowed_elements),
-                           std::cend(allowed_elements), current_element);
-        });
+  } else if constexpr (is_operator_less_than_defined_v<T, U>) {
+    if (is_sorted(std::cbegin(allowed_elements), std::cend(allowed_elements))) {
+      const auto first{std::find_if(
+          start, last, [&allowed_elements](const auto& current_element) {
+            return std::binary_search(std::cbegin(allowed_elements),
+                                      std::cend(allowed_elements),
+                                      current_element);
+          })};
+      if (last == first)
+        return make_pair(last, last);
+      auto second{first};
+      ++second;
+      second = std::find_if(
+          second, last, [&allowed_elements](const auto& current_element) {
+            return !std::binary_search(std::cbegin(allowed_elements),
+                                       std::cend(allowed_elements),
+                                       current_element);
+          });
 
-    return make_pair(first, second);
+      return make_pair(first, second);
+    }
   }
+
+  const auto first{std::find_if(
+      start, last, [&allowed_elements](const auto& current_element) {
+        return std::cend(allowed_elements) !=
+               std::find(std::cbegin(allowed_elements),
+                         std::cend(allowed_elements), current_element);
+      })};
+  if (last == first)
+    return make_pair(last, last);
+  auto second{first};
+  ++second;
+  second = std::find_if(
+      second, last, [&allowed_elements](const auto& current_element) {
+        return std::cend(allowed_elements) ==
+               std::find(std::cbegin(allowed_elements),
+                         std::cend(allowed_elements), current_element);
+      });
+
+  return make_pair(first, second);
 }
 
 string LongestWord_v3(string sen) {
