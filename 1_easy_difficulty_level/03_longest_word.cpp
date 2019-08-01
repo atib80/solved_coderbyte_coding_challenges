@@ -25,35 +25,9 @@ Output: "love"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (!str_len)
-    return {};
-
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return {};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
-}
-
 string LongestWord_v1(string sen) {
-  sen = trim(sen);
-
-  size_t word_len{}, start_index{string::npos};
+  size_t word_len{};
+  size_t start_index{string::npos};
   size_t max_word_len{};
   string longest_first_word{};
 
@@ -82,10 +56,9 @@ string LongestWord_v1(string sen) {
 }
 
 string LongestWord_v2(string sen) {
-  sen = trim(sen);
-
   const size_t sen_len{sen.length()};
-  size_t start{}, max_word_len{};
+  size_t start{};
+  size_t max_word_len{};
   string longest_first_word{};
 
   while (start < sen_len) {
@@ -114,11 +87,11 @@ string LongestWord_v2(string sen) {
   return longest_first_word;
 }
 
-template <typename T, typename U>
+template <typename T, typename U = T>
 using is_operator_less_than_defined_t =
-    decltype(std::declval<T>() < std::declval<U>());
+    decltype(std::declval<T&>().operator<(std::declval<U>()));
 
-template <typename T, typename U, typename = void>
+template <typename T, typename U = T, typename = void>
 struct is_operator_less_than_defined : std::false_type {};
 
 template <typename T, typename U>
@@ -127,7 +100,7 @@ struct is_operator_less_than_defined<
     U,
     std::void_t<is_operator_less_than_defined_t<T, U>>> : std::true_type {};
 
-template <typename T, typename U>
+template <typename T, typename U = T>
 constexpr const bool is_operator_less_than_defined_v =
     is_operator_less_than_defined<T, U>::value;
 
@@ -149,91 +122,93 @@ constexpr const bool has_find_member_function_v =
     has_find_member_function<T, U>::value;
 
 template <typename ForwardIterType, typename ContainerType>
-std::pair<ForwardIterType, ForwardIterType>
-find_next_consecutive_sequence_of_elements(
+std::pair<ForwardIterType, ForwardIterType> find_next_sequence(
     ForwardIterType start,
     ForwardIterType last,
-    const ContainerType& allowed_elements) {
-  using T = typename std::iterator_traits<ForwardIterType>::value_type;
-  using U = typename ContainerType::value_type;
+    const ContainerType& haystack,
+    const bool is_haystack_sorted = false) {
+  using T = typename iterator_traits<ForwardIterType>::value_type;
 
   if (start == last)
     return make_pair(last, last);
 
   if constexpr (has_find_member_function_v<ContainerType, T>) {
-    const auto first{std::find_if(
-        start, last, [&allowed_elements](const auto& current_element) {
-          return std::cend(allowed_elements) !=
-                 allowed_elements.find(current_element);
+    const auto first{
+        std::find_if(start, last, [&haystack](const auto& current_element) {
+          return std::cend(haystack) != haystack.find(current_element);
         })};
     if (first == last)
       return make_pair(last, last);
     auto second{first};
     ++second;
-    second = std::find_if(second, last,
-                          [&allowed_elements](const auto& current_element) {
-                            return std::cend(allowed_elements) ==
-                                   allowed_elements.find(current_element);
-                          });
+    second =
+        std::find_if(second, last, [&haystack](const auto& current_element) {
+          return std::cend(haystack) == haystack.find(current_element);
+        });
     return make_pair(first, second);
 
-  } else if constexpr (is_operator_less_than_defined_v<T, U>) {
-    if (is_sorted(std::cbegin(allowed_elements), std::cend(allowed_elements))) {
-      const auto first{std::find_if(
-          start, last, [&allowed_elements](const auto& current_element) {
-            return std::binary_search(std::cbegin(allowed_elements),
-                                      std::cend(allowed_elements),
-                                      current_element);
+  } else {
+    if (is_haystack_sorted) {
+      const auto first{
+          std::find_if(start, last, [&haystack](const auto& current_element) {
+            return std::binary_search(std::cbegin(haystack),
+                                      std::cend(haystack), current_element);
           })};
       if (last == first)
         return make_pair(last, last);
       auto second{first};
       ++second;
-      second = std::find_if(
-          second, last, [&allowed_elements](const auto& current_element) {
-            return !std::binary_search(std::cbegin(allowed_elements),
-                                       std::cend(allowed_elements),
-                                       current_element);
+      second =
+          std::find_if(second, last, [&haystack](const auto& current_element) {
+            return !std::binary_search(std::cbegin(haystack),
+                                       std::cend(haystack), current_element);
+          });
+
+      return make_pair(first, second);
+    } else {
+      const auto first{
+          std::find_if(start, last, [&haystack](const auto& current_element) {
+            return std::cend(haystack) != std::find(std::cbegin(haystack),
+                                                    std::cend(haystack),
+                                                    current_element);
+          })};
+      if (last == first)
+        return make_pair(last, last);
+      auto second{first};
+      ++second;
+      second =
+          std::find_if(second, last, [&haystack](const auto& current_element) {
+            return std::cend(haystack) == std::find(std::cbegin(haystack),
+                                                    std::cend(haystack),
+                                                    current_element);
           });
 
       return make_pair(first, second);
     }
   }
-
-  const auto first{std::find_if(
-      start, last, [&allowed_elements](const auto& current_element) {
-        return std::cend(allowed_elements) !=
-               std::find(std::cbegin(allowed_elements),
-                         std::cend(allowed_elements), current_element);
-      })};
-  if (last == first)
-    return make_pair(last, last);
-  auto second{first};
-  ++second;
-  second = std::find_if(
-      second, last, [&allowed_elements](const auto& current_element) {
-        return std::cend(allowed_elements) ==
-               std::find(std::cbegin(allowed_elements),
-                         std::cend(allowed_elements), current_element);
-      });
-
-  return make_pair(first, second);
 }
 
-string LongestWord_v3(string sen) {
-  const unordered_set<char> alpha_num_chars{
-      cbegin("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
-      cend("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")};
+template <typename StringType, typename ContainerType>
+StringType find_longest_word(StringType&& src, ContainerType&& haystack) {
+  using T = typename StringType::value_type;
+  using U = typename ContainerType::value_type;
 
-  sen = trim(sen);
-  const auto last_iter = cend(sen);
-  auto next_iter = cbegin(sen);
-  ptrdiff_t max_word_len{};
-  string longest_first_word{};
+  bool is_haystack_sorted{has_find_member_function_v<ContainerType, T>};
+
+  if constexpr (!has_find_member_function_v<ContainerType, T> &&
+                is_operator_less_than_defined_v<U>) {
+    sort(begin(haystack), end(haystack));
+    is_haystack_sorted = true;
+  }
+
+  auto next_iter = cbegin(src);
+  const auto last_iter = cend(src);
+  decltype(distance(next_iter, last_iter)) max_word_len{};
+  StringType longest_first_word{};
 
   while (next_iter != last_iter) {
-    const auto [first, last] = find_next_consecutive_sequence_of_elements(
-        next_iter, last_iter, alpha_num_chars);
+    const auto [first, last] =
+        find_next_sequence(next_iter, last_iter, haystack, is_haystack_sorted);
 
     if (first == last)
       break;
@@ -249,6 +224,15 @@ string LongestWord_v3(string sen) {
   }
 
   return longest_first_word;
+}
+
+string LongestWord_v3(string sen) {
+  static const char allowed_chars[]{
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"};
+  auto haystack{
+      unordered_set<char>{cbegin(allowed_chars), cend(allowed_chars)}};
+
+  return find_longest_word(move(sen), move(haystack));
 }
 
 int main() {
