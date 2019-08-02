@@ -33,6 +33,9 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "ctime": "cpp",
+        "list": "cpp",
+        "numeric": "cpp"
     }
 }
