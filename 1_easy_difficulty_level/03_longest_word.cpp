@@ -23,7 +23,24 @@ Output: "love"
 #include <type_traits>
 #include <unordered_set>
 
-using namespace std;
+using std::array;
+using std::begin;
+using std::binary_search;
+using std::cbegin;
+using std::cend;
+using std::cout;
+using std::declval;
+using std::end;
+using std::false_type;
+using std::iterator_traits;
+using std::make_pair;
+using std::move;
+using std::pair;
+using std::sort;
+using std::string;
+using std::true_type;
+using std::unordered_set;
+using std::void_t;
 
 string LongestWord_v1(string sen) {
   size_t word_len{};
@@ -89,40 +106,51 @@ string LongestWord_v2(string sen) {
 
 template <typename T, typename U = T>
 using is_operator_less_than_defined_t =
-    decltype(std::declval<T&>().operator<(std::declval<U>()));
+    decltype(declval<T&>().operator<(declval<U>()));
 
 template <typename T, typename U = T, typename = void>
-struct is_operator_less_than_defined : std::false_type {};
+struct is_operator_less_than_defined : false_type {};
 
 template <typename T, typename U>
 struct is_operator_less_than_defined<
     T,
     U,
-    std::void_t<is_operator_less_than_defined_t<T, U>>> : std::true_type {};
+    void_t<is_operator_less_than_defined_t<T, U>>> : true_type {};
 
 template <typename T, typename U = T>
 constexpr const bool is_operator_less_than_defined_v =
     is_operator_less_than_defined<T, U>::value;
 
 template <typename T, typename U>
-using has_find_member_function_t =
-    decltype(std::declval<T&>().find(std::declval<U>()));
+using has_find_member_function_t = decltype(declval<T&>().find(declval<U>()));
 
 template <typename T, typename U, typename = void>
-struct has_find_member_function : std::false_type {};
+struct has_find_member_function : false_type {};
 
 template <typename T, typename U>
-struct has_find_member_function<T,
-                                U,
-                                std::void_t<has_find_member_function_t<T, U>>>
-    : std::true_type {};
+struct has_find_member_function<T, U, void_t<has_find_member_function_t<T, U>>>
+    : true_type {};
 
 template <typename T, typename U>
 constexpr const bool has_find_member_function_v =
     has_find_member_function<T, U>::value;
 
+template <typename T>
+using has_sort_member_function_t = decltype(declval<T&>().sort());
+
+template <typename T, typename = void>
+struct has_sort_member_function : false_type {};
+
+template <typename T>
+struct has_sort_member_function<T, void_t<has_sort_member_function_t<T>>>
+    : true_type {};
+
+template <typename T>
+constexpr const bool has_sort_member_function_v =
+    has_sort_member_function<T>::value;
+
 template <typename ForwardIterType, typename ContainerType>
-std::pair<ForwardIterType, ForwardIterType> find_next_sequence(
+pair<ForwardIterType, ForwardIterType> find_next_sequence(
     ForwardIterType start,
     ForwardIterType last,
     const ContainerType& haystack,
@@ -134,54 +162,49 @@ std::pair<ForwardIterType, ForwardIterType> find_next_sequence(
 
   if constexpr (has_find_member_function_v<ContainerType, T>) {
     const auto first{
-        std::find_if(start, last, [&haystack](const auto& current_element) {
-          return std::cend(haystack) != haystack.find(current_element);
+        find_if(start, last, [&haystack](const auto& current_element) {
+          return cend(haystack) != haystack.find(current_element);
         })};
     if (first == last)
       return make_pair(last, last);
     auto second{first};
     ++second;
-    second =
-        std::find_if(second, last, [&haystack](const auto& current_element) {
-          return std::cend(haystack) == haystack.find(current_element);
-        });
+    second = find_if(second, last, [&haystack](const auto& current_element) {
+      return cend(haystack) == haystack.find(current_element);
+    });
     return make_pair(first, second);
 
   } else {
     if (is_haystack_sorted) {
       const auto first{
-          std::find_if(start, last, [&haystack](const auto& current_element) {
-            return std::binary_search(std::cbegin(haystack),
-                                      std::cend(haystack), current_element);
+          find_if(start, last, [&haystack](const auto& current_element) {
+            return binary_search(cbegin(haystack), cend(haystack),
+                                 current_element);
           })};
       if (last == first)
         return make_pair(last, last);
       auto second{first};
       ++second;
-      second =
-          std::find_if(second, last, [&haystack](const auto& current_element) {
-            return !std::binary_search(std::cbegin(haystack),
-                                       std::cend(haystack), current_element);
-          });
+      second = find_if(second, last, [&haystack](const auto& current_element) {
+        return !binary_search(cbegin(haystack), cend(haystack),
+                              current_element);
+      });
 
       return make_pair(first, second);
     } else {
       const auto first{
-          std::find_if(start, last, [&haystack](const auto& current_element) {
-            return std::cend(haystack) != std::find(std::cbegin(haystack),
-                                                    std::cend(haystack),
-                                                    current_element);
+          find_if(start, last, [&haystack](const auto& current_element) {
+            return cend(haystack) !=
+                   find(cbegin(haystack), cend(haystack), current_element);
           })};
       if (last == first)
         return make_pair(last, last);
       auto second{first};
       ++second;
-      second =
-          std::find_if(second, last, [&haystack](const auto& current_element) {
-            return std::cend(haystack) == std::find(std::cbegin(haystack),
-                                                    std::cend(haystack),
-                                                    current_element);
-          });
+      second = find_if(second, last, [&haystack](const auto& current_element) {
+        return cend(haystack) ==
+               find(cbegin(haystack), cend(haystack), current_element);
+      });
 
       return make_pair(first, second);
     }
@@ -189,15 +212,21 @@ std::pair<ForwardIterType, ForwardIterType> find_next_sequence(
 }
 
 template <typename StringType, typename ContainerType>
-StringType find_longest_word(StringType&& src, ContainerType&& haystack) {
+StringType find_longest_word(StringType src, const ContainerType& haystack) {
   using T = typename StringType::value_type;
   using U = typename ContainerType::value_type;
 
   bool is_haystack_sorted{has_find_member_function_v<ContainerType, T>};
 
   if constexpr (!has_find_member_function_v<ContainerType, T> &&
-                is_operator_less_than_defined_v<U>) {
-    sort(begin(haystack), end(haystack));
+                ((has_sort_member_function_v<ContainerType> &&
+                  is_operator_less_than_defined_v<U>) ||
+                 is_operator_less_than_defined_v<U>)) {
+    if constexpr (has_sort_member_function_v<ContainerType>)
+      haystack.sort();
+    else
+      sort(begin(haystack),
+           end(haystack));
     is_haystack_sorted = true;
   }
 
@@ -213,7 +242,7 @@ StringType find_longest_word(StringType&& src, ContainerType&& haystack) {
     if (first == last)
       break;
 
-    const auto current_distance{std::distance(first, last)};
+    const auto current_distance{distance(first, last)};
 
     if (current_distance > max_word_len) {
       max_word_len = current_distance;
@@ -227,12 +256,11 @@ StringType find_longest_word(StringType&& src, ContainerType&& haystack) {
 }
 
 string LongestWord_v3(string sen) {
-  static const char allowed_chars[]{
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"};
-  auto haystack{
-      unordered_set<char>{cbegin(allowed_chars), cend(allowed_chars)}};
+  static constexpr const array<char, 63> allowed_chars{
+      {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"}};
 
-  return find_longest_word(move(sen), move(haystack));
+  return find_longest_word(move(sen), unordered_set<char>{cbegin(allowed_chars),
+                                                          cend(allowed_chars)});
 }
 
 int main() {
