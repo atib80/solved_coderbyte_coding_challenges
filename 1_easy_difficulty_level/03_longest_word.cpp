@@ -47,7 +47,6 @@ using std::move;
 using std::mt19937;
 using std::pair;
 using std::random_device;
-using std::remove_reference_t;
 using std::shuffle;
 using std::sort;
 using std::string;
@@ -226,11 +225,9 @@ pair<ForwardIterType, ForwardIterType> find_next_sequence(
 }
 
 template <typename StringType, typename ContainerType>
-std::remove_reference_t<StringType> find_longest_word(
-    StringType&& src,
-    ContainerType&& haystack) {
-  using T = typename remove_reference_t<StringType>::value_type;
-  using U = typename remove_reference_t<ContainerType>::value_type;
+StringType find_longest_word(const StringType& src, ContainerType& haystack) {
+  using T = typename StringType::value_type;
+  using U = typename ContainerType::value_type;
 
   bool is_haystack_sorted{has_find_member_function_v<ContainerType, T>};
 
@@ -241,15 +238,14 @@ std::remove_reference_t<StringType> find_longest_word(
     if constexpr (has_sort_member_function_v<ContainerType>)
       haystack.sort();
     else
-      sort(begin(forward<ContainerType>(haystack)),
-           end(forward<ContainerType>(haystack)));
+      sort(begin(haystack), end(haystack));
     is_haystack_sorted = true;
   }
 
-  auto next_iter = cbegin(forward<StringType>(src));
-  const auto last_iter = cend(forward<StringType>(src));
+  auto next_iter = cbegin(src);
+  const auto last_iter = cend(src);
   decltype(distance(next_iter, last_iter)) max_word_len{};
-  remove_reference_t<StringType> longest_first_word{};
+  StringType longest_first_word{};
 
   while (next_iter != last_iter) {
     const auto [first, last] =
@@ -287,21 +283,21 @@ string LongestWord_v3(string sen) {
 
   unordered_set<char> allowed_chars_hash_set{cbegin(allowed_chars),
                                              cend(allowed_chars)};
-  const string longest_word1{find_longest_word(sen, allowed_chars_hash_set)};
-  const string longest_word2{find_longest_word(sen, unsorted_allowed_chars)};
-  const string longest_word3{find_longest_word(sen, list_of_unsorted_chars)};
 
-  assert(longest_word1.length() == longest_word2.length());
-  assert(longest_word1.length() == longest_word3.length());
-  assert(longest_word2.length() == longest_word3.length());
+  vector<string> results(3);
+  results[0] = find_longest_word(sen, allowed_chars_hash_set);
+  results[1] = find_longest_word(sen, unsorted_allowed_chars);
+  results[2] = find_longest_word(sen, list_of_unsorted_chars);
 
-  return longest_word1.length() >= longest_word2.length()
-             ? (longest_word1.length() >= longest_word3.length()
-                    ? longest_word1
-                    : longest_word3)
-             : (longest_word2.length() >= longest_word3.length()
-                    ? longest_word2
-                    : longest_word3);
+  sort(begin(results), end(results), [](const string& lhs, const string& rhs) {
+    return lhs.length() >= rhs.length();
+  });
+
+  assert(results[0].length() == results[1].length() &&
+         results[0].length() == results[2].length() &&
+         results[1].length() == results[2].length());
+
+  return move(results[0]);
 }
 
 int main() {
