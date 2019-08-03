@@ -51,53 +51,61 @@ string trim(const string& str) {
   return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-string LetterChanges(string str) {
-  static bool is_offsets_calculated{};
-  static mutex mu{};
-  static array<char, 256> offsets{0};
-  static array<char, 256> capitalized_letters{0};
+struct lookup_table {
+  array<char, 256> offsets;
+  array<char, 256> capitalized_letters;
+  static constexpr const char char_max_value{numeric_limits<char>::max()};
 
-  {
-    lock_guard<mutex> guard{mu};
-
-    if (!is_offsets_calculated) {
-      for (char i{}; i < 'A'; i++) {
-        offsets[i] = i;
-        capitalized_letters[i] = i;
-      }
-      for (char i{'Z' + 1}; i < 'a'; i++) {
-        offsets[i] = i;
-        capitalized_letters[i] = i;
-      }
-      for (size_t i{'z' + 1}; i <= numeric_limits<char>::max(); i++) {
-        offsets[i] = static_cast<char>(i);
-        capitalized_letters[i] = static_cast<char>(i);
-      }
-
-      for (char i{'a'}, j{'A'}; i < 'z'; i++, j++) {
-        offsets[i] = i + 1;
-        offsets[j] = j + 1;
-        capitalized_letters[i] = i;
-        capitalized_letters[j] = j;
-      }
-
-      offsets['Z'] = 'A';
-      offsets['z'] = 'A';
-      capitalized_letters['a'] = 'A';
-      capitalized_letters['e'] = 'E';
-      capitalized_letters['i'] = 'I';
-      capitalized_letters['o'] = 'O';
-      capitalized_letters['u'] = 'U';
-
-      is_offsets_calculated = true;
+  constexpr lookup_table() : offsets{}, capitalized_letters{} {
+    for (char i{}; i < 'A'; i++) {
+      offsets[i] = i;
+      capitalized_letters[i] = i;
     }
+    for (char i{'Z' + 1}; i < 'a'; i++) {
+      offsets[i] = i;
+      capitalized_letters[i] = i;
+    }
+    for (size_t i{'z' + 1}; i <= numeric_limits<char>::max(); i++) {
+      offsets[i] = static_cast<char>(i);
+      capitalized_letters[i] = static_cast<char>(i);
+    }
+
+    for (char i{'a'}, j{'A'}; i < 'z'; i++, j++) {
+      offsets[i] = i + 1;
+      offsets[j] = j + 1;
+      capitalized_letters[i] = i;
+      capitalized_letters[j] = j;
+    }
+
+    offsets['Z'] = 'A';
+    offsets['z'] = 'A';
+    capitalized_letters['a'] = 'A';
+    capitalized_letters['e'] = 'E';
+    capitalized_letters['i'] = 'I';
+    capitalized_letters['o'] = 'O';
+    capitalized_letters['u'] = 'U';
   }
 
+  constexpr pair<char, char> operator[](const size_t index) const {
+    if (index > char_max_value) {
+      char buffer[128]{};
+      _snprintf(buffer, 128, "index's value must be between 0 and %u!",
+                char_max_value);
+      throw out_of_range{buffer};
+    }
+
+    return make_pair(offsets[index], capitalized_letters[index]);
+  }
+};
+
+static constexpr lookup_table lu{};
+
+string LetterChanges(string str) {
   str = trim(str);
 
   for (auto& ch : str) {
-    ch = offsets[ch];
-    ch = capitalized_letters[ch];
+    ch = lu[ch].first;
+    ch = lu[ch].second;
   }
 
   return str;
