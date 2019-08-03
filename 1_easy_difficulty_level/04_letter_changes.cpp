@@ -17,11 +17,12 @@ Output: "gvO Ujnft!"
 */
 
 #include <algorithm>
-#include <cctype>
+#include <array>
 #include <iostream>
-#include <locale>
+#include <limits>
+#include <mutex>
 #include <string>
-#include <unordered_set>
+#include <vector>
 
 using namespace std;
 
@@ -51,26 +52,53 @@ string trim(const string& str) {
 }
 
 string LetterChanges(string str) {
-  str = trim(str);
+  static bool is_offsets_calculated{};
+  static mutex mu{};
+  static array<char, 256> offsets{0};
+  static array<char, 256> capitalized_letters{0};
 
-  const unordered_set<char> vowels{'a', 'e', 'i', 'o', 'u'};
+  {
+    lock_guard<mutex> guard{mu};
 
-  for (auto& ch : str) {
-    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z'))
-      ch += 1;
-    else if (ch == 'z')
-      ch = 'a';
-    else if (ch == 'Z')
-      ch = 'A';
+    if (!is_offsets_calculated) {
+      for (char i{}; i < 'A'; i++) {
+        offsets[i] = i;
+        capitalized_letters[i] = i;
+      }
+      for (char i{'Z' + 1}; i < 'a'; i++) {
+        offsets[i] = i;
+        capitalized_letters[i] = i;
+      }
+      for (size_t i{'z' + 1}; i <= numeric_limits<char>::max(); i++) {
+        offsets[i] = static_cast<char>(i);
+        capitalized_letters[i] = static_cast<char>(i);
+      }
+
+      for (char i{'a'}, j{'A'}; i < 'z'; i++, j++) {
+        offsets[i] = i + 1;
+        offsets[j] = j + 1;
+        capitalized_letters[i] = i;
+        capitalized_letters[j] = j;
+      }
+
+      offsets['Z'] = 'A';
+      offsets['z'] = 'A';
+      capitalized_letters['a'] = 'A';
+      capitalized_letters['e'] = 'E';
+      capitalized_letters['i'] = 'I';
+      capitalized_letters['o'] = 'O';
+      capitalized_letters['u'] = 'U';
+
+      is_offsets_calculated = true;
+    }
   }
 
-  const auto& f = use_facet<std::ctype<char>>(locale{});
+  str = trim(str);
 
-  transform(cbegin(str), cend(str), begin(str), [&](const char ch) {
-    if (vowels.find(ch) != end(vowels))
-      return f.toupper(ch);
-    return ch;
-  });
+  for (auto& ch : str) {
+    ch = offsets[ch];
+    ch = capitalized_letters[ch];
+  }
 
   return str;
 }
