@@ -24,7 +24,7 @@ Output: 9870
 
 using namespace std;
 
-uint64_t SimpleAdding_v1(const uint64_t num) {
+constexpr uint64_t SimpleAdding_v1(const uint64_t num) {
   uint64_t result{1ULL};
 
   for (uint64_t i{2ULL}; i <= num; ++i)
@@ -35,10 +35,10 @@ uint64_t SimpleAdding_v1(const uint64_t num) {
 
 template <typename T, T start, T last>
 class crange {
-  array<T, last - start> crange_;
+  const array<T, last - start> crange_;
 
  public:
-  constexpr explicit crange() : crange_{} {
+  constexpr explicit crange() {
     if (start > last)
       throw invalid_argument{
           "The start value of a range object cannot be greater than its last!"};
@@ -47,7 +47,7 @@ class crange {
   }
 
   template <typename ContainerType>
-  explicit operator ContainerType() const {
+  operator ContainerType() const {
     ContainerType rangeContainer{};
     for (T i{start}; i < last; ++i)
       rangeContainer.insert(end(rangeContainer), i);
@@ -92,17 +92,15 @@ class range {
 
  public:
   explicit range(const T start = 0, const T last = 0)
-      : start_{start}, last_{last} {
+      : start_{start}, last_{last}, range_(last_ - start_) {
     if (start_ > last_)
       throw invalid_argument{
           "The start value of a range object cannot be greater than its last!"};
-    range_.resize(static_cast<size_t>(last_ - start_));
-    for (T i{}, j{start_}; j < last_; ++i, ++j)
-      range_[i] = j;
+    iota(range_.begin(), range_.end(), start_);
   }
 
   template <typename ContainerType>
-  explicit operator ContainerType() const {
+  operator ContainerType() const {
     ContainerType rangeContainer{};
     for (T i{start_}; i < last_; ++i)
       rangeContainer.insert(end(rangeContainer), i);
@@ -145,7 +143,7 @@ uint64_t SimpleAdding_v2(const uint64_t num) {
 }
 
 int main() {
-  // cout << SimpleAdding_v1(gets(stdin));
+  // cout << SimpleAdding_v2(gets(stdin));
   cout << SimpleAdding_v2(4) << '\n';    // expected output: 10
   cout << SimpleAdding_v2(12) << '\n';   // expected output: 78
   cout << SimpleAdding_v2(140) << '\n';  // expected output: 9870
