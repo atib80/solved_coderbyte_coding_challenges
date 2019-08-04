@@ -22,6 +22,7 @@ Output: "gvO Ujnft!"
 #include <limits>
 #include <mutex>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
@@ -49,6 +50,29 @@ string trim(const string& str) {
   }
 
   return str.substr(begin_str, end_str - begin_str + 1);
+}
+
+string LetterChanges_v1(string str) {
+  str = trim(str);
+
+  const unordered_set<char> vowels{'a', 'e', 'i', 'o', 'u'};
+
+  for (auto& ch : str) {
+    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z'))
+      ++ch;
+    else if ('z' == ch || 'Z' == ch)
+      ch -= 'z' - 'a';
+  }
+
+  const auto& f = use_facet<std::ctype<char>>(locale{});
+
+  transform(cbegin(str), cend(str), begin(str), [&](const char ch) {
+    if (vowels.find(ch) != end(vowels))
+      return f.toupper(ch);
+    return ch;
+  });
+
+  return str;
 }
 
 struct lookup_table {
@@ -100,7 +124,7 @@ struct lookup_table {
 
 static constexpr lookup_table lu{};
 
-string LetterChanges(string str) {
+string LetterChanges_v2(string str) {
   str = trim(str);
 
   for (auto& ch : str) {
@@ -113,8 +137,9 @@ string LetterChanges(string str) {
 
 int main() {
   // cout << LetterChanges(gets(stdin));
-  cout << LetterChanges("hello*3") << '\n';     // expected output: "Ifmmp*3"
-  cout << LetterChanges("fun times!") << '\n';  // expected output: "gvO Ujnft!"
+  cout << LetterChanges_v2("hello*3") << '\n';  // expected output: "Ifmmp*3"
+  cout << LetterChanges_v2("fun times!")
+       << '\n';  // expected output: "gvO Ujnft!"
 
   return 0;
 }
