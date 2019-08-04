@@ -15,12 +15,16 @@ Input:  140
 Output: 9870
 */
 
+#include <array>
 #include <cstdint>
 #include <iostream>
+#include <numeric>
+#include <stdexcept>
+#include <vector>
 
 using namespace std;
 
-uint64_t SimpleAdding(const uint64_t num) {
+uint64_t SimpleAdding_v1(const uint64_t num) {
   uint64_t result{1ULL};
 
   for (uint64_t i{2ULL}; i <= num; ++i)
@@ -29,11 +33,122 @@ uint64_t SimpleAdding(const uint64_t num) {
   return result;
 }
 
+template <typename T, T start, T last>
+class crange {
+  array<T, last - start> crange_;
+
+ public:
+  constexpr explicit crange() : crange_{} {
+    if (start > last)
+      throw invalid_argument{
+          "The start value of a range object cannot be greater than its last!"};
+    for (T i{}, j{start}; j < last; ++i, ++j)
+      crange_[i] = j;
+  }
+
+  template <typename ContainerType>
+  explicit operator ContainerType() const {
+    ContainerType rangeContainer{};
+    for (T i{start}; i < last; ++i)
+      rangeContainer.insert(end(rangeContainer), i);
+    return rangeContainer;
+  }
+
+  constexpr auto begin() const { return std::begin(crange_); }
+
+  constexpr auto end() const { return std::end(crange_); }
+
+  constexpr auto cbegin() const { return std::cbegin(crange_); }
+
+  constexpr auto cend() const { return std::cend(crange_); }
+};
+
+template <typename T, T first, T last>
+constexpr auto begin(const crange<T, first, last>& cr) {
+  return cr.begin();
+}
+
+template <typename T, T first, T last>
+auto end(const crange<T, first, last>& cr) {
+  return cr.end();
+}
+
+template <typename T, T first, T last>
+auto cbegin(const crange<T, first, last>& cr) {
+  return cr.cbegin();
+}
+
+template <typename T, T first, T last>
+auto cend(const crange<T, first, last>& cr) {
+  return cr.cend();
+}
+
+template <typename T>
+class range {
+  T start_;
+  T last_;
+
+  vector<T> range_;
+
+ public:
+  explicit range(const T start = 0, const T last = 0)
+      : start_{start}, last_{last} {
+    if (start_ > last_)
+      throw invalid_argument{
+          "The start value of a range object cannot be greater than its last!"};
+    range_.resize(static_cast<size_t>(last_ - start_));
+    for (T i{}, j{start_}; j < last_; ++i, ++j)
+      range_[i] = j;
+  }
+
+  template <typename ContainerType>
+  explicit operator ContainerType() const {
+    ContainerType rangeContainer{};
+    for (T i{start_}; i < last_; ++i)
+      rangeContainer.insert(end(rangeContainer), i);
+    return rangeContainer;
+  }
+
+  auto begin() const { return std::begin(range_); }
+
+  auto end() const { return std::end(range_); }
+
+  auto cbegin() const { return std::cbegin(range_); }
+
+  auto cend() const { return std::cend(range_); }
+};
+
+template <typename T>
+auto begin(const range<T>& r) {
+  return r.begin();
+}
+
+template <typename T>
+auto end(const range<T>& r) {
+  return r.end();
+}
+
+template <typename T>
+auto cbegin(const range<T>& r) {
+  return r.cbegin();
+}
+
+template <typename T>
+auto cend(const range<T>& r) {
+  return r.cend();
+}
+
+uint64_t SimpleAdding_v2(const uint64_t num) {
+  range<size_t> r{1, num + 1};
+
+  return accumulate(cbegin(r), cend(r), 0UL);
+}
+
 int main() {
-  // cout << SimpleAdding(gets(stdin));
-  cout << SimpleAdding(4) << '\n';    // expected output: 10
-  cout << SimpleAdding(12) << '\n';   // expected output: 78
-  cout << SimpleAdding(140) << '\n';  // expected output: 9870
+  // cout << SimpleAdding_v1(gets(stdin));
+  cout << SimpleAdding_v2(4) << '\n';    // expected output: 10
+  cout << SimpleAdding_v2(12) << '\n';   // expected output: 78
+  cout << SimpleAdding_v2(140) << '\n';  // expected output: 9870
 
   return 0;
 }
