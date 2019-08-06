@@ -33,7 +33,7 @@ struct is_anyone_of<T, First> : std::is_same<T, First> {};
 template <typename T, typename First, typename... Rest>
 struct is_anyone_of<T, First, Rest...>
     : std::integral_constant<bool,
-                             std::is_same_v<T, First> ||
+                             std::is_same<T, First>::value ||
                                  is_anyone_of<T, Rest...>::value> {};
 
 template <typename T, typename First, typename... Rest>
@@ -150,42 +150,45 @@ template <typename T>
 constexpr const bool is_char_array_type_v = is_char_array_type<T>::value;
 
 template <typename T>
+struct remove_all_decorations {
+  using dt = std::decay_t<T>;
+
+  using mt1 = std::conditional_t<std::is_const_v<dt> || std::is_volatile_v<dt>,
+                                 std::remove_cv_t<dt>,
+                                 dt>;
+  using mt2 = std::
+      conditional_t<std::is_array_v<mt1>, std::remove_all_extents_t<mt1>, mt1>;
+  using mt3 = std::
+      conditional_t<std::is_pointer_v<mt2>, std::remove_pointer_t<mt2>, mt2>;
+  using mt4 = std::conditional_t<std::is_reference_v<mt3>,
+                                 std::remove_reference_t<mt3>,
+                                 mt3>;
+  using type =
+      std::conditional_t<std::is_const_v<mt4> || std::is_volatile_v<mt4>,
+                         std::remove_cv_t<mt4>,
+                         mt4>;
+};
+
+template <typename T>
+using remove_all_decorations_t = typename remove_all_decorations<T>::type;
+
+template <typename T>
 struct is_valid_string_type {
-  static constexpr const bool value = is_anyone_of_v<
-      std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>,
-      std::string,
-      std::wstring,
-      std::u16string,
-      std::u32string>;
+  static constexpr const bool value =
+      is_anyone_of_v<remove_all_decorations_t<T>,
+                     std::string,
+                     std::wstring,
+                     std::u16string,
+                     std::u32string>;
 };
 
 template <typename T>
 constexpr const bool is_valid_string_type_v = is_valid_string_type<T>::value;
 
 template <typename T>
-struct get_string_or_string_view_char_type {
-  using type = typename std::remove_cv_t<
-      std::remove_pointer_t<std::decay_t<T>>>::value_type;
-};
-
-template <typename T, size_t N>
-struct get_string_or_string_view_char_type<T[N]> {
-  using type = typename std::remove_all_extents_t<T>::value_type;
-};
-
-template <typename T>
-struct get_string_or_string_view_char_type<T[]> {
-  using type = typename std::remove_all_extents_t<T>::value_type;
-};
-
-template <typename T>
-using get_string_or_string_view_char_type_t =
-    typename get_string_or_string_view_char_type<T>::type;
-
-template <typename T>
 struct is_valid_string_view_type {
   static constexpr const bool value =
-      is_anyone_of_v<std::remove_cv_t<std::remove_pointer_t<std::decay_t<T>>>,
+      is_anyone_of_v<remove_all_decorations_t<T>,
                      std::string_view,
                      std::wstring_view,
                      std::u16string_view,
@@ -197,56 +200,31 @@ constexpr const bool is_valid_string_view_type_v =
     is_valid_string_view_type<T>::value;
 
 template <typename T>
+using has_value_type_t = decltype(std::declval<typename T::value_type>());
+
+template <typename T, typename = void>
+struct has_value_type : std::false_type {};
+
+template <typename T>
+struct has_value_type<T, std::void_t<has_value_type_t<T>>> : std::true_type {};
+
+template <typename T>
+constexpr const bool has_value_type_v = has_value_type<T>::value;
+
+template <typename T, typename = void>
 struct get_char_type {
-  using type = std::conditional_t<
-      is_valid_char_type_v<std::remove_cv_t<
-          std::remove_pointer_t<std::decay_t<std::remove_all_extents_t<T>>>>>,
-      std::remove_cv_t<std::remove_cv_t<
-          std::remove_pointer_t<std::decay_t<std::remove_all_extents_t<T>>>>>,
-      std::false_type>;
-
+  using type = remove_all_decorations_t<T>;
   static_assert(is_valid_char_type_v<type>,
-                "Provided type T is not a valid character type!");
+                "Underlying type is not an intrinsic character type!");
 };
 
-template <>
-struct get_char_type<std::string> {
-  using type = char;
-};
-
-template <>
-struct get_char_type<std::wstring> {
-  using type = wchar_t;
-};
-
-template <>
-struct get_char_type<std::u16string> {
-  using type = char16_t;
-};
-
-template <>
-struct get_char_type<std::u32string> {
-  using type = char32_t;
-};
-
-template <>
-struct get_char_type<std::string_view> {
-  using type = char;
-};
-
-template <>
-struct get_char_type<std::wstring_view> {
-  using type = wchar_t;
-};
-
-template <>
-struct get_char_type<std::u16string_view> {
-  using type = char16_t;
-};
-
-template <>
-struct get_char_type<std::u32string_view> {
-  using type = char32_t;
+template <typename T>
+struct get_char_type<
+    T,
+    std::void_t<has_value_type_t<remove_all_decorations_t<T>>>> {
+  using type = typename remove_all_decorations_t<T>::value_type;
+  static_assert(is_valid_char_type_v<type>,
+                "Underlying type is not an intrinsic character type!");
 };
 
 template <typename T>
@@ -269,18 +247,19 @@ template <typename T,
               is_char_array_type_v<T> || is_char_pointer_type_v<T> ||
               is_valid_string_type_v<T> || is_valid_string_view_type_v<T>>>
 size_t len(T src, size_t max_allowed_string_length = max_string_length) {
-  if constexpr (is_valid_string_type_v<T>) {
+  if constexpr (is_valid_string_type_v<T> || is_valid_string_view_type_v<T>) {
     return src.length() > max_allowed_string_length ? max_allowed_string_length
                                                     : src.length();
   } else {
-    if (nullptr == src)
-      return 0u;
+    if constexpr (is_char_pointer_type_v<T>) {
+      if (nullptr == src)
+        return 0U;
+    }
 
     size_t length{};
 
-    while (*src++) {
+    while (src[length]) {
       ++length;
-
       if (max_allowed_string_length == length)
         return max_allowed_string_length;
     }
@@ -336,7 +315,7 @@ string LetterCapitalize(string str) {
     }
 
     if (is_space_char) {
-      ch = static_cast<char>(f.toupper(ch));
+      ch = f.toupper(ch);
       is_space_char = false;
     }
   }
@@ -350,11 +329,6 @@ int main() {
        << '\n';  // expected output: "Hello World"
   cout << LetterCapitalize("i ran there")
        << '\n';  // expected output: "I Ran There"
-
-  cout << "std::is_same_v<get_char_type_t<const char*>, char> -> "
-       << (std::is_same_v<get_char_type_t<const char*>, char> ? "true"
-                                                              : "false")
-       << '\n';
 
   return 0;
 }
