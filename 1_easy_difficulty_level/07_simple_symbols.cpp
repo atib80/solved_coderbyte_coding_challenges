@@ -60,6 +60,9 @@ string SimpleSymbols_v1(string str) {
   if (isalpha(str.front()) || isalpha(str.back()))
     return "false";
 
+  if (str_len < 3U)
+    return "true";
+
   for (size_t i{}; i < str_len - 2; i++) {
     if (str[i] == '+') {
       if (isalpha(str[i + 1])) {
@@ -87,6 +90,9 @@ string SimpleSymbols_v2(string str) {
 
   if (isalpha(str.front()) || isalpha(str.back()))
     return "false";
+
+  if (str_len < 3U)
+    return "true";
 
   for (size_t i{1}; i < str_len - 1; i++) {
     if (isalpha(str[i])) {
