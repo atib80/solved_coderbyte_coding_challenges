@@ -13,14 +13,19 @@ Output: "true"
 
 Input:  67 & num2 = 67
 Output: "-1"
+
+Input:  83 & num2 = 67
+Output: "false"
 */
 
+#include <cmath>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 
-string CheckNums(const int num1, const int num2) {
+string CheckNums_v1(const int num1, const int num2) {
   if (num1 == num2)
     return "-1";
 
@@ -30,11 +35,20 @@ string CheckNums(const int num1, const int num2) {
   return "false";
 }
 
+string CheckNums_v2(const int num1, const int num2) {
+  static constexpr const char* dict[3]{"true", "-1", "false"};
+
+  const int diff{num1 - num2};
+  const int abs_diff{abs(diff)};
+  const int key{1 + diff / (0 != abs_diff ? abs_diff : 1)};
+  return dict[key];
+}
+
 int main() {
-  // cout << CheckNums(gets(stdin));
-  cout << CheckNums(3, 122) << '\n';  // expected output: "true"
-  cout << CheckNums(67, 67) << '\n';  // expected output: "-1"
-  cout << CheckNums(35, 17) << '\n';  // expected output: "false"
+  // cout << CheckNums_v2(gets(stdin));
+  cout << CheckNums_v2(3, 122) << '\n';  // expected output: "true"
+  cout << CheckNums_v2(67, 67) << '\n';  // expected output: "-1"
+  cout << CheckNums_v2(35, 17) << '\n';  // expected output: "false"
 
   return 0;
 }
