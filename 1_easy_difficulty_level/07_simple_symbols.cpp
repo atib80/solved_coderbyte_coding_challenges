@@ -27,7 +27,7 @@ using namespace std;
 string trim(const string& str) {
   const size_t str_len{str.length()};
 
-  if (!str_len)
+  if (0U == str_len)
     return {};
 
   size_t begin_str{};
@@ -49,12 +49,15 @@ string trim(const string& str) {
   return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-string SimpleSymbols(string str) {
+string SimpleSymbols_v1(string str) {
   str = trim(str);
 
   const size_t str_len{str.length()};
 
-  if (isalpha(str[0]) || isalpha(str[str_len - 1]))
+  if (0U == str_len)
+    return "true";
+
+  if (isalpha(str.front()) || isalpha(str.back()))
     return "false";
 
   for (size_t i{}; i < str_len - 2; i++) {
@@ -64,15 +67,11 @@ string SimpleSymbols(string str) {
           i++;
           continue;
         }
-
-        else
-          return "false";
+        return "false";
       }
 
-    } else if ('=' == str[i]) {
-      if (isalpha(str[i + 1]))
-        return "false";
-    }
+    } else if ('=' == str[i] && isalpha(str[i + 1]))
+      return "false";
   }
 
   return "true";
@@ -83,12 +82,16 @@ string SimpleSymbols_v2(string str) {
 
   const size_t str_len{str.length()};
 
-  if (isalpha(str[0]) || isalpha(str[str_len - 1]))
+  if (0U == str_len)
+    return "true";
+
+  if (isalpha(str.front()) || isalpha(str.back()))
     return "false";
 
   for (size_t i{1}; i < str_len - 1; i++) {
     if (isalpha(str[i])) {
-      if ('+' != str[i - 1] || '+' != str[i + 1]) return "false";
+      if (!('+' == str[i - 1] && '+' == str[i + 1]))
+        return "false";
       i++;
     }
   }
@@ -99,11 +102,9 @@ string SimpleSymbols_v2(string str) {
 int main() {
   // cout << SimpleSymbols_v2(gets(stdin));
   cout << SimpleSymbols_v2("++d+===+c++==a")
-       << '\n';  // expected output: "false"
-  cout << SimpleSymbols_v2("+d+=3=+s+")
-       << '\n';  // expected output: "true"
-  cout << SimpleSymbols_v2("f++d+")
-       << '\n';  // expected output: "false"
+       << '\n';                                   // expected output: "false"
+  cout << SimpleSymbols_v2("+d+=3=+s+") << '\n';  // expected output: "true"
+  cout << SimpleSymbols_v2("f++d+") << '\n';      // expected output: "false"
 
   return 0;
 }
