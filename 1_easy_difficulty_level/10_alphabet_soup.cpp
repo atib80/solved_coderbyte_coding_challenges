@@ -33,19 +33,34 @@ int compare(const void* lc, const void* rc) {
 }
 
 string AlphabetSoup_v2(string str) {
-  if (str.empty()) return {};
+  if (str.empty())
+    return {};
   qsort(&str[0], str.length(), sizeof(str.front()), compare);
+  return str;
+}
+
+// simple bubblesort implementation
+string AlphabetSoup_v3(string str) {
+  bool did_swap_elements{};
+
+  do {
+    did_swap_elements = false;
+    for (size_t i{}; i < str.size() - 1; i++) {
+      if (str[i] > str[i + 1]) {
+        swap(str[i], str[i + 1]);
+        did_swap_elements = true;
+      }
+    }
+  } while (did_swap_elements);
+
   return str;
 }
 
 int main() {
   // cout << AlphabetSoup_v2(gets(stdin));
-  cout << AlphabetSoup_v2("hello")
-       << '\n';  // expected output: ehllo
-  cout << AlphabetSoup_v2("coderbyte")
-       << '\n';  // expected output: bcdeeorty
-  cout << AlphabetSoup_v2("hooplah")
-       << '\n';  // expected output: ahhloop
+  cout << AlphabetSoup_v3("hello") << '\n';      // expected output: ehllo
+  cout << AlphabetSoup_v3("coderbyte") << '\n';  // expected output: bcdeeorty
+  cout << AlphabetSoup_v3("hooplah") << '\n';    // expected output: ahhloop
 
   return 0;
 }
