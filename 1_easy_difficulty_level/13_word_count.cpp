@@ -18,15 +18,47 @@ Output: 3
 #include <cctype>
 #include <cstring>
 #include <iostream>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <typeinfo>
 #include <vector>
 
 using namespace std;
 
+template <typename T>
+string number_to_string(const T& number) {
+  static char buffer[32]{};
+  if constexpr (is_integral_v<T>) {
+    if constexpr (is_signed_v<T>) {
+      const long long value = number;
+      snprintf(buffer, 32, "%lld", value);
+    }
+    else {
+      const unsigned long long value = number;
+      snprintf(buffer, 32, "%llu", value);
+    }
+  } else if constexpr (is_floating_point_v<T>) {
+    if constexpr (is_same_v<float, T>)
+      snprintf(buffer, 32, "%f", number);
+    else
+      snprintf(buffer, 32, "%lf", number);
+  } else {
+    static char buffer[128]{};
+    snprintf(buffer, 128,
+             "Provided data type T [%s] is not a valid primitive integral or "
+             "floating point number type!",
+             typeid(T).name());
+    throw std::invalid_argument{buffer};
+  }
+
+  return buffer;
+}
+
 string trim(const string& str) {
   const size_t str_len{str.length()};
 
-  if (!str_len)
+  if (0U == str_len)
     return {};
 
   size_t begin_str{};
@@ -126,7 +158,7 @@ string word_count_v1(string str) {
     start = last + 1;
   }
 
-  return to_string(word_count);
+  return number_to_string(word_count);
 }
 
 string word_count_v2(string str) {
@@ -134,11 +166,11 @@ string word_count_v2(string str) {
 
   const vector<string> words{split(str, " ")};
 
-  return to_string(words.size());
+  return number_to_string(words.size());
 }
 
 int main() {
-  // cout << word_count_v1(gets(stdin));
+  // cout << word_count_v2(gets(stdin));
   cout << word_count_v1("Never eat shredded wheat or cake")
        << '\n';                                   // expected output: 6
   cout << word_count_v1("Hello World") << '\n';   // expected output: 2
