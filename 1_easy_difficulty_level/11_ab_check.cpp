@@ -316,9 +316,12 @@ string ABCheck_v1(string str) {
 
   const int str_len{static_cast<int>(str.length())};
 
-  for (int i{}; i < str_len - 4; i++) {
+  for (int i{}, j{str_len - 1}; i < str_len - 4 && j > 3 && i < j;
+       i++, j--) {
     if (('a' == str[i] && 'b' == str[i + 4]) ||
-        ('b' == str[i] && 'a' == str[i + 4]))
+        ('b' == str[i] && 'a' == str[i + 4]) ||
+        ('a' == str[j] && 'b' == str[j - 4]) ||
+        ('b' == str[j] && 'a' == str[j - 4]))
       return "true";
   }
 
@@ -350,6 +353,10 @@ string ABCheck_v2(string str) {
 
 int main() {
   // cout << ABCheck_v1(gets(stdin));
+  cout << ABCheck_v1("ab") << '\n';             // expected output: "false"
+  cout << ABCheck_v1("a-b") << '\n';            // expected output: "false"
+  cout << ABCheck_v1("a--b") << '\n';           // expected output: "false"
+  cout << ABCheck_v1("a---b") << '\n';          // expected output: "true"
   cout << ABCheck_v1("lane borrowed") << '\n';  // expected output: "true"
   cout << ABCheck_v1("after badly") << '\n';    // expected output: "false"
   cout << ABCheck_v1("Laura sobs") << '\n';     // expected output: "true"
