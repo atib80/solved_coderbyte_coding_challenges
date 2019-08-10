@@ -292,7 +292,7 @@ basic_string<remove_all_decorations_t<FormatStringType>> num_to_str(
   return buffer;
 }
 
-string trim(const string& str) {
+string trim(const string& str, const locale& loc = locale{}) {
   const size_t str_len{str.length()};
 
   if (0U == str_len)
@@ -302,7 +302,7 @@ string trim(const string& str) {
   size_t end_str{str_len - 1};
 
   for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
+    if (!isspace(str[begin_str], loc))
       break;
   }
 
@@ -310,7 +310,7 @@ string trim(const string& str) {
     return {};
 
   for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
+    if (!isspace(str[end_str], loc))
       break;
   }
 
@@ -414,15 +414,15 @@ string word_count_v2(string str) {
 
 int main() {
   // cout << word_count_v2(gets(stdin));
-  cout << word_count_v1("Never eat shredded wheat or cake")
+  cout << word_count_v2("Never eat shredded wheat or cake")
        << '\n';                                   // expected output: 6
-  cout << word_count_v1("Hello World") << '\n';   // expected output: 2
-  cout << word_count_v1("one 22 three") << '\n';  // expected output: 3
-  cout << word_count_v1("Coderbyte") << '\n';     // expected output: 1
-  cout << word_count_v1("h333llLo") << '\n';      // expected output: 1
-  cout << word_count_v1("Yo0") << '\n';           // expected output: 1
-  cout << word_count_v1("commacomma!") << '\n';   // expected output: 1
-  cout << word_count_v1("aq") << '\n';            // expected output: 1
+  cout << word_count_v2("Hello World") << '\n';   // expected output: 2
+  cout << word_count_v2("one 22 three") << '\n';  // expected output: 3
+  cout << word_count_v2("Coderbyte") << '\n';     // expected output: 1
+  cout << word_count_v2("h333llLo") << '\n';      // expected output: 1
+  cout << word_count_v2("Yo0") << '\n';           // expected output: 1
+  cout << word_count_v2("commacomma!") << '\n';   // expected output: 1
+  cout << word_count_v2("aq") << '\n';            // expected output: 1
 
   return 0;
 }
