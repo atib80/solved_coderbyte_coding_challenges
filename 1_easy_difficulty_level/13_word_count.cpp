@@ -39,7 +39,7 @@ struct is_anyone_of<T, First, Rest...>
                                  is_anyone_of<T, Rest...>::value> {};
 
 template <typename T, typename First, typename... Rest>
-inline constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
+constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
 
 template <typename CharType>
 struct default_whitespace_chars {};
@@ -328,44 +328,63 @@ string trim(const string& str, const locale& loc = locale{}) {
   return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-vector<string> split(const string& source,
-                     const char* needle,
-                     const bool split_on_whole_needle = true,
-                     const bool ignore_empty_string = true,
-                     size_t const max_count = string::npos) {
-  const size_t source_len{source.length()};
+template <
+    typename T,
+    typename U,
+    typename = enable_if_t<
+        (is_valid_string_type_v<T> || is_valid_string_view_type_v<T> ||
+         is_char_array_type_v<T> ||
+         is_char_pointer_type_v<
+             T>)&&(is_valid_string_type_v<U> ||
+                   is_valid_string_view_type_v<U> || is_char_array_type_v<U> ||
+                   is_char_pointer_type_v<U>)&&(is_same_v<get_char_type_t<T>,
+                                                          get_char_type_t<U>>)>>
+vector<basic_string<get_char_type_t<T>>> split(
+    const T& source,
+    const U& needle,
+    const bool split_on_whole_needle = true,
+    const bool ignore_empty_string = true,
+    size_t const max_count = basic_string<get_char_type_t<T>>::npos) {
+  using char_type = get_char_type_t<T>;
+  if constexpr (is_char_pointer_type_v<T>) {
+    if (nullptr == source)
+      return {};
+  }
+  const basic_string_view<char_type> sv{source};
+  const size_t source_len{sv.length()};
   if (0U == source_len)
     return {};
 
-  if (nullptr == needle || 0U == strlen(needle)) {
+  const basic_string_view<char_type> nv{needle};
+  const size_t needle_len{split_on_whole_needle ? nv.length() : 1U};
+
+  if (0U == needle_len) {
     const size_t upper_limit{max_count < source_len ? max_count : source_len};
-    vector<string> parts(upper_limit);
+    vector<basic_string<char_type>> parts(upper_limit);
     for (size_t i{}; i < upper_limit; i++)
-      parts[i].assign({1, source[i]});
+      parts[i].assign({1, sv[i]});
     return parts;
   }
 
-  const size_t needle_len{split_on_whole_needle ? strlen(needle) : 1U};
-
-  vector<string> parts{};
+  vector<basic_string<char_type>> parts{};
   size_t number_of_parts{}, prev{};
 
   while (true) {
     const size_t current = split_on_whole_needle
-                               ? source.find(needle, prev)
-                               : source.find_first_of(needle, prev);
+                               ? sv.find(nv.data(), prev)
+                               : sv.find_first_of(nv.data(), prev);
 
-    if (string::npos == current)
+    if (basic_string<char_type>::npos == current)
       break;
 
-    if (string::npos != max_count && parts.size() == max_count)
+    if (basic_string<char_type>::npos != max_count && parts.size() == max_count)
       break;
 
-    if (current - prev > 0) {
-      parts.emplace_back(source.substr(prev, current - prev));
-      number_of_parts++;
-    } else if (!ignore_empty_string) {
-      parts.emplace_back();
+    if (current - prev > 0 || !ignore_empty_string) {
+      if (!ignore_empty_string)
+        parts.emplace_back();
+      else
+        parts.emplace_back(cbegin(sv) + prev, cbegin(sv) + current);
       number_of_parts++;
     }
 
@@ -375,13 +394,9 @@ vector<string> split(const string& source,
       break;
   }
 
-  if (prev < source_len) {
-    if (string::npos == max_count)
-      parts.emplace_back(cbegin(source) + prev, cend(source));
-
-    else if (parts.size() < max_count)
-      parts.emplace_back(cbegin(source) + prev, cend(source));
-  }
+  if (prev < source_len &&
+      (basic_string<char_type>::npos == max_count || parts.size() < max_count))
+    parts.emplace_back(cbegin(sv) + prev, cend(sv));
 
   return parts;
 }
@@ -424,16 +439,16 @@ string word_count_v2(string str) {
 }
 
 int main() {
-  // cout << word_count_v1(gets(stdin));
-  cout << word_count_v1("Never eat shredded wheat or cake")
+  // cout << word_count_v2(gets(stdin));
+  cout << word_count_v2("Never eat shredded wheat or cake")
        << '\n';                                   // expected output: 6
-  cout << word_count_v1("Hello World") << '\n';   // expected output: 2
-  cout << word_count_v1("one 22 three") << '\n';  // expected output: 3
-  cout << word_count_v1("Coderbyte") << '\n';     // expected output: 1
-  cout << word_count_v1("h333llLo") << '\n';      // expected output: 1
-  cout << word_count_v1("Yo0") << '\n';           // expected output: 1
-  cout << word_count_v1("commacomma!") << '\n';   // expected output: 1
-  cout << word_count_v1("aq") << '\n';            // expected output: 1
+  cout << word_count_v2("Hello World") << '\n';   // expected output: 2
+  cout << word_count_v2("one 22 three") << '\n';  // expected output: 3
+  cout << word_count_v2("Coderbyte") << '\n';     // expected output: 1
+  cout << word_count_v2("h333llLo") << '\n';      // expected output: 1
+  cout << word_count_v2("Yo0") << '\n';           // expected output: 1
+  cout << word_count_v2("commacomma!") << '\n';   // expected output: 1
+  cout << word_count_v2("aq") << '\n';            // expected output: 1
 
   return 0;
 }
