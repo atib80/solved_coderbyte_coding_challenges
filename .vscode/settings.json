@@ -51,6 +51,11 @@
         "functional": "cpp",
         "iterator": "cpp",
         "memory_resource": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "cinttypes": "cpp",
+        "bit": "cpp",
+        "iomanip": "cpp"
     }
 }

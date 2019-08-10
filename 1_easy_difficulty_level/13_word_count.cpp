@@ -267,19 +267,30 @@ basic_string<remove_all_decorations_t<FormatStringType>> num_to_str(
 
   if constexpr (is_integral_v<data_type>) {
     if constexpr (is_signed_v<data_type>) {
-      if (!format_string) {
-        const long long value = std::forward<T>(number);
+      const long long value = std::forward<T>(number);
+      if constexpr (std::is_same_v<char_type, char>)
         snprintf(buffer, 32, "%lld", value);
-      }
+      else
+        snwprintf(buffer, 32, L"%lld", value);
     } else {
       const unsigned long long value = std::forward<T>(number);
-      snprintf(buffer, 32, "%llu", value);
+      if constexpr (std::is_same_v<char_type, char>)
+        snprintf(buffer, 32, "%llu", value);
+      else
+        snwprintf(buffer, 32, L"%llu", value);
     }
   } else if constexpr (is_floating_point_v<data_type>) {
-    if constexpr (is_same_v<float, data_type>)
-      snprintf(buffer, 32, "%f", std::forward<T>(number));
-    else
-      snprintf(buffer, 32, "%lf", std::forward<T>(number));
+    if constexpr (is_same_v<float, data_type>) {
+      if constexpr (std::is_same_v<char_type, char>)
+        snprintf(buffer, 32, "%f", std::forward<T>(number));
+      else
+        snwprintf(buffer, 32, L"%f", std::forward<T>(number));
+    } else {
+      if constexpr (std::is_same_v<char_type, char>)
+        snprintf(buffer, 32, "%lf", std::forward<T>(number));
+      else
+        snwprintf(buffer, 32, L"%lf", std::forward<T>(number));
+    }
   } else {
     static char buffer[128]{};
     snprintf(buffer, 128,
@@ -413,16 +424,16 @@ string word_count_v2(string str) {
 }
 
 int main() {
-  // cout << word_count_v2(gets(stdin));
-  cout << word_count_v2("Never eat shredded wheat or cake")
+  // cout << word_count_v1(gets(stdin));
+  cout << word_count_v1("Never eat shredded wheat or cake")
        << '\n';                                   // expected output: 6
-  cout << word_count_v2("Hello World") << '\n';   // expected output: 2
-  cout << word_count_v2("one 22 three") << '\n';  // expected output: 3
-  cout << word_count_v2("Coderbyte") << '\n';     // expected output: 1
-  cout << word_count_v2("h333llLo") << '\n';      // expected output: 1
-  cout << word_count_v2("Yo0") << '\n';           // expected output: 1
-  cout << word_count_v2("commacomma!") << '\n';   // expected output: 1
-  cout << word_count_v2("aq") << '\n';            // expected output: 1
+  cout << word_count_v1("Hello World") << '\n';   // expected output: 2
+  cout << word_count_v1("one 22 three") << '\n';  // expected output: 3
+  cout << word_count_v1("Coderbyte") << '\n';     // expected output: 1
+  cout << word_count_v1("h333llLo") << '\n';      // expected output: 1
+  cout << word_count_v1("Yo0") << '\n';           // expected output: 1
+  cout << word_count_v1("commacomma!") << '\n';   // expected output: 1
+  cout << word_count_v1("aq") << '\n';            // expected output: 1
 
   return 0;
 }
