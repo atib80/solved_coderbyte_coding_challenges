@@ -26,29 +26,266 @@ Output: 3
 
 using namespace std;
 
+template <typename T, typename... Rest>
+struct is_anyone_of : std::false_type {};
+
+template <typename T, typename First>
+struct is_anyone_of<T, First> : std::is_same<T, First> {};
+
+template <typename T, typename First, typename... Rest>
+struct is_anyone_of<T, First, Rest...>
+    : std::integral_constant<bool,
+                             std::is_same<T, First>::value ||
+                                 is_anyone_of<T, Rest...>::value> {};
+
+template <typename T, typename First, typename... Rest>
+inline constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
+
+template <typename CharType>
+struct default_whitespace_chars {};
+
+template <>
+struct default_whitespace_chars<char> {
+  static constexpr const char* value = " \t\n\f\v\r";
+};
+
+template <>
+struct default_whitespace_chars<wchar_t> {
+  static constexpr const wchar_t* value = L" \t\n\f\v\r";
+};
+
+template <>
+struct default_whitespace_chars<char16_t> {
+  static constexpr const char16_t* value = u" \t\n\f\v\r";
+};
+
+template <>
+struct default_whitespace_chars<char32_t> {
+  static constexpr const char32_t* value = U" \t\n\f\v\r";
+};
+
+template <typename CharType>
+constexpr const CharType* default_whitespace_chars_v =
+    default_whitespace_chars<CharType>::value;
+
 template <typename T>
-string number_to_string(const T& number) {
-  static char buffer[32]{};
-  if constexpr (is_integral_v<T>) {
-    if constexpr (is_signed_v<T>) {
-      const long long value = number;
-      snprintf(buffer, 32, "%lld", value);
-    }
-    else {
-      const unsigned long long value = number;
+struct is_valid_char_type {
+  static constexpr const bool value =
+      is_anyone_of_v<std::remove_cv_t<T>, char, wchar_t, char16_t, char32_t>;
+};
+
+template <typename T>
+constexpr const bool is_valid_char_type_v = is_valid_char_type<T>::value;
+
+template <typename T>
+struct is_non_const_char_pointer_type {
+  static constexpr const bool value = is_anyone_of_v<T,
+                                                     char*,
+                                                     wchar_t*,
+                                                     char16_t*,
+                                                     char32_t*,
+                                                     char* const,
+                                                     wchar_t* const,
+                                                     char16_t* const,
+                                                     char32_t* const>;
+};
+
+template <typename T>
+constexpr const bool is_non_const_char_pointer_type_v =
+    is_non_const_char_pointer_type<T>::value;
+
+template <typename T>
+struct is_const_char_pointer_type {
+  static constexpr const bool value = is_anyone_of_v<T,
+                                                     const char*,
+                                                     const wchar_t*,
+                                                     const char16_t*,
+                                                     const char32_t*,
+                                                     const char* const,
+                                                     const wchar_t* const,
+                                                     const char16_t* const,
+                                                     const char32_t* const>;
+};
+
+template <typename T>
+constexpr const bool is_const_char_pointer_type_v =
+    is_const_char_pointer_type<T>::value;
+
+template <typename T>
+struct is_non_const_char_array_type {
+  static constexpr bool value = 1u == std::rank_v<T> &&
+                                is_valid_char_type_v<std::remove_extent_t<T>> &&
+                                !std::is_const_v<std::remove_extent_t<T>>;
+};
+
+template <typename T>
+constexpr const bool is_non_const_char_array_type_v =
+    is_non_const_char_array_type<T>::value;
+
+template <typename T>
+struct is_const_char_array_type {
+  static constexpr bool value = 1u == std::rank_v<T> &&
+                                is_valid_char_type_v<std::remove_extent_t<T>> &&
+                                std::is_const_v<std::remove_extent_t<T>>;
+};
+
+template <typename T>
+constexpr const bool is_const_char_array_type_v =
+    is_const_char_array_type<T>::value;
+
+template <typename T>
+struct is_char_pointer_type {
+  static constexpr const bool value =
+      is_non_const_char_pointer_type_v<T> || is_const_char_pointer_type_v<T>;
+};
+
+template <typename T>
+constexpr const bool is_char_pointer_type_v = is_char_pointer_type<T>::value;
+
+template <typename T>
+struct is_char_array_type {
+  static constexpr const bool value =
+      is_non_const_char_array_type_v<T> || is_const_char_array_type_v<T>;
+};
+
+template <typename T>
+constexpr const bool is_char_array_type_v = is_char_array_type<T>::value;
+
+template <typename T>
+struct remove_all_decorations {
+  using dt = std::decay_t<T>;
+
+  using mt1 = std::conditional_t<std::is_const_v<dt> || std::is_volatile_v<dt>,
+                                 std::remove_cv_t<dt>,
+                                 dt>;
+  using mt2 = std::
+      conditional_t<std::is_array_v<mt1>, std::remove_all_extents_t<mt1>, mt1>;
+  using mt3 = std::
+      conditional_t<std::is_pointer_v<mt2>, std::remove_pointer_t<mt2>, mt2>;
+  using mt4 = std::conditional_t<std::is_reference_v<mt3>,
+                                 std::remove_reference_t<mt3>,
+                                 mt3>;
+  using type =
+      std::conditional_t<std::is_const_v<mt4> || std::is_volatile_v<mt4>,
+                         std::remove_cv_t<mt4>,
+                         mt4>;
+};
+
+template <typename T>
+using remove_all_decorations_t = typename remove_all_decorations<T>::type;
+
+template <typename T>
+struct is_valid_string_type {
+  static constexpr const bool value =
+      is_anyone_of_v<remove_all_decorations_t<T>,
+                     std::string,
+                     std::wstring,
+                     std::u16string,
+                     std::u32string>;
+};
+
+template <typename T>
+constexpr const bool is_valid_string_type_v = is_valid_string_type<T>::value;
+
+template <typename T>
+struct is_valid_string_view_type {
+  static constexpr const bool value =
+      is_anyone_of_v<remove_all_decorations_t<T>,
+                     std::string_view,
+                     std::wstring_view,
+                     std::u16string_view,
+                     std::u32string_view>;
+};
+
+template <typename T>
+constexpr const bool is_valid_string_view_type_v =
+    is_valid_string_view_type<T>::value;
+
+template <typename T>
+using has_value_type_t = decltype(std::declval<typename T::value_type>());
+
+template <typename T, typename = void>
+struct has_value_type : std::false_type {};
+
+template <typename T>
+struct has_value_type<T, std::void_t<has_value_type_t<T>>> : std::true_type {};
+
+template <typename T>
+constexpr const bool has_value_type_v = has_value_type<T>::value;
+
+template <typename T, typename = void>
+struct get_char_type {
+  using type = remove_all_decorations_t<T>;
+  static_assert(is_valid_char_type_v<type>,
+                "Underlying type is not an intrinsic character type!");
+};
+
+template <typename T>
+struct get_char_type<
+    T,
+    std::void_t<has_value_type_t<remove_all_decorations_t<T>>>> {
+  using type = typename remove_all_decorations_t<T>::value_type;
+  static_assert(is_valid_char_type_v<type>,
+                "Underlying type is not an intrinsic character type!");
+};
+
+template <typename T>
+using get_char_type_t = typename get_char_type<T>::type;
+
+template <typename T>
+struct add_const_pointer_to_char_type {
+  using type = std::add_const_t<
+      std::add_pointer_t<std::add_const_t<get_char_type_t<T>>>>;
+};
+
+template <typename T>
+using add_const_pointer_to_char_type_t =
+    typename add_const_pointer_to_char_type<T>::type;
+
+template <
+    typename T,
+    typename FormatStringType = const char*,
+    typename = std::enable_if_t<
+        is_valid_char_type_v<remove_all_decorations_t<FormatStringType>> &&
+        is_anyone_of_v<remove_all_decorations_t<FormatStringType>,
+                       char,
+                       wchar_t>>>
+basic_string<remove_all_decorations_t<FormatStringType>> num_to_str(
+    T&& number,
+    FormatStringType format_string = nullptr) {
+  using char_type = remove_all_decorations_t<FormatStringType>;
+  using data_type = remove_all_decorations_t<T>;
+
+  static char_type buffer[32]{};
+
+  if (nullptr != format_string) {
+    if constexpr (std::is_same_v<char_type, char>)
+      snprintf(buffer, 32, format_string, std::forward<T>(number));
+    else
+      snwprintf(buffer, 32, format_string, std::forward<T>(number));
+  }
+
+  if constexpr (is_integral_v<data_type>) {
+    if constexpr (is_signed_v<data_type>) {
+      if (!format_string) {
+        const long long value = std::forward<T>(number);
+        snprintf(buffer, 32, "%lld", value);
+      }
+    } else {
+      const unsigned long long value = std::forward<T>(number);
       snprintf(buffer, 32, "%llu", value);
     }
-  } else if constexpr (is_floating_point_v<T>) {
-    if constexpr (is_same_v<float, T>)
-      snprintf(buffer, 32, "%f", number);
+  } else if constexpr (is_floating_point_v<data_type>) {
+    if constexpr (is_same_v<float, data_type>)
+      snprintf(buffer, 32, "%f", std::forward<T>(number));
     else
-      snprintf(buffer, 32, "%lf", number);
+      snprintf(buffer, 32, "%lf", std::forward<T>(number));
   } else {
     static char buffer[128]{};
     snprintf(buffer, 128,
-             "Provided data type T [%s] is not a valid primitive integral or "
+             "Provided data type [%s] is not a valid primitive integral or "
              "floating point number type!",
-             typeid(T).name());
+             typeid(data_type).name());
     throw std::invalid_argument{buffer};
   }
 
@@ -82,38 +319,44 @@ string trim(const string& str) {
 
 vector<string> split(const string& source,
                      const char* needle,
+                     const bool split_on_whole_needle = true,
+                     const bool ignore_empty_string = true,
                      size_t const max_count = string::npos) {
-  vector<string> parts{};
-
   const size_t source_len{source.length()};
+  if (0U == source_len)
+    return {};
 
-  const size_t needle_len{strlen(needle)};
-
-  if (!source_len)
-    return parts;
-
-  if (!needle_len) {
+  if (nullptr == needle || 0U == strlen(needle)) {
     const size_t upper_limit{max_count < source_len ? max_count : source_len};
+    vector<string> parts(upper_limit);
     for (size_t i{}; i < upper_limit; i++)
-      parts.emplace_back(1, source[i]);
+      parts[i].assign({1, source[i]});
     return parts;
   }
 
+  const size_t needle_len{split_on_whole_needle ? strlen(needle) : 1U};
+
+  vector<string> parts{};
   size_t number_of_parts{}, prev{};
 
   while (true) {
-    const size_t current{source.find(needle, prev)};
+    const size_t current = split_on_whole_needle
+                               ? source.find(needle, prev)
+                               : source.find_first_of(needle, prev);
 
     if (string::npos == current)
       break;
 
-    number_of_parts++;
-
     if (string::npos != max_count && parts.size() == max_count)
       break;
 
-    if (current - prev > 0)
+    if (current - prev > 0) {
       parts.emplace_back(source.substr(prev, current - prev));
+      number_of_parts++;
+    } else if (!ignore_empty_string) {
+      parts.emplace_back();
+      number_of_parts++;
+    }
 
     prev = current + needle_len;
 
@@ -123,10 +366,10 @@ vector<string> split(const string& source,
 
   if (prev < source_len) {
     if (string::npos == max_count)
-      parts.emplace_back(source.substr(prev));
+      parts.emplace_back(cbegin(source) + prev, cend(source));
 
     else if (parts.size() < max_count)
-      parts.emplace_back(source.substr(prev));
+      parts.emplace_back(cbegin(source) + prev, cend(source));
   }
 
   return parts;
@@ -158,7 +401,7 @@ string word_count_v1(string str) {
     start = last + 1;
   }
 
-  return number_to_string(word_count);
+  return num_to_str(word_count);
 }
 
 string word_count_v2(string str) {
@@ -166,7 +409,7 @@ string word_count_v2(string str) {
 
   const vector<string> words{split(str, " ")};
 
-  return number_to_string(words.size());
+  return num_to_str(words.size());
 }
 
 int main() {
