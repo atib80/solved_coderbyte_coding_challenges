@@ -19,56 +19,66 @@ Output: "false"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <locale>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
-string trim(const string& str) {
+string trim(const string& str, const locale& loc = locale{}) {
   const size_t str_len{str.length()};
 
-  if (!str_len)
+  if (0U == str_len)
     return {};
 
-  size_t first{}, last{str_len - 1};
+  size_t begin_str{};
+  size_t end_str{str_len - 1};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str], loc))
       break;
   }
 
-  if (first > last)
+  if (begin_str > end_str)
     return {};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str], loc))
       break;
   }
 
-  return str.substr(first, last - first + 1);
+  return str.substr(begin_str, end_str - begin_str + 1);
 }
 
-// time complexity: O(N + 2N + c) -> O(N)
 string ex_oh_v1(string str) {
   str = trim(str);
 
-  const auto o_count{count(cbegin(str), cend(str), 'o')};
-  const auto x_count{count(cbegin(str), cend(str), 'x')};
- 
-  if (o_count == x_count)
+  const size_t str_len{str.length()};
+
+  if (0U == str_len || str_len % 2 == 1)
+    return "false";
+
+  static size_t char_count[128];
+  char_count['o'] = 0U;
+  char_count['x'] = 0U;
+
+  for (const char ch : str)
+    ++char_count[static_cast<size_t>(ch)];
+
+  if (char_count['o'] == char_count['x'])
     return "true";
   return "false";
 }
 
-// time complexity: O(N + Nlog2N + C) -> O(Nlog2N)
 string ex_oh_v2(string str) {
   str = trim(str);
 
-  const size_t str_len{str.length()}; // O(N)
+  const size_t str_len{str.length()};
 
-  if (!str_len || str_len % 2 == 1)
+  if (0U == str_len || str_len % 2 == 1)
     return "false";
 
-  sort(begin(str), end(str)); // NlogN
+  sort(begin(str), end(str));
 
   if (str[str_len / 2 - 1] != 'o' && str[str_len / 2] != 'x')
     return "false";
@@ -76,11 +86,27 @@ string ex_oh_v2(string str) {
   return "true";
 }
 
+string ex_oh_v3(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  if (0U == str_len || str_len % 2 == 1)
+    return "false";
+
+  unordered_multiset<char> char_freq{cbegin(str), cend(str)};
+
+  if (char_freq.count('o') != char_freq.count('x'))
+    return "false";
+
+  return "true";
+}
+
 int main() {
-  // cout << ex_oh_v2(gets(stdin));
-  cout << ex_oh_v2("xooxxxxooxo") << '\n';  // expected output: "false"
-  cout << ex_oh_v2("xooxxo") << '\n';       // expected output: "true"
-  cout << ex_oh_v2("x") << '\n';            // expected output: "false"
+  // cout << ex_oh_v1(gets(stdin));
+  cout << ex_oh_v3("xooxxxxooxo") << '\n';  // expected output: "false"
+  cout << ex_oh_v3("xooxxo") << '\n';       // expected output: "true"
+  cout << ex_oh_v3("x") << '\n';            // expected output: "false"
 
   return 0;
 }
