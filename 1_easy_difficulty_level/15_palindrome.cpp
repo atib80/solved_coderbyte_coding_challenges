@@ -18,34 +18,36 @@ Output: "true"
 
 #include <cctype>
 #include <iostream>
+#include <locale>
 #include <queue>
 #include <stack>
 #include <string>
 
 using namespace std;
 
-string trim(const string& str) {
+string trim(const string& str, const locale& loc = locale{}) {
   const size_t str_len{str.length()};
 
-  if (!str_len)
+  if (0U == str_len)
     return {};
 
-  size_t first{}, last{str_len - 1};
+  size_t begin_str{};
+  size_t end_str{str_len - 1};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
+  for (; begin_str <= end_str; ++begin_str) {
+    if (!isspace(str[begin_str], loc))
       break;
   }
 
-  if (first > last)
+  if (begin_str > end_str)
     return {};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
+  for (; end_str > begin_str; --end_str) {
+    if (!isspace(str[end_str], loc))
       break;
   }
 
-  return str.substr(first, last - first + 1);
+  return {cbegin(str) + begin_str, cbegin(str) + end_str + 1};
 }
 
 string palindrome_v1(string str) {
@@ -56,9 +58,10 @@ string palindrome_v1(string str) {
 
   stack<char> s{};
   queue<char> q{};
+  locale loc{};
 
   for (const char ch : str) {
-    if (isspace(ch))
+    if (isspace(ch, loc))
       continue;
 
     s.emplace(ch);
@@ -84,14 +87,15 @@ string palindrome_v2(string str) {
     return "false";
 
   size_t i{}, j{str_len - 1};
+  locale loc{};
 
   while (i < j) {
-    if (!isalpha(str[i])) {
+    if (!isalpha(str[i], loc)) {
       i++;
       continue;
     }
 
-    if (!isalpha(str[j])) {
+    if (!isalpha(str[j], loc)) {
       j--;
       continue;
     }
@@ -106,12 +110,39 @@ string palindrome_v2(string str) {
   return "true";
 }
 
+string palindrome_v3(string str) {
+  str = trim(str);
+
+  const size_t str_len{str.length()};
+
+  if (str_len < 2U)
+    return "false";
+
+  string str_no_spaces{};
+  str_no_spaces.reserve(str_len);
+  locale loc{};
+
+  for (const char ch : str) {
+    if (isalpha(ch, loc))
+      str_no_spaces.push_back(ch);
+  }
+
+  for (size_t i{}, j{str_no_spaces.length() - 1}; i < j; ++i, --j) {
+    if (str_no_spaces[i] != str_no_spaces[j])
+      return "false";
+  }
+
+  return "true";
+}
+
 int main() {
-  // cout << palindrome_v2(gets(stdin));
-  cout << palindrome_v2("racecar") << '\n';  // expected output: "true"
-  cout << palindrome_v2("never odd or even")
-       << '\n';                          // expected output: "true"
-  cout << palindrome_v2("eye") << '\n';  // expected output: "true"
+  // cout << palindrome_v3(gets(stdin));
+  cout << palindrome_v3("racecar") << '\n';  // expected output: "true"
+  cout << palindrome_v3("never odd or even")
+       << '\n';                            // expected output: "true"
+  cout << palindrome_v3("eye") << '\n';    // expected output: "true"
+  cout << palindrome_v3("apple") << '\n';  // expected output: "false"
+  cout << palindrome_v3("rotor") << '\n';  // expected output: "true"
 
   return 0;
 }
