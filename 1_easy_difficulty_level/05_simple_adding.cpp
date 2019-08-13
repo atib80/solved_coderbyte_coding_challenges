@@ -142,11 +142,15 @@ uint64_t SimpleAdding_v2(const uint64_t num) {
   return accumulate(cbegin(r), cend(r), 0UL);
 }
 
+constexpr uint64_t SimpleAdding_v3(const uint64_t num) {
+  return (num * (num + 1)) / 2;
+}
+
 int main() {
-  // cout << SimpleAdding_v2(gets(stdin));
-  cout << SimpleAdding_v2(4) << '\n';    // expected output: 10
-  cout << SimpleAdding_v2(12) << '\n';   // expected output: 78
-  cout << SimpleAdding_v2(140) << '\n';  // expected output: 9870
+  // cout << SimpleAdding_v3(gets(stdin));
+  cout << SimpleAdding_v3(4) << '\n';    // expected output: 10
+  cout << SimpleAdding_v3(12) << '\n';   // expected output: 78
+  cout << SimpleAdding_v3(140) << '\n';  // expected output: 9870
 
   return 0;
 }
