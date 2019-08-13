@@ -45,13 +45,13 @@ string AlphabetSoup_v3(string str) {
   if (str_len < 2U)
     return str;
 
-  bool did_swap_elements{true};
-  for (size_t i{1U}; did_swap_elements && i < str_len; ++i) {
-    did_swap_elements = false;
+  for (size_t i{1U}, did_swap_elements{1U};
+       0U != did_swap_elements && i < str_len; ++i) {
+    did_swap_elements = 0U;
     for (size_t j{}; j < str_len - i; j++) {
       if (str[j] > str[j + 1]) {
         swap(str[j], str[j + 1]);
-        did_swap_elements = true;
+        did_swap_elements = 1U;
       }
     }
   }
