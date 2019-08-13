@@ -37,7 +37,6 @@ string array_addition_1(int* arr, const size_t arr_size) {
 
   for (size_t i{1}; i < arr_size; i++) {
     int current_sum{};
-    const int* current_negative_pos{negative_pos};
 
     for (size_t j{i}; j < arr_size; j++) {
       current_sum += arr[j];
@@ -46,10 +45,10 @@ string array_addition_1(int* arr, const size_t arr_size) {
         return "true";
 
       if (current_sum > maximum) {
-        if (current_negative_pos != arr + arr_size) {
+        if (negative_pos != arr + arr_size) {
           int csum{current_sum};
 
-          for (auto current_negative_number = current_negative_pos;
+          for (auto current_negative_number = negative_pos;
                current_negative_number != arr + arr_size;
                ++current_negative_number) {
             csum += *current_negative_number;
@@ -57,10 +56,8 @@ string array_addition_1(int* arr, const size_t arr_size) {
             if (maximum == csum)
               return "true";
 
-            if (csum < maximum) {
-              ++current_negative_pos;
-              break;
-            }
+            if (csum < maximum)
+              csum -= *current_negative_number;
           }
 
           if (csum > maximum)
