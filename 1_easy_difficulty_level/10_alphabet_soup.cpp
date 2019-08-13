@@ -41,17 +41,20 @@ string AlphabetSoup_v2(string str) {
 
 // simple bubblesort implementation
 string AlphabetSoup_v3(string str) {
-  bool did_swap_elements{};
+  const size_t str_len{str.length()};
+  if (str_len < 2U)
+    return str;
 
-  do {
+  bool did_swap_elements{true};
+  for (size_t i{1U}; did_swap_elements && i < str_len; ++i) {
     did_swap_elements = false;
-    for (size_t i{}; i < str.size() - 1; i++) {
-      if (str[i] > str[i + 1]) {
-        swap(str[i], str[i + 1]);
+    for (size_t j{}; j < str_len - i; j++) {
+      if (str[j] > str[j + 1]) {
+        swap(str[j], str[j + 1]);
         did_swap_elements = true;
       }
     }
-  } while (did_swap_elements);
+  }
 
   return str;
 }

@@ -16,6 +16,7 @@ Output: 9870
 */
 
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <numeric>
@@ -142,8 +143,14 @@ uint64_t SimpleAdding_v2(const uint64_t num) {
   return accumulate(cbegin(r), cend(r), 0UL);
 }
 
-constexpr uint64_t SimpleAdding_v3(const uint64_t num) {
-  return (num * (num + 1)) / 2;
+constexpr int64_t SimpleAdding_v3(int64_t num) {
+  const bool is_negative{num < 0};
+  if (is_negative)
+    num = -num;
+
+  const int64_t result{(num * (num + 1)) / 2};
+
+  return !is_negative ? result : -result;
 }
 
 int main() {
