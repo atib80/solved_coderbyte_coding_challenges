@@ -28,26 +28,24 @@ string array_addition_1(int* arr, const size_t arr_size) {
     return "false";
 
   sort(arr, arr + arr_size);
-  const int max_number{arr[arr_size - 1]};
-  const size_t numbers_size{arr_size - 1};
 
-  const bool no_negative_numbers{
-      arr + numbers_size ==
-      find_if(arr, arr + numbers_size, [](const int n) { return n < 0; })};
+  const int max_number{arr[arr_size - 1]};
+
+  const bool has_negative_numbers{arr[0] < 0};
 
   do {
     int current_sum{};
 
-    for (size_t i{}; i < numbers_size; i++) {
+    for (size_t i{}; i < arr_size - 1; i++) {
       current_sum += arr[i];
 
       if (max_number == current_sum)
         return "true";
-      if (no_negative_numbers && current_sum > max_number)
+      if (!has_negative_numbers && current_sum > max_number)
         break;
     }
 
-  } while (next_permutation(arr, arr + numbers_size));
+  } while (next_permutation(arr, arr + arr_size - 1));
 
   return "false";
 }

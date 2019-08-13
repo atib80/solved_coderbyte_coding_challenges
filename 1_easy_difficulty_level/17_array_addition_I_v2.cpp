@@ -26,21 +26,18 @@ using namespace std;
 bool find_sum_of_numbers_equal_max_number(
     int* numbers,
     const size_t numbers_size,
-    const size_t start_index,
-    const bool no_negative_numbers = false,
+    const size_t current_index,
+    const bool has_negative_numbers = false,
     const int current_sum = 0) {
-  if (numbers[0] == current_sum)
+  if (current_sum == numbers[0])
     return true;
 
-  if (no_negative_numbers && current_sum > numbers[0])
+  if (!has_negative_numbers && current_sum > numbers[0])
     return false;
 
-  if (start_index == numbers_size)
-    return false;
-
-  for (size_t i{start_index}; i < numbers_size; i++) {
+  for (size_t i{current_index}; i < numbers_size; i++) {
     if (find_sum_of_numbers_equal_max_number(numbers, numbers_size, i + 1,
-                                             no_negative_numbers,
+                                             has_negative_numbers,
                                              current_sum + numbers[i]))
       return true;
   }
@@ -55,12 +52,10 @@ string array_addition_1(int* arr, const size_t arr_size) {
   sort(arr, arr + arr_size,
        [](const int lhs, const int rhs) { return lhs > rhs; });
 
-  const bool no_negative_numbers{
-      arr + arr_size ==
-      find_if(arr, arr + arr_size, [](const int n) { return n < 0; })};
+  const bool has_negative_numbers{arr[arr_size - 1] < 0};
 
   if (find_sum_of_numbers_equal_max_number(arr, arr_size, 1,
-                                           no_negative_numbers, 0))
+                                           has_negative_numbers, 0))
     return "true";
 
   return "false";
