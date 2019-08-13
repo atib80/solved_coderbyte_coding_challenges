@@ -24,7 +24,7 @@ Output: "true"
 using namespace std;
 
 string array_addition_1(int* arr, const size_t arr_size) {
-  if (arr_size < 2)
+  if (arr_size < 2 || (2U == arr_size && arr[0] != arr[1]))
     return "false";
 
   sort(arr, arr + arr_size,
@@ -33,10 +33,11 @@ string array_addition_1(int* arr, const size_t arr_size) {
   const int maximum{arr[0]};
 
   const auto negative_pos =
-      find_if(arr, arr + arr_size, [](const int n) { return n < 0; });
+      find_if(arr + 1, arr + arr_size, [](const int n) { return n < 0; });
 
   for (size_t i{1}; i < arr_size; i++) {
     int current_sum{};
+    const int* current_negative_pos{negative_pos};
 
     for (size_t j{i}; j < arr_size; j++) {
       current_sum += arr[j];
@@ -45,14 +46,21 @@ string array_addition_1(int* arr, const size_t arr_size) {
         return "true";
 
       if (current_sum > maximum) {
-        if (negative_pos != arr + arr_size) {
+        if (current_negative_pos != arr + arr_size) {
           int csum{current_sum};
 
-          for (auto start = negative_pos; start != arr + arr_size; ++start) {
-            csum += *start;
+          for (auto current_negative_number = current_negative_pos;
+               current_negative_number != arr + arr_size;
+               ++current_negative_number) {
+            csum += *current_negative_number;
 
             if (maximum == csum)
               return "true";
+
+            if (csum < maximum) {
+              ++current_negative_pos;
+              break;
+            }
           }
 
           if (csum > maximum)
