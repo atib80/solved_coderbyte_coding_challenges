@@ -76,25 +76,26 @@ string LetterChanges_v1(string str) {
 }
 
 struct lookup_table {
-  array<char, 256> offsets;
-  array<char, 256> capitalized_letters;
-  static constexpr const char char_max_value{numeric_limits<char>::max()};
+  using byte = unsigned char;
+  array<byte, 256> offsets;
+  array<byte, 256> capitalized_letters;
+  static constexpr const byte byte_max_value{numeric_limits<byte>::max()};
 
   constexpr lookup_table() : offsets{}, capitalized_letters{} {
-    for (char i{}; i < 'A'; i++) {
+    for (byte i{}; i < 'A'; i++) {
       offsets[i] = i;
       capitalized_letters[i] = i;
     }
-    for (char i{'Z' + 1}; i < 'a'; i++) {
+    for (byte i{'Z' + 1}; i < 'a'; i++) {
       offsets[i] = i;
       capitalized_letters[i] = i;
     }
-    for (size_t i{'z' + 1}; i <= numeric_limits<char>::max(); i++) {
-      offsets[i] = static_cast<char>(i);
-      capitalized_letters[i] = static_cast<char>(i);
+    for (byte i = 'z' + 1; i < byte_max_value; i++) {
+      offsets[i] = i;
+      capitalized_letters[i] = i;
     }
 
-    for (char i{'a'}, j{'A'}; i < 'z'; i++, j++) {
+    for (byte i{'a'}, j{'A'}; i < 'z'; i++, j++) {
       offsets[i] = i + 1;
       offsets[j] = j + 1;
       capitalized_letters[i] = i;
@@ -102,7 +103,7 @@ struct lookup_table {
     }
 
     offsets['Z'] = 'A';
-    offsets['z'] = 'A';
+    offsets['z'] = 'a';
     capitalized_letters['a'] = 'A';
     capitalized_letters['e'] = 'E';
     capitalized_letters['i'] = 'I';
@@ -110,15 +111,15 @@ struct lookup_table {
     capitalized_letters['u'] = 'U';
   }
 
-  constexpr pair<char, char> operator[](const size_t index) const {
-    if (index > char_max_value) {
+  constexpr pair<byte, byte> operator[](const size_t index) const {
+    if (index > byte_max_value) {
       char buffer[128]{};
       _snprintf(buffer, 128, "index's value must be between 0 and %u!",
-                char_max_value);
+                byte_max_value);
       throw out_of_range{buffer};
     }
 
-    return make_pair(offsets[index], capitalized_letters[index]);
+    return {offsets[index], capitalized_letters[index]};
   }
 };
 
