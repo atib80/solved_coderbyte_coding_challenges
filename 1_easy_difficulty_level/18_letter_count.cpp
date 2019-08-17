@@ -21,6 +21,7 @@ Output: -1
 #include <cctype>
 #include <cstring>
 #include <iostream>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -251,92 +252,6 @@ using add_const_pointer_to_char_type_t =
 
 template <
     typename T,
-    typename FormatStringType = const char*,
-    typename = std::enable_if_t<
-        is_valid_char_type_v<remove_all_decorations_t<FormatStringType>> &&
-        is_anyone_of_v<remove_all_decorations_t<FormatStringType>,
-                       char,
-                       wchar_t>>>
-basic_string<remove_all_decorations_t<FormatStringType>> num_to_str(
-    T&& number,
-    FormatStringType format_string = nullptr) {
-  using char_type = remove_all_decorations_t<FormatStringType>;
-  using data_type = remove_all_decorations_t<T>;
-
-  static char_type buffer[32]{};
-
-  if (nullptr != format_string) {
-    if constexpr (std::is_same_v<char_type, char>)
-      snprintf(buffer, 32, format_string, std::forward<T>(number));
-    else
-      snwprintf(buffer, 32, format_string, std::forward<T>(number));
-  }
-
-  if constexpr (is_integral_v<data_type>) {
-    if constexpr (is_signed_v<data_type>) {
-      const long long value = std::forward<T>(number);
-      if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%lld", value);
-      else
-        snwprintf(buffer, 32, L"%lld", value);
-    } else {
-      const unsigned long long value = std::forward<T>(number);
-      if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%llu", value);
-      else
-        snwprintf(buffer, 32, L"%llu", value);
-    }
-  } else if constexpr (is_floating_point_v<data_type>) {
-    if constexpr (is_same_v<float, data_type>) {
-      if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%f", std::forward<T>(number));
-      else
-        snwprintf(buffer, 32, L"%f", std::forward<T>(number));
-    } else {
-      if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%lf", std::forward<T>(number));
-      else
-        snwprintf(buffer, 32, L"%lf", std::forward<T>(number));
-    }
-  } else {
-    static char buffer[128]{};
-    snprintf(buffer, 128,
-             "Provided data type [%s] is not a valid primitive integral or "
-             "floating point number type!",
-             typeid(data_type).name());
-    throw std::invalid_argument{buffer};
-  }
-
-  return buffer;
-}
-
-string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (0U == str_len)
-    return {};
-
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return {};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
-}
-
-template <
-    typename T,
     typename U,
     typename = enable_if_t<
         (is_valid_string_type_v<T> || is_valid_string_view_type_v<T> ||
@@ -409,8 +324,6 @@ vector<basic_string<get_char_type_t<T>>> split(
 }
 
 string LetterCountI_v1(string str) {
-  str = trim(str);
-
   const size_t str_len{str.length()};
 
   size_t start{};
@@ -457,8 +370,6 @@ string LetterCountI_v1(string str) {
 }
 
 string LetterCountI_v2(string str) {
-  str = trim(str);
-
   vector<string> words{split(str, " \t\f\v\n\r", false)};
 
   bool found_word_with_repeated_characters{};
@@ -515,13 +426,49 @@ string LetterCountI_v2(string str) {
   return "-1";
 }
 
+string LetterCountI_v3(string str) {
+  size_t max_number_of_repeated_letters{1U};
+  size_t found_word_index{string::npos};
+
+  vector<string> words{split(str, " \t\f\v\n\r", false)};
+
+  for (size_t i{}; i < words.size(); ++i) {
+    const string& w{words.at(i)};
+    multiset<char> word_char_frequencies{cbegin(w), cend(w)};
+    if (w.length() <= max_number_of_repeated_letters)
+      continue;
+
+    unordered_set<char> unique_chars{cbegin(w), cend(w)};
+    if ((unique_chars.size() == w.length()) ||
+        ((word_char_frequencies.size() - unique_chars.size()) * 2 <=
+         max_number_of_repeated_letters))
+      continue;
+
+    size_t repeated_char_count{};
+    for (const char ch : unique_chars) {
+      if (word_char_frequencies.count(ch) > 1U)
+        repeated_char_count += word_char_frequencies.count(ch);
+    }
+
+    if (repeated_char_count > max_number_of_repeated_letters) {
+      max_number_of_repeated_letters = repeated_char_count;
+      found_word_index = i;
+    }
+  }
+
+  if (string::npos != found_word_index)
+    return move(words[found_word_index]);
+
+  return "-1";
+}
+
 int main() {
-  // cout << LetterCountI_v1(gets(stdin));
-  cout << LetterCountI_v1("Today, is the greatest day ever!")
+  // cout << LetterCountI_v3(gets(stdin));
+  cout << LetterCountI_v3("Today, is the greatest day ever!")
        << '\n';  // expected output: "greatest"
-  cout << LetterCountI_v1("Hello apple pie")
+  cout << LetterCountI_v3("Hello apple pie")
        << '\n';                                 // expected output: "Hello"
-  cout << LetterCountI_v1("No words") << '\n';  // expected output: "-1"
+  cout << LetterCountI_v3("No words") << '\n';  // expected output: "-1"
 
   return 0;
 }
