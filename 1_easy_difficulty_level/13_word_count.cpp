@@ -213,6 +213,24 @@ struct has_value_type<T, std::void_t<has_value_type_t<T>>> : std::true_type {};
 template <typename T>
 constexpr const bool has_value_type_v = has_value_type<T>::value;
 
+template <typename StreamType, typename T>
+using has_output_stream_operator_type_t =
+    decltype(std::declval<StreamType&>() << std::declval<T>());
+
+template <typename StreamType, typename T, typename = void>
+struct has_output_stream_operator : std::false_type {};
+
+template <typename StreamType, typename T>
+struct has_output_stream_operator<
+    StreamType,
+    T,
+    std::void_t<has_output_stream_operator_type_t<StreamType, T>>>
+    : std::true_type {};
+
+template <typename StreamType, typename T>
+constexpr const bool has_output_stream_operator_v =
+    has_output_stream_operator<StreamType, T>::value;
+
 template <typename T, typename = void>
 struct get_char_type {
   using type = remove_all_decorations_t<T>;
@@ -242,54 +260,66 @@ template <typename T>
 using add_const_pointer_to_char_type_t =
     typename add_const_pointer_to_char_type<T>::type;
 
-template <
-    typename T,
-    typename FormatStringType = const char*,
-    typename = std::enable_if_t<
-        is_valid_char_type_v<remove_all_decorations_t<FormatStringType>> &&
-        is_anyone_of_v<remove_all_decorations_t<FormatStringType>,
-                       char,
-                       wchar_t>>>
-basic_string<remove_all_decorations_t<FormatStringType>> num_to_str(
-    T&& number,
+template <typename T,
+          typename FormatStringType = const char*,
+          typename = std::enable_if_t<
+              has_output_stream_operator_v<
+                  std::basic_ostream<get_char_type_t<FormatStringType>>,
+                  std::remove_reference_t<T>> &&
+              is_valid_char_type_v<get_char_type_t<FormatStringType>> &&
+              is_anyone_of_v<get_char_type_t<FormatStringType>, char, wchar_t>>>
+std::basic_string<get_char_type_t<FormatStringType>> to_str(
+    T&& data,
     FormatStringType format_string = nullptr) {
-  using char_type = remove_all_decorations_t<FormatStringType>;
+  using char_type = get_char_type_t<FormatStringType>;
   using data_type = remove_all_decorations_t<T>;
 
-  static char_type buffer[32]{};
+  static constexpr const size_t buf_size{32};
+
+  static char_type buffer[buf_size]{};
 
   if (nullptr != format_string) {
-    if constexpr (std::is_same_v<char_type, char>)
-      snprintf(buffer, 32, format_string, std::forward<T>(number));
+    if constexpr (!std::is_integral_v<data_type> &&
+                  !std::is_floating_point_v<data_type>) {
+      std::basic_ostringstream<char_type> oss{};
+      oss << std::forward<T>(data);
+      return oss.str();
+    } else if constexpr (std::is_same_v<char_type, char>)
+      snprintf(buffer, buf_size, format_string, std::forward<T>(data));
     else
-      snwprintf(buffer, 32, format_string, std::forward<T>(number));
+      snwprintf(buffer, buf_size, format_string, std::forward<T>(data));
   }
 
-  if constexpr (is_integral_v<data_type>) {
-    if constexpr (is_signed_v<data_type>) {
-      const long long value = std::forward<T>(number);
+  if constexpr (std::is_integral_v<data_type>) {
+    if constexpr (std::is_signed_v<data_type>) {
+      const long long value{std::forward<T>(data)};
       if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%lld", value);
+        snprintf(buffer, buf_size, "%lld", value);
       else
-        snwprintf(buffer, 32, L"%lld", value);
+        snwprintf(buffer, buf_size, L"%lld", value);
     } else {
-      const unsigned long long value = std::forward<T>(number);
+      const unsigned long long value{std::forward<T>(data)};
       if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%llu", value);
+        snprintf(buffer, buf_size, "%llu", value);
       else
-        snwprintf(buffer, 32, L"%llu", value);
+        snwprintf(buffer, buf_size, L"%llu", value);
     }
-  } else if constexpr (is_floating_point_v<data_type>) {
-    if constexpr (is_same_v<float, data_type>) {
+  } else if constexpr (std::is_floating_point_v<data_type>) {
+    if constexpr (std::is_same_v<float, data_type>) {
       if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%f", std::forward<T>(number));
+        snprintf(buffer, buf_size, "%f", std::forward<T>(data));
       else
-        snwprintf(buffer, 32, L"%f", std::forward<T>(number));
+        snwprintf(buffer, buf_size, L"%f", std::forward<T>(data));
+    } else if constexpr (std::is_same_v<double, data_type>) {
+      if constexpr (std::is_same_v<char_type, char>)
+        snprintf(buffer, buf_size, "%lf", std::forward<T>(data));
+      else
+        snwprintf(buffer, buf_size, L"%lf", std::forward<T>(data));
     } else {
       if constexpr (std::is_same_v<char_type, char>)
-        snprintf(buffer, 32, "%lf", std::forward<T>(number));
+        snprintf(buffer, buf_size, "%Lf", std::forward<T>(data));
       else
-        snwprintf(buffer, 32, L"%lf", std::forward<T>(number));
+        snwprintf(buffer, buf_size, L"%Lf", std::forward<T>(data));
     }
   } else {
     static char buffer[128]{};
@@ -427,7 +457,7 @@ string word_count_v1(string str) {
     start = last + 1;
   }
 
-  return num_to_str(word_count);
+  return to_str(word_count);
 }
 
 string word_count_v2(string str) {
@@ -435,7 +465,7 @@ string word_count_v2(string str) {
 
   const vector<string> words{split(str, " ")};
 
-  return num_to_str(words.size());
+  return to_str(words.size());
 }
 
 int main() {
