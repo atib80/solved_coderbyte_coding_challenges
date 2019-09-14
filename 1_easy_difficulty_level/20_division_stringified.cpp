@@ -18,41 +18,56 @@ Output: "103"
 
 #include <cmath>
 #include <cstdint>
+#include <exception>
 #include <iostream>
 #include <string>
-#include <vector>
 
 using namespace std;
 
-string DivisionStringified(const vector<int64_t>& numbers) {
-  const int64_t num1{numbers[0]};
-  const int64_t num2{numbers[1]};
-  if (0 == num2)
+string DivisionStringified(const int64_t numerator, const int64_t denumerator) {
+  constexpr static size_t buffer_size{32U};
+  char buffer[buffer_size];
+
+  if (0 == denumerator)
     return "Not possible!";
-  const int64_t whole_part{
-      static_cast<int64_t>(round(static_cast<double>(num1) / num2))};
-  string whole_part_str{to_string(whole_part)};
-  if (whole_part_str.length() <= 3)
-    return whole_part_str;
+  int64_t whole_part{static_cast<int64_t>(
+      round(static_cast<double>(numerator) / denumerator))};
 
-  for (int i = whole_part_str.length() - 3; i > 0; i -= 3)
-    whole_part_str.insert(i, 1, ',');
+  size_t j{buffer_size - 1}, digit_count{1};
+  buffer[j] = 0;
 
-  return whole_part_str;
+  while (true) {
+    buffer[--j] = static_cast<char>('0' + whole_part % 10);
+    whole_part /= 10;
+
+    if (0 == whole_part)
+      break;
+
+    if (0U == digit_count % 3)
+      buffer[--j] = ',';
+
+    digit_count++;
+  }
+
+  return buffer + j;
 }
 
 int main() {
-  // const vector<long> numbers { gets(stdin) };
-  // cout << DivisionStringified(numbers);
-  cout << DivisionStringified({1, 10}) << '\n';    // expected output: "0"
-  cout << DivisionStringified({5, 54}) << '\n';    // expected output: "0"
-  cout << DivisionStringified({175, 24}) << '\n';  // expected output: "7"
-  cout << DivisionStringified({101077282, 21123})
-       << '\n';  // expected output: "4,785"
-  cout << DivisionStringified({100000, 1})
-       << '\n';  // expected output: "100,000"
-  cout << DivisionStringified({10000000, 10})
-       << '\n';  // expected output: "1,000,000"
+  try {
+    // const vector<int64_t> numbers { gets(stdin) };
+    // cout << DivisionStringified(numbers[0], numbers[1]);
+    cout << DivisionStringified(1, 10) << '\n';    // expected output: "0"
+    cout << DivisionStringified(5, 54) << '\n';    // expected output: "0"
+    cout << DivisionStringified(175, 24) << '\n';  // expected output: "7"
+    cout << DivisionStringified(101077282, 21123)
+         << '\n';  // expected output: "4,785"
+    cout << DivisionStringified(100000, 1)
+         << '\n';  // expected output: "100,000"
+    cout << DivisionStringified(10000000, 10)
+         << '\n';  // expected output: "1,000,000"
+  } catch (exception& e) {
+    cerr << "Exception occured in function int main(): " << e.what() << endl;
+  }
 
   return 0;
 }

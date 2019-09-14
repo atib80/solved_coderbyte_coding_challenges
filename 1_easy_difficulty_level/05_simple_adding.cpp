@@ -42,7 +42,7 @@ class crange {
   constexpr explicit crange() {
     if (start > last)
       throw invalid_argument{
-          "The start value of a range object cannot be greater than its last!"};
+          "The start value of a range object cannot be greater than its last element!"};
     for (T i{}, j{start}; j < last; ++i, ++j)
       crange_[i] = j;
   }

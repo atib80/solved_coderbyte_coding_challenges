@@ -347,6 +347,13 @@ string second_great_low(int* arr, const int arr_size) {
   int second_max_element{arr[arr_size - 1]};
   int x{};
 
+  // 1 2 5
+  // 1   5
+  //  second_min_element = 2, x = 1
+  // 1, 1 >= 1, 1--
+  // 2 < 5 ? 2
+  // second_max_element = 2
+
   for (int i{1}; i < arr_size; i++) {
     if (arr[i] > second_min_element) {
       second_min_element = arr[i];
@@ -377,6 +384,9 @@ int main() {
   int c[] = {4, 90};
   cout << second_great_low(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: "90 4"
+  int d[] = {1, 2, 5};
+  cout << second_great_low(d, sizeof(d) / sizeof(*d))
+       << '\n';  // expected output: "2 2"
 
   return 0;
 }
