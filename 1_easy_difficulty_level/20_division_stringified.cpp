@@ -33,6 +33,10 @@ string DivisionStringified(const int64_t numerator, const int64_t denumerator) {
   int64_t whole_part{static_cast<int64_t>(
       round(static_cast<double>(numerator) / denumerator))};
 
+  const bool is_negative{whole_part < 0};
+  if (is_negative)
+    whole_part = abs(whole_part);
+
   size_t j{buffer_size - 1}, digit_count{1};
   buffer[j] = 0;
 
@@ -49,6 +53,9 @@ string DivisionStringified(const int64_t numerator, const int64_t denumerator) {
     digit_count++;
   }
 
+  if (is_negative)
+    buffer[--j] = '-';
+
   return buffer + j;
 }
 
@@ -60,6 +67,12 @@ int main() {
     cout << DivisionStringified(5, 54) << '\n';    // expected output: "0"
     cout << DivisionStringified(175, 24) << '\n';  // expected output: "7"
     cout << DivisionStringified(101077282, 21123)
+         << '\n';  // expected output: "4,785"
+    cout << DivisionStringified(-101077282, 21123)
+         << '\n';  // expected output: "-4,785"
+    cout << DivisionStringified(101077282, -21123)
+         << '\n';  // expected output: "-4,785"
+    cout << DivisionStringified(-101077282, -21123)
          << '\n';  // expected output: "4,785"
     cout << DivisionStringified(100000, 1)
          << '\n';  // expected output: "100,000"
