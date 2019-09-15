@@ -59,28 +59,79 @@ string DivisionStringified(const int64_t numerator, const int64_t denumerator) {
   return buffer + j;
 }
 
-int main() {
-  try {
-    // const vector<int64_t> numbers { gets(stdin) };
-    // cout << DivisionStringified(numbers[0], numbers[1]);
-    cout << DivisionStringified(1, 10) << '\n';    // expected output: "0"
-    cout << DivisionStringified(5, 54) << '\n';    // expected output: "0"
-    cout << DivisionStringified(175, 24) << '\n';  // expected output: "7"
-    cout << DivisionStringified(101077282, 21123)
-         << '\n';  // expected output: "4,785"
-    cout << DivisionStringified(-101077282, 21123)
-         << '\n';  // expected output: "-4,785"
-    cout << DivisionStringified(101077282, -21123)
-         << '\n';  // expected output: "-4,785"
-    cout << DivisionStringified(-101077282, -21123)
-         << '\n';  // expected output: "4,785"
-    cout << DivisionStringified(100000, 1)
-         << '\n';  // expected output: "100,000"
-    cout << DivisionStringified(10000000, 10)
-         << '\n';  // expected output: "1,000,000"
-  } catch (exception& e) {
-    cerr << "Exception occured in function int main(): " << e.what() << endl;
+class division_stringified_v2 {
+  static constexpr const size_t buffer_size{32U};
+  char buffer[buffer_size];
+  size_t offset;
+
+ public:
+  constexpr division_stringified_v2(const int64_t numerator,
+                                    const int64_t denumerator)
+      : buffer{}, offset{buffer_size - 1} {
+    if (0 == denumerator)
+      throw runtime_error{"Cannot divide a number by 0!"};
+
+    const double result{static_cast<double>(numerator) / denumerator};
+    int64_t whole_part{static_cast<int64_t>(result)};
+
+    if (whole_part > 0) {
+      if (result - whole_part >= 0.5)
+        whole_part++;
+    } else if (whole_part < 0) {
+      if (result - whole_part <= -0.5)
+        whole_part--;
+    } else {
+      buffer[--offset] = '0';
+      return;
+    }
+
+    const bool is_negative{result < 0};
+    if (is_negative)
+      whole_part = -whole_part;
+
+    size_t digit_count{1};
+
+    while (true) {
+      buffer[--offset] = static_cast<char>('0' + whole_part % 10);
+      whole_part /= 10;
+
+      if (0 == whole_part)
+        break;
+
+      if (0U == digit_count % 3)
+        buffer[--offset] = ',';
+
+      digit_count++;
+    }
+
+    if (is_negative)
+      buffer[--offset] = '-';
   }
+
+  constexpr const char* get_result() const { return buffer + offset; }
+};
+
+int main() {
+  // const vector<int64_t> numbers { gets(stdin) };
+  // cout << DivisionStringified(numbers[0], numbers[1]);
+  constexpr division_stringified_v2 div1{1, 10};
+  cout << div1.get_result() << '\n';  // expected output: "0"
+  constexpr division_stringified_v2 div2{5, 54};
+  cout << div2.get_result() << '\n';  // expected output: "0"
+  constexpr division_stringified_v2 div3{175, 24};
+  cout << div3.get_result() << '\n';  // expected output: "7"
+  constexpr division_stringified_v2 div4{101077282, 21123};
+  cout << div4.get_result() << '\n';  // expected output: "4,785"
+  constexpr division_stringified_v2 div5{-101077282, 21123};
+  cout << div5.get_result() << '\n';  // expected output: "-4,785"
+  constexpr division_stringified_v2 div6{101077282, -21123};
+  cout << div6.get_result() << '\n';  // expected output: "-4,785"
+  constexpr division_stringified_v2 div7{-101077282, -21123};
+  cout << div7.get_result() << '\n';  // expected output: "4,785"
+  constexpr division_stringified_v2 div8{100000, 1};
+  cout << div8.get_result() << '\n';  // expected output: "100,000"
+  constexpr division_stringified_v2 div9{10000000, 10};
+  cout << div9.get_result() << '\n';  // expected output: "1,000,000"
 
   return 0;
 }
