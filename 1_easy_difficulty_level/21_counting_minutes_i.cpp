@@ -17,86 +17,118 @@ Input:  "1:23am-1:08am"
 Output: 1425
 */
 
+#include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t first{}, last{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (first > last)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return {first, last};
 }
 
-vector<string> split(const string& source,
-                     const char* needle,
-                     size_t const max_count = string::npos) {
-  vector<string> parts{};
+std::string to_lower_case(const std::string& src,
+                          const std::locale& loc = std::locale{}) {
+  std::string src_lc{src};
 
-  string needle_st{needle};
+  if (std::has_facet<std::ctype<char>>(loc)) {
+    const auto& f = std::use_facet<std::ctype<char>>(loc);
+    std::transform(std::cbegin(src_lc), std::cend(src_lc), std::begin(src_lc),
+                   [&f](const char ch) { return f.tolower(ch); });
 
-  const size_t source_len{source.length()};
+  } else {
+    std::transform(
+        std::cbegin(src_lc), std::cend(src_lc), std::begin(src_lc),
+        [](const char ch) { return static_cast<char>(std::tolower(ch)); });
+  }
 
-  const size_t needle_len{needle_st.size()};
+  return src_lc;
+}
 
-  if (!source_len)
-    return parts;
+std::vector<std::string> split(const std::string& src,
+                               const char* needle,
+                               const bool split_on_whole_needle = true,
+                               const bool ignore_empty_string = true,
+                               size_t const max_count = std::string::npos) {
+  const size_t src_len{src.length()};
 
-  if (!needle_len) {
-    const size_t upper_limit{max_count < source_len ? max_count : source_len};
+  if (0U == src_len)
+    return {};
+
+  size_t needle_len{strlen(needle)};
+
+  if (0U == needle_len) {
+    const size_t upper_limit{max_count < src_len ? max_count : src_len};
+    std::vector<std::string> parts{};
+    parts.reserve(upper_limit);
     for (size_t i{}; i < upper_limit; i++)
-      parts.emplace_back(1, source[i]);
+      parts.emplace_back(1, src[i]);
     return parts;
   }
 
+  if (!split_on_whole_needle)
+    needle_len = 1U;
+
+  std::vector<std::string> parts{};
   size_t number_of_parts{}, prev{};
 
   while (true) {
-    const size_t current{source.find(needle_st, prev)};
+    const size_t current = split_on_whole_needle
+                               ? src.find(needle, prev)
+                               : src.find_first_of(needle, prev);
 
-    if (string::npos == current)
+    if (std::string::npos == current)
       break;
 
-    number_of_parts++;
-
-    if ((string::npos != max_count) && (parts.size() == max_count))
+    if (parts.size() == max_count)
       break;
 
-    if ((current - prev) > 0)
-      parts.emplace_back(source.substr(prev, current - prev));
+    if (current - prev > 0 || !ignore_empty_string) {
+      if (current - prev > 0)
+        parts.emplace_back(std::cbegin(src) + prev, std::cbegin(src) + current);
+      else if (!ignore_empty_string)
+        parts.emplace_back();
+
+      number_of_parts++;
+    }
 
     prev = current + needle_len;
 
-    if (prev >= source_len)
+    if (prev >= src_len)
       break;
   }
 
-  if (prev < source_len) {
-    if (string::npos == max_count)
-      parts.emplace_back(source.substr(prev));
-
-    else if ((string::npos != max_count) && (parts.size() < max_count))
-      parts.emplace_back(source.substr(prev));
+  if (parts.size() < max_count) {
+    if (prev < src_len)
+      parts.emplace_back(std::cbegin(src) + prev, std::cend(src));
+    else if (!ignore_empty_string)
+      parts.emplace_back();
   }
 
   return parts;
@@ -108,17 +140,17 @@ string counting_minutes_i(string str) {
 
   const vector<string> times_str{split(str, "-")};
 
-  if (2 != times_str.size())
+  if (2U != times_str.size())
     return "Not possible!";
 
   const vector<string> start_times_str{split(times_str[0], ":")};
 
-  if (2 != start_times_str.size())
+  if (2U != start_times_str.size())
     return "Not possible!";
 
   const vector<string> end_times_str{split(times_str[1], ":")};
 
-  if (2 != end_times_str.size())
+  if (2U != end_times_str.size())
     return "Not possible!";
 
   const size_t am_pm_start_char{start_times_str[1].find_first_of("ap")};
@@ -127,52 +159,60 @@ string counting_minutes_i(string str) {
     return "Not possible!";
 
   const string start_time_am_pm_str{
-      start_times_str[1].substr(am_pm_start_char, 2)};
+      to_lower_case(start_times_str[1].substr(am_pm_start_char, 2))};
 
-  const size_t start_hour{stoul(start_times_str[0])};
+  const size_t start_hour =
+      2U == start_times_str[0].length()
+          ? (start_times_str[0][0] - '0') * 10 + (start_times_str[0][1] - '0')
+          : start_times_str[0][0] - '0';
 
-  const size_t start_minutes{
-      stoul(start_times_str[1].substr(0, am_pm_start_char))};
+  const size_t start_minutes =
+      4U == start_times_str[1].length()
+          ? (start_times_str[1][0] - '0') * 10 + (start_times_str[1][1] - '0')
+          : start_times_str[1][0] - '0';
 
   const size_t am_pm_end_char{end_times_str[1].find_first_of("ap")};
 
   if (string::npos == am_pm_end_char)
     return "Not possible!";
 
-  const string end_time_am_pm_str{end_times_str[1].substr(am_pm_end_char, 2)};
+  const string end_time_am_pm_str{
+      to_lower_case(end_times_str[1].substr(am_pm_end_char, 2))};
 
-  const size_t end_hour{stoul(end_times_str[0])};
+  const size_t end_hour =
+      2U == end_times_str[0].length()
+          ? (end_times_str[0][0] - '0') * 10 + (end_times_str[0][1] - '0')
+          : end_times_str[0][0] - '0';
 
-  const size_t end_minutes{stoul(end_times_str[1].substr(0, am_pm_end_char))};
+  const size_t end_minutes =
+      4U == end_times_str[1].length()
+          ? (end_times_str[1][0] - '0') * 10 + (end_times_str[1][1] - '0')
+          : end_times_str[1][0] - '0';
 
-  size_t start_time_in_minutes{
-      ("am" == start_time_am_pm_str)
-          ? (((start_hour % 12) * 60) + start_minutes)
-          : (((start_hour % 12) * 60) + 720 + start_minutes)};
+  const size_t start_time_in_minutes{
+      "am" == start_time_am_pm_str
+          ? (start_hour % 12) * 60 + start_minutes
+          : 720 + (start_hour % 12) * 60 + start_minutes};
 
   const size_t end_time_in_minutes{
-      ("am" == end_time_am_pm_str)
-          ? (((end_hour % 12) * 60) + end_minutes)
-          : (((end_hour % 12) * 60) + 720 + end_minutes)};
+      "am" == end_time_am_pm_str ? (end_hour % 12) * 60 + end_minutes
+                                 : 720 + (end_hour % 12) * 60 + end_minutes};
 
-  if (start_time_in_minutes > end_time_in_minutes) {
-    start_time_in_minutes = 1440 - start_time_in_minutes;
-
-    return to_string(start_time_in_minutes + end_time_in_minutes);
-  }
+  if (start_time_in_minutes > end_time_in_minutes)
+    return to_string(1440U - start_time_in_minutes + end_time_in_minutes);
 
   return to_string(end_time_in_minutes - start_time_in_minutes);
 }
 
 int main() {
-  // cout << counting_minutes_i(move(string{gets(stdin)}));
-  cout << counting_minutes_i(move(string{"9:00am-10:00am"}))
+  // cout << counting_minutes_i(gets(stdin));
+  cout << counting_minutes_i("9:00am-10:00am")
        << '\n';  // expected output: "60"
-  cout << counting_minutes_i(move(string{"1:00pm-11:00am"}))
+  cout << counting_minutes_i("1:00pm-11:00am")
        << '\n';  // expected output: "1320"
-  cout << counting_minutes_i(move(string{"12:30pm-12:00am"}))
+  cout << counting_minutes_i("12:30pm-12:00am")
        << '\n';  // expected output: "690"
-  cout << counting_minutes_i(move(string{"1:23am-1:08am"}))
+  cout << counting_minutes_i("1:23am-1:08am")
        << '\n';  // expected output: "1425"
 
   return 0;
