@@ -25,80 +25,38 @@ Output: 1
 using namespace std;
 
 int MeanMode_v1(vector<int> numbers) {
-  if (numbers.size() < 2)
+  if (numbers.size() < 2U)
     return -1;
 
-  const int sum{accumulate(begin(numbers), end(numbers), 0)};
-
-  const int mean = sum / numbers.size();
+  const int mean = accumulate(begin(numbers), end(numbers), 0) / numbers.size();
 
   unordered_map<int, size_t> number_frequency{};
 
-  for (const int n : numbers)
+  int max_frequency_number{numbers.front()};
+  size_t max_frequency{1U};
+
+  for (const int n : numbers) {
     number_frequency[n]++;
-
-  auto start = begin(number_frequency);
-  int max_freq_number{start->first};
-  size_t max_freq{start->second};
-  ++start;
-
-  while (start != end(number_frequency)) {
-    if (start->second > max_freq) {
-      max_freq_number = start->first;
-      max_freq = start->second;
+    if (number_frequency[n] > max_frequency) {
+      max_frequency = number_frequency[n];
+      max_frequency_number = n;
     }
-    ++start;
   }
 
-  if (mean == max_freq_number)
-    return 1;
-
-  return 0;
-}
-
-int MeanMode_v2(vector<int> numbers) {
-  if (numbers.size() < 2)
-    return -1;
-
-  sort(begin(numbers), end(numbers));
-
-  const int sum{accumulate(begin(numbers), end(numbers), 0)};
-
-  const int mean = sum / numbers.size();
-
-  unordered_map<int, size_t> number_frequency{};
-
-  for (const int n : numbers)
-    number_frequency[n]++;
-
-  vector<pair<int, size_t>> number_frequency_sorted{};
-
-  for (const auto& nf : number_frequency)
-    number_frequency_sorted.emplace_back(nf);
-
-  sort(begin(number_frequency_sorted), end(number_frequency_sorted),
-       [](const pair<int, size_t>& l, const pair<int, size_t>& r) {
-         return (l.second > r.second);
-       });
-
-  if (mean == number_frequency_sorted[0].first)
+  if (mean == max_frequency_number)
     return 1;
 
   return 0;
 }
 
 int main() {
-  // cout << MeanMode_v1(move(vector<int>{gets(stdin)}));
-  cout << MeanMode_v1(move(vector<int>{5, 3, 3, 3, 1}))
-       << '\n';  // expected output: 1
-  cout << MeanMode_v1(move(vector<int>{1, 2, 3}))
-       << '\n';  // expected output: 0
-  cout << MeanMode_v1(move(vector<int>{4, 4, 4, 6, 2}))
-       << '\n';                                            // expected output: 1
-  cout << MeanMode_v1(move(vector<int>{10, 10})) << '\n';  // expected output: 1
-  cout << MeanMode_v1(move(vector<int>{1, 1, 1, 1, 1}))
-       << '\n';  // expected output: 1
-  cout << MeanMode_v1(move(vector<int>{10, 10, 10, 10, 10, 10, 10, 20, 9, 1}))
+  // cout << MeanMode_v1(vector<int>{gets(stdin)});
+  cout << MeanMode_v1({5, 3, 3, 3, 1}) << '\n';  // expected output: 1
+  cout << MeanMode_v1({1, 2, 3}) << '\n';        // expected output: 0
+  cout << MeanMode_v1({4, 4, 4, 6, 2}) << '\n';  // expected output: 1
+  cout << MeanMode_v1({10, 10}) << '\n';         // expected output: 1
+  cout << MeanMode_v1({1, 1, 1, 1, 1}) << '\n';  // expected output: 1
+  cout << MeanMode_v1({10, 10, 10, 10, 10, 10, 10, 20, 9, 1})
        << '\n';  // expected output: 1
 
   return 0;

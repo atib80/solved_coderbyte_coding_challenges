@@ -13,7 +13,7 @@
                 "_UNICODE"
             ],
             
-            "intelliSenseMode": "msvc-x64",
+            "intelliSenseMode": "gcc-x64",
             "cppStandard": "c++17",
             "cStandard": "c11"
         },
