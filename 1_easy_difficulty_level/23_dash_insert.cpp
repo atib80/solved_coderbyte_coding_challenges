@@ -85,14 +85,14 @@ string DashInsert_v2(string str) {
     return str;
 
   ostringstream oss{};
-  oss << str[0];
+  oss << str.front();
 
-  bool is_prev_odd{(str[0] - '0') % 2 == 1};
+  bool is_prev_odd{(str.front() - '0') % 2 == 1};
 
   for (size_t i{1}; i < str_len; i++) {
-    if (is_prev_odd && (str[i] - '0') % 2 == 1) {
+    if (is_prev_odd && (str[i] - '0') % 2 == 1)
       oss << '-' << str[i];
-    } else {
+    else {
       oss << str[i];
       is_prev_odd = (str[i] - '0') % 2 == 1;
     }

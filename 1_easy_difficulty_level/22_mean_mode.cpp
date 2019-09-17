@@ -43,10 +43,7 @@ int MeanMode_v1(vector<int> numbers) {
     }
   }
 
-  if (mean == max_frequency_number)
-    return 1;
-
-  return 0;
+  return mean == max_frequency_number ? 1 : 0;
 }
 
 int main() {

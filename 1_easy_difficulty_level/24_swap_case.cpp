@@ -14,57 +14,61 @@ Input:  "Sup DUDE!!?"
 Output: "sUP dude!!?"
 */
 
+#include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t first{}, last{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (first > last)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return {first, last};
 }
 
 string swap_case(string str) {
   str = trim(str);
 
   for (auto& ch : str) {
-    if ((ch >= 'A') && (ch <= 'Z'))
-      ch += ('a' - 'A');
-    else if ((ch >= 'a') && (ch <= 'z'))
-      ch -= ('a' - 'A');
+    if (isalpha(ch)) {
+      if (islower(ch))
+        ch = static_cast<char>(toupper(ch));
+      else
+        ch = static_cast<char>(tolower(ch));
+    }
   }
 
   return str;
 }
 
 int main() {
-  // cout << swap_case(move(string{ gets(stdin) }));
-  cout << swap_case(move(string{"Hello World"}))
-       << '\n';  // expected output: "hELLO wORLD"
-  cout << swap_case(move(string{"Hello-LOL"}))
-       << '\n';  // expected output: "hELLO-lol"
-  cout << swap_case(move(string{"Sup DUDE!!?"}))
-       << '\n';  // expected output: "sUP dude!!?"
+  // cout << swap_case(gets(stdin));
+  cout << swap_case("Hello World") << '\n';  // expected output: "hELLO wORLD"
+  cout << swap_case("Hello-LOL") << '\n';    // expected output: "hELLO-lol"
+  cout << swap_case("Sup DUDE!!?") << '\n';  // expected output: "sUP dude!!?"
 
   return 0;
 }
