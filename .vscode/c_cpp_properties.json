@@ -4,18 +4,38 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "c:/MinGW/include/c++/8.2.0/**",
-                "c:/MinGW/x86_64-w64-mingw32/include/**"
+                "e:/Programs/MSVS/2019/Community/VC/Tools/MSVC/14.22.27905/include/**",
+                "e:/Programs/MSVS/2019/Community/VC/Tools/MSVC/14.22.27905/include/experimental/**"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            
-            "intelliSenseMode": "gcc-x64",
+            "intelliSenseMode": "msvc-x64",
             "cppStandard": "c++17",
-            "cStandard": "c11"
+            "cStandard": "c11",
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerArgs": [
+                "/nologo",
+                "/W4",
+                "/EHsc",
+                "/O2",
+                "/Ot",
+                "/Ox",
+                "/Ob2",
+                "/Oy",
+                "/Oi"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                    "c:/MinGW/include/c++/8.2.0/**",
+                    "c:/MinGW/x86_64-w64-mingw32/include/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "compilerPath": "e:/Programs/MSVS/2019/Community/VC/Tools/MSVC/14.22.27905/bin/Hostx64/x64/cl.exe"
         },
         {
             "name": "MinGW",
@@ -50,7 +70,8 @@
                 "-Og"
             ],
             "cppStandard": "c++17",
-            "cStandard": "c11"
+            "cStandard": "c11",
+            "windowsSdkVersion": "10.0.18362.0"
         }
     ],
     "version": 4
