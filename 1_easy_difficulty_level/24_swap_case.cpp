@@ -66,30 +66,39 @@ string swap_case_v1(string str) {
   return str;
 }
 
-string swap_case_v2(string str) {
-  str = trim(str);
-  const int offset{'a' - 'A'};
-  array<int, 256U> offset_values{};
+template <int offset1, int offset2>
+struct character_offsets {
+  int offsets[256U];
 
-  for (char ch1{'a'}, ch2{'A'}; ch1 <= 'z'; ++ch1, ++ch2) {
-    offset_values[ch1] = -offset;
-    offset_values[ch2] = offset;
+  constexpr character_offsets() : offsets{} {
+    for (char i{'A'}, j{'a'}; i <= 'Z'; ++i, ++j) {
+      offsets[i] = offset1;
+      offsets[j] = offset2;
+    }
   }
+};
 
-  transform(cbegin(str), cend(str), begin(str),
-            [&offset_values](const char ch) {
-              return static_cast<char>(ch + offset_values[ch]);
-            });
+template <int char_offset1, int char_offset2>
+using co = character_offsets<char_offset1, char_offset2>;
+
+string swap_case_v2(string str) {
+  constexpr co<'a' - 'A', 'A' - 'a'> char_offsets{};
+
+  str = trim(str);
+
+  transform(cbegin(str), cend(str), begin(str), [&char_offsets](const char ch) {
+    return static_cast<char>(ch + char_offsets.offsets[ch]);
+  });
 
   return str;
 }
 
 int main() {
-  // cout << swap_case_v1(gets(stdin));
-  cout << swap_case_v1("Hello World")
+  // cout << swap_case_v2(gets(stdin));
+  cout << swap_case_v2("Hello World")
        << '\n';                               // expected output: "hELLO wORLD"
-  cout << swap_case_v1("Hello-LOL") << '\n';  // expected output: "hELLO-lol"
-  cout << swap_case_v1("Sup DUDE!!?")
+  cout << swap_case_v2("Hello-LOL") << '\n';  // expected output: "hELLO-lol"
+  cout << swap_case_v2("Sup DUDE!!?")
        << '\n';  // expected output: "sUP dude!!?"
 
   return 0;
