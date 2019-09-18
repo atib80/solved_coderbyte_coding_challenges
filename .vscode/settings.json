@@ -56,6 +56,9 @@
         "set": "cpp",
         "cinttypes": "cpp",
         "bit": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "xhash": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }

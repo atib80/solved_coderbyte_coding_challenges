@@ -15,6 +15,7 @@ Output: "sUP dude!!?"
 */
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstring>
 #include <iostream>
@@ -49,26 +50,47 @@ std::string trim(const std::string& src,
   return {first, last};
 }
 
-string swap_case(string str) {
+string swap_case_v1(string str) {
   str = trim(str);
 
-  for (auto& ch : str) {
-    if (isalpha(ch)) {
-      if (islower(ch))
-        ch = static_cast<char>(toupper(ch));
-      else
-        ch = static_cast<char>(tolower(ch));
-    }
+  const int offset{'a' - 'A'};
+
+  transform(cbegin(str), cend(str), begin(str), [&offset](const char ch) {
+    if (ch >= 'a' && ch <= 'z')
+      return static_cast<char>(ch - offset);
+    else if (ch >= 'A' && ch <= 'Z')
+      return static_cast<char>(ch + offset);
+    return ch;
+  });
+
+  return str;
+}
+
+string swap_case_v2(string str) {
+  str = trim(str);
+  const int offset{'a' - 'A'};
+  array<int, 256U> offset_values{};
+
+  for (char ch1{'a'}, ch2{'A'}; ch1 <= 'z'; ++ch1, ++ch2) {
+    offset_values[ch1] = -offset;
+    offset_values[ch2] = offset;
   }
+
+  transform(cbegin(str), cend(str), begin(str),
+            [&offset_values](const char ch) {
+              return static_cast<char>(ch + offset_values[ch]);
+            });
 
   return str;
 }
 
 int main() {
-  // cout << swap_case(gets(stdin));
-  cout << swap_case("Hello World") << '\n';  // expected output: "hELLO wORLD"
-  cout << swap_case("Hello-LOL") << '\n';    // expected output: "hELLO-lol"
-  cout << swap_case("Sup DUDE!!?") << '\n';  // expected output: "sUP dude!!?"
+  // cout << swap_case_v1(gets(stdin));
+  cout << swap_case_v1("Hello World")
+       << '\n';                               // expected output: "hELLO wORLD"
+  cout << swap_case_v1("Hello-LOL") << '\n';  // expected output: "hELLO-lol"
+  cout << swap_case_v1("Sup DUDE!!?")
+       << '\n';  // expected output: "sUP dude!!?"
 
   return 0;
 }
