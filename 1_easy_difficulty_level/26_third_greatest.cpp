@@ -23,30 +23,31 @@ Output: "abc"
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
 
 string ThirdGreatest(vector<string> words) {
-  if (words.size() < 3)
+  if (words.size() < 3U)
     return "not possible";
 
-  stable_sort(begin(words), end(words), [](const string& lw, const string& rw) {
-    return (lw.length() > rw.length());
+  stable_sort(begin(words), end(words), [](const auto& lw, const auto& rw) {
+    return lw.length() > rw.length();
   });
 
-  return words[2];
+  return move(words[2]);
 }
 
 int main() {
-  // cout << ThirdGreatest(move(vector<string>{gets(stdin)}));
-  cout << ThirdGreatest(move(vector<string>{"hello", "world", "before", "all"}))
+  // cout << ThirdGreatest(gets(stdin));
+  cout << ThirdGreatest({"hello", "world", "before", "all"})
        << '\n';  // expected output: world
-  cout << ThirdGreatest(move(vector<string>{"hello", "world", "after", "all"}))
+  cout << ThirdGreatest({"hello", "world", "after", "all"})
        << '\n';  // expected output: after
-  cout << ThirdGreatest(move(vector<string>{"coder", "byte", "code"}))
+  cout << ThirdGreatest({"coder", "byte", "code"})
        << '\n';  // expected output: code
-  cout << ThirdGreatest(move(vector<string>{"abc", "defg", "z", "hijk"}))
+  cout << ThirdGreatest({"abc", "defg", "z", "hijk"})
        << '\n';  // expected output: abc
 
   return 0;
