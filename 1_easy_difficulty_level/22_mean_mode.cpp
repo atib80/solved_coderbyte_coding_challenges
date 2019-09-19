@@ -47,7 +47,7 @@ int MeanMode_v1(vector<int> numbers) {
 }
 
 int main() {
-  // cout << MeanMode_v1(vector<int>{gets(stdin)});
+  // cout << MeanMode_v1({gets(stdin)});
   cout << MeanMode_v1({5, 3, 3, 3, 1}) << '\n';  // expected output: 1
   cout << MeanMode_v1({1, 2, 3}) << '\n';        // expected output: 0
   cout << MeanMode_v1({4, 4, 4, 6, 2}) << '\n';  // expected output: 1
