@@ -22,50 +22,34 @@ Output: "false"
 
 using namespace std;
 
-string PowersofTwo(int num) {
-  if (!num)
+string PowersofTwo_v1(int64_t target_num) {
+  if (target_num < 1)
     return "false";
 
-  const bool is_number_negative{num < 0};
-
-  const int factor{is_number_negative ? -2 : 2};
-
-  while (num) {
-    if (1 == num)
-      return "true";
-
-    if (abs(num) % 2 == 1)
+  while (target_num > 1) {
+    if (1 == target_num % 2)
       return "false";
 
-    num /= factor;
+    target_num /= 2;
   }
 
   return "true";
 }
 
-string PowersofTwo_v2(const int target_num) {
-  if (!target_num)
+string PowersofTwo_v2(const int64_t target_num) {
+  if (target_num < 1)
     return "false";
 
-  const bool is_number_negative{target_num < 0};
-  const int mult_factor{is_number_negative ? -1 : 1};
+  int64_t num{1};
 
-  int search_num{1};
-
-  while (true) {
-    if (target_num == search_num)
+  while (num <= target_num) {
+    if (target_num == num)
       return "true";
 
-    search_num <<= 1;
-
-    search_num *= mult_factor;
-
-    if (is_number_negative) {
-      if (search_num < target_num)
-        return "false";
-    } else if (search_num > target_num)
-      return "false";
+    num <<= 1;
   }
+
+  return "false";
 }
 
 int main() {
@@ -74,9 +58,7 @@ int main() {
   cout << PowersofTwo_v2(22) << '\n';   // expected output: "false"
   cout << PowersofTwo_v2(4) << '\n';    // expected output: "true"
   cout << PowersofTwo_v2(124) << '\n';  // expected output: "false"
-  cout << PowersofTwo_v2(-8) << '\n';   // expected output: "true"
   cout << PowersofTwo_v2(16) << '\n';   // expected output: "true"
-  cout << PowersofTwo_v2(-32) << '\n';  // expected output: "true"
 
   return 0;
 }
