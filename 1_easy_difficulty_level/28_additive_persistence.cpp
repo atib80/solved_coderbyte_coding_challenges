@@ -20,7 +20,10 @@ Output: 2
 
 using namespace std;
 
-int AdditivePersistence(int64_t num) {
+constexpr int AdditivePersistence(int64_t num) {
+  if (num < 0) 
+    num = -num;
+
   int iter_count{};
 
   while (num > 9) {

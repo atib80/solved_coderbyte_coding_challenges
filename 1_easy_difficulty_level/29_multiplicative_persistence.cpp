@@ -18,29 +18,28 @@ Output: 2
 */
 
 #include <iostream>
-#include <string>
-#include <cmath>
 
 using namespace std;
 
-int MultiplicativePersistence(int num) {
-  
-  num = abs(num);
+constexpr int MultiplicativePersistence(int64_t num) {
+  if (num < 0)
+    num = -num;
 
-  size_t iter{};
+  int iter_count{};
 
   while (num > 9) {
-    iter++;
+    iter_count++;
+    int64_t product{1};
 
-    const string num_str{to_string(num)};
+    while (0 != num) {
+      product *= num % 10;
+      num /= 10;
+    }
 
-    num = 1;
-
-    for (const char digit : num_str)
-      num *= static_cast<int>(digit - '0');
+    num = product;
   }
 
-  return iter;
+  return iter_count;
 }
 
 int main() {
