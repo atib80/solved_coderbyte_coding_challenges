@@ -17,28 +17,25 @@ Output: 2
 */
 
 #include <iostream>
-#include <string>
-#include <cmath>
 
 using namespace std;
 
-int AdditivePersistence(int num) {
-  num = abs(num);
-
-  size_t iter{};
+int AdditivePersistence(int64_t num) {
+  int iter_count{};
 
   while (num > 9) {
-    iter++;
+    iter_count++;
+    int64_t sum{};
 
-    const string num_str{to_string(num)};
+    while (0 != num) {
+      sum += num % 10;
+      num /= 10;
+    }
 
-    num = 0;
-
-    for (const char digit : num_str)
-      num += static_cast<int>(digit - '0');
+    num = sum;
   }
 
-  return iter;
+  return iter_count;
 }
 
 int main() {
