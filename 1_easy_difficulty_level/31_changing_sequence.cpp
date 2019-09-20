@@ -21,42 +21,60 @@ Output: 3
 */
 
 #include <iostream>
-#include <string>
 #include <vector>
 
 using namespace std;
 
-int ChangingSequence(vector<int> numbers) {
-  if (numbers.size() < 3)
+int ChangingSequence_v1(vector<int> numbers) {
+  if (numbers.size() < 3U)
     return -1;
-
+  const size_t numbers_size{numbers.size()};
   size_t si{1};
 
-  for (; si < numbers.size(); si++) {
+  for (; si < numbers_size; si++) {
     if (numbers[0] != numbers[si])
       break;
   }
 
   const bool ascending_order{numbers[0] < numbers[si]};
 
-  for (size_t i{si}; i < numbers.size(); i++) {
-    if (ascending_order && (numbers[i - 1] > numbers[i]))
-      return (i - 1);
+  for (size_t i{si}; i < numbers.size(); ++i) {
+    if (ascending_order) {
+      if (numbers[i] < numbers[i - 1])
+        return i - 1;
+    }
 
-    if (!ascending_order && (numbers[i - 1] < numbers[i]))
-      return (i - 1);
+    if (!ascending_order) {
+      if (numbers[i] > numbers[i - 1])
+        return i - 1;
+    }
+  }
+
+  return -1;
+}
+
+int ChangingSequence_v2(vector<int> numbers) {
+  if (numbers.size() < 3U)
+    return -1;
+  const size_t numbers_size{numbers.size()};
+
+  for (size_t i{1}; i < numbers_size - 1; ++i) {
+    if (numbers[i] > numbers[i - 1] && numbers[i] > numbers[i + 1])
+      return i;
+
+    if (numbers[i] < numbers[i - 1] && numbers[i] < numbers[i + 1])
+      return i;
   }
 
   return -1;
 }
 
 int main() {
-  // cout << ChangingSequence(move(vector<int>{gets(stdin)}));
-  cout << ChangingSequence(move(vector<int>{1, 2, 4, 6, 4, 3, 1}))
-       << '\n';  // expected output: 3
-  cout << ChangingSequence(move(vector<int>{-4, -2, 9, 10}))
-       << '\n';  // expected output: -1
-  cout << ChangingSequence(move(vector<int>{5, 4, 3, 2, 10, 11}))
+  // cout << ChangingSequence_v2(gets(stdin));
+  cout << ChangingSequence_v2({1, 2, 4, 6, 4, 3, 1})
+       << '\n';                                          // expected output: 3
+  cout << ChangingSequence_v2({-4, -2, 9, 10}) << '\n';  // expected output: -1
+  cout << ChangingSequence_v2({5, 4, 3, 2, 10, 11})
        << '\n';  // expected output: 3
 
   return 0;
