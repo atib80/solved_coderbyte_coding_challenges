@@ -28,26 +28,69 @@ Output: "abc"
 
 using namespace std;
 
-string ThirdGreatest(vector<string> words) {
+string ThirdGreatest_v1(vector<string> words) {
   if (words.size() < 3U)
     return "not possible";
 
-  stable_sort(begin(words), end(words), [](const auto& lw, const auto& rw) {
+  stable_sort(begin(words), end(words), [](const string& lw, const string& rw) {
     return lw.length() > rw.length();
   });
 
   return move(words[2]);
 }
 
+string ThirdGreatest_v2(vector<string> words) {
+  const size_t words_len{words.size()};
+
+  if (words_len < 3U)
+    return "not possible";
+
+  size_t max_word_len{words.front().length()};
+  size_t first_longest_word_index{};
+
+  for (size_t i{1U}; i < words_len; ++i) {
+    if (words[i].length() > max_word_len) {
+      max_word_len = words[i].length();
+      first_longest_word_index = i;
+    }
+  }
+
+  words[first_longest_word_index].clear();
+
+  max_word_len = 0U;
+  size_t second_longest_word_index{};
+
+  for (size_t i{}; i < words_len; ++i) {
+    if (words[i].length() > max_word_len) {
+      max_word_len = words[i].length();
+      second_longest_word_index = i;
+    }
+  }
+
+  words[second_longest_word_index].clear();
+
+  max_word_len = 0U;
+  size_t third_longest_word_index{};
+
+  for (size_t i{}; i < words_len; ++i) {
+    if (words[i].length() > max_word_len) {
+      max_word_len = words[i].length();
+      third_longest_word_index = i;
+    }
+  }
+
+  return move(words[third_longest_word_index]);
+}
+
 int main() {
-  // cout << ThirdGreatest(gets(stdin));
-  cout << ThirdGreatest({"hello", "world", "before", "all"})
+  // cout << ThirdGreatest_v2(gets(stdin));
+  cout << ThirdGreatest_v2({"hello", "world", "before", "all"})
        << '\n';  // expected output: world
-  cout << ThirdGreatest({"hello", "world", "after", "all"})
+  cout << ThirdGreatest_v2({"hello", "world", "after", "all"})
        << '\n';  // expected output: after
-  cout << ThirdGreatest({"coder", "byte", "code"})
+  cout << ThirdGreatest_v2({"coder", "byte", "code"})
        << '\n';  // expected output: code
-  cout << ThirdGreatest({"abc", "defg", "z", "hijk"})
+  cout << ThirdGreatest_v2({"abc", "defg", "z", "hijk"})
        << '\n';  // expected output: abc
 
   return 0;
