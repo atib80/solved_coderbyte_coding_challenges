@@ -45,41 +45,23 @@ string ThirdGreatest_v2(vector<string> words) {
   if (words_len < 3U)
     return "not possible";
 
-  size_t max_word_len{words.front().length()};
-  size_t first_longest_word_index{};
+  auto longest_word_iter = max_element(
+      begin(words), end(words),
+      [](const auto& lw, const auto& rw) { return lw.length() < rw.length(); });
 
-  for (size_t i{1U}; i < words_len; ++i) {
-    if (words[i].length() > max_word_len) {
-      max_word_len = words[i].length();
-      first_longest_word_index = i;
-    }
-  }
+  longest_word_iter->clear();
 
-  words[first_longest_word_index].clear();
+  longest_word_iter = max_element(
+      begin(words), end(words),
+      [](const auto& lw, const auto& rw) { return lw.length() < rw.length(); });
 
-  max_word_len = 0U;
-  size_t second_longest_word_index{};
+  longest_word_iter->clear();
 
-  for (size_t i{}; i < words_len; ++i) {
-    if (words[i].length() > max_word_len) {
-      max_word_len = words[i].length();
-      second_longest_word_index = i;
-    }
-  }
+  longest_word_iter = max_element(
+      begin(words), end(words),
+      [](const auto& lw, const auto& rw) { return lw.length() < rw.length(); });
 
-  words[second_longest_word_index].clear();
-
-  max_word_len = 0U;
-  size_t third_longest_word_index{};
-
-  for (size_t i{}; i < words_len; ++i) {
-    if (words[i].length() > max_word_len) {
-      max_word_len = words[i].length();
-      third_longest_word_index = i;
-    }
-  }
-
-  return move(words[third_longest_word_index]);
+  return move(*longest_word_iter);
 }
 
 int main() {
