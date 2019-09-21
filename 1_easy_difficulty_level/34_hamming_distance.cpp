@@ -20,37 +20,42 @@ Output: 8
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t first{}, last{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (first > last)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return {first, last};
 }
 
 string HammingDistance(const string* str_arr, const size_t str_arr_size) {
-  if (str_arr_size < 2)
+  if (str_arr_size < 2U)
     return "Not possible!";
 
   size_t number_of_ch_differences{};
@@ -61,16 +66,16 @@ string HammingDistance(const string* str_arr, const size_t str_arr_size) {
   const size_t str1_len{str_arr[0].length()};
   const size_t str2_len{str_arr[1].length()};
 
-  const size_t diff_len{str1_len < str2_len ? str2_len - str1_len
-                                            : str1_len - str2_len};
+  const size_t max_len{max(str1_len, str2_len)};
+  const size_t min_len{min(str1_len, str2_len)};
 
-  for (size_t i{}; i < min(str1_len, str2_len); i++) {
-    if (str1[i] != str2[i])
-      number_of_ch_differences++;
-  }
+  const size_t diff_len{max_len - min_len};
 
-  if (diff_len)
-    number_of_ch_differences += diff_len;
+  for (size_t i{}; i < min_len; ++i)
+    number_of_ch_differences = str1[i] != str2[i] ? number_of_ch_differences + 1
+                                                  : number_of_ch_differences;
+
+  number_of_ch_differences += diff_len;
 
   return to_string(number_of_ch_differences);
 }
@@ -78,14 +83,14 @@ string HammingDistance(const string* str_arr, const size_t str_arr_size) {
 int main() {
   // const string A[] = gets(stdin);
   // cout << HammingDistance(A, sizeof(A)/sizeof(A[0]));
-  const string A[] = {"coder", "codec"};
-  cout << HammingDistance(A, sizeof(A) / sizeof(A[0]))
+  const string A[]{"coder", "codec"};
+  cout << HammingDistance(A, sizeof(A) / sizeof(*A))
        << '\n';  // expected output: 1
-  const string B[] = {"10011", "10100"};
-  cout << HammingDistance(B, sizeof(B) / sizeof(B[0]))
+  const string B[]{"10011", "10100"};
+  cout << HammingDistance(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 3
-  const string C[] = {"helloworld", "worldhello"};
-  cout << HammingDistance(C, sizeof(C) / sizeof(C[0]))
+  const string C[]{"helloworld", "worldhello"};
+  cout << HammingDistance(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 8
 
   return 0;
