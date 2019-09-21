@@ -22,43 +22,65 @@ Input:  1,8,2,4,4
 Output: "false"
 */
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
 
 using namespace std;
 
-string OverlappingRanges(vector<int> v) {
-  if (v.size() < 5)
-    return "Please give me at least 5 whole numbers.";
+string OverlappingRanges_v1(vector<int64_t> v) {
+  if (v.size() < 5U)
+    return "Please give me at least 5 whole numbers!";
 
-  const int A1{v[0]};
-  const int B1{v[1]};
+  const int64_t A1{v[0]};
+  const int64_t B1{v[1]};
 
-  const int A2{v[2]};
-  const int B2{v[3]};
+  const int64_t A2{v[2]};
+  const int64_t B2{v[3]};
 
-  const int x{v[4]};
+  const int64_t x{v[4]};
 
-  if ((A1 <= A2) && (B1 >= B2) && (B2 - A2 + 1 >= x))
+  if (A1 <= A2 && B1 >= B2 && B2 - A2 + 1 >= x)
     return "true";
 
-  if ((A1 <= A2) && (B1 <= B2) && (B1 >= A2) && (B1 - A2 + 1 >= x))
+  if (A1 <= A2 && B1 <= B2 && B1 >= A2 && B1 - A2 + 1 >= x)
     return "true";
 
-  if ((A1 >= A2) && (B1 >= B2) && (A1 <= B2) && (B2 - A1 + 1 >= x))
+  if (A1 >= A2 && B1 >= B2 && A1 <= B2 && B2 - A1 + 1 >= x)
+    return "true";
+
+  return "false";
+}
+
+string OverlappingRanges_v2(vector<int64_t> v) {
+  if (v.size() < 5U)
+    return "Please give me at least 5 whole numbers!";
+
+  vector<pair<int64_t, int>> intervals{
+      {v[0], 1}, {v[1], -1}, {v[2], 1}, {v[3], -1}};
+  sort(begin(intervals), end(intervals),
+       [](const auto& lp, const auto& rp) { return lp.first < rp.first; });
+
+  if (0 == intervals[0].second + intervals[1].second) {
+    if (intervals[1].first == intervals[2].first && 1 == v[4])
+      return "true";
+    return "false";
+  }
+
+  if (intervals[2].first - intervals[1].first + 1 >= v[4])
     return "true";
 
   return "false";
 }
 
 int main() {
-  // cout << OverlappingRanges(move(vector<int>{gets(stdin)}));
-  cout << OverlappingRanges(move(vector<int>{4, 10, 2, 6, 3}))
+  // cout << OverlappingRanges_v2(gets(stdin));
+  cout << OverlappingRanges_v2({4, 10, 2, 6, 3})
        << '\n';  // expected output: "true"
-  cout << OverlappingRanges(move(vector<int>{5, 11, 1, 5, 1}))
+  cout << OverlappingRanges_v2({5, 11, 1, 5, 1})
        << '\n';  // expected output: "true"
-  cout << OverlappingRanges(move(vector<int>{1, 8, 2, 4, 4}))
+  cout << OverlappingRanges_v2({1, 8, 2, 4, 4})
        << '\n';  // expected output: "false"
 
   return 0;
