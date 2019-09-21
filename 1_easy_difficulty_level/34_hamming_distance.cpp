@@ -54,7 +54,19 @@ std::string trim(const std::string& src,
   return {first, last};
 }
 
+template <size_t BUFFER_LEN>
+struct char_offsets {
+  size_t offsets[BUFFER_LEN];
+
+  constexpr char_offsets() : offsets{} {
+    for (size_t i{1}; i < BUFFER_LEN; ++i)
+      offsets[i] = 1U;
+  }
+};
+
 string HammingDistance(const string* str_arr, const size_t str_arr_size) {
+  static constexpr char_offsets<256U> char_diff_gain{};
+
   if (str_arr_size < 2U)
     return "Not possible!";
 
@@ -72,8 +84,8 @@ string HammingDistance(const string* str_arr, const size_t str_arr_size) {
   const size_t diff_len{max_len - min_len};
 
   for (size_t i{}; i < min_len; ++i)
-    number_of_ch_differences = str1[i] != str2[i] ? number_of_ch_differences + 1
-                                                  : number_of_ch_differences;
+    number_of_ch_differences +=
+        char_diff_gain.offsets[static_cast<unsigned char>(str1[i] - str2[i])];
 
   number_of_ch_differences += diff_len;
 
