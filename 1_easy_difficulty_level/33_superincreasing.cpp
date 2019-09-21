@@ -24,13 +24,13 @@ Output: "true"
 
 using namespace std;
 
-string Superincreasing(vector<int> numbers) {
+string Superincreasing(vector<int64_t> numbers) {
   if (numbers.empty())
-    return "Not possible!";
+    return "not possible";
 
-  int prev_sum{numbers[0]};
+  int64_t prev_sum{numbers.front()};
 
-  for (size_t i{1}; i < numbers.size(); i++) {
+  for (size_t i{1}; i < numbers.size(); ++i) {
     if (numbers[i] <= prev_sum)
       return "false";
 
@@ -41,13 +41,11 @@ string Superincreasing(vector<int> numbers) {
 }
 
 int main() {
-  // cout << Superincreasing(move(vector<int>{gets(stdin)}));
-  cout << Superincreasing(move(vector<int>{1, 3, 6, 13, 54}))
-       << '\n';  // expected output: "true"
-  cout << Superincreasing(move(vector<int>{1, 2, 3, 4}))
-       << '\n';  // expected output: "false"
-  cout << Superincreasing(move(vector<int>{1, 2, 5, 10}))
-       << '\n';  // expected output: "true"
+  // cout << Superincreasing(gets(stdin));
+  cout << Superincreasing({1, 3, 6, 13, 54})
+       << '\n';                                    // expected output: "true"
+  cout << Superincreasing({1, 2, 3, 4}) << '\n';   // expected output: "false"
+  cout << Superincreasing({1, 2, 5, 10}) << '\n';  // expected output: "true"
 
   return 0;
 }
