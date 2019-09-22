@@ -23,47 +23,105 @@ Output: "12-36-18-6"
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 using namespace std;
 
-template <typename _Container>
-string join(const _Container& items, const string& needle) {
+// alias template 'has_cbegin_member_function_t' type function checks if
+// typename 'T' has a cbegin() member function
+template <typename T>
+using has_cbegin_member_function_t = decltype(std::declval<T&>().cbegin());
+
+template <typename T, typename = void>
+struct has_cbegin_member_function : std::false_type {};
+
+template <typename T>
+struct has_cbegin_member_function<T,
+                                  std::void_t<has_cbegin_member_function_t<T>>>
+    : std::true_type {};
+
+template <typename T>
+constexpr const bool has_cbegin_member_function_v =
+    has_cbegin_member_function<T>::value;
+
+// alias template 'has_cend_member_function_t' type function checks if typename
+// 'T' has a cend() member function
+template <typename T>
+using has_cend_member_function_t = decltype(std::declval<T&>().cend());
+
+template <typename T, typename = void>
+struct has_cend_member_function : std::false_type {};
+
+template <typename T>
+struct has_cend_member_function<T, std::void_t<has_cend_member_function_t<T>>>
+    : std::true_type {};
+
+template <typename T>
+constexpr const bool has_cend_member_function_v =
+    has_cend_member_function<T>::value;
+
+// alias template 'has_output_stream_operator_type_t' type function checks if
+// typename 'T' has a valid operator<<(StreamType&, const T&) member function,
+// overloaded output operator defined for specified output stream type
+// 'StreamType'
+template <typename StreamType, typename T>
+using has_output_stream_operator_type_t =
+    decltype(std::declval<StreamType&>() << std::declval<T>());
+
+template <typename StreamType, typename T, typename = void>
+struct has_output_stream_operator : std::false_type {};
+
+template <typename StreamType, typename T>
+struct has_output_stream_operator<
+    StreamType,
+    T,
+    std::void_t<has_output_stream_operator_type_t<StreamType, T>>>
+    : std::true_type {};
+
+template <typename StreamType, typename T>
+constexpr const bool has_output_stream_operator_v =
+    has_output_stream_operator<StreamType, T>::value;
+
+template <typename ContainerType,
+          typename NeedleType,
+          typename = enable_if_t<
+              has_cbegin_member_function_v<ContainerType> &&
+              has_cend_member_function_v<ContainerType> &&
+              has_output_stream_operator_v<ostringstream, NeedleType>>>
+string join(const ContainerType& items, const NeedleType& needle) {
   ostringstream oss{};
+  auto start = cbegin(items);
+  const auto last = cend(items);
 
-  auto start = begin(items);
+  if (start == last)
+    return {};
 
-  const auto last = end(items);
-
-  while (start != last) {
-    oss << *start << needle;
-
+  while (true) {
+    oss << *start;
     ++start;
+    if (start == last)
+      break;
+    oss << needle;
   }
 
-  string result{oss.str()};
-
-  const size_t needle_len{needle.length()};
-
-  result.erase(result.length() - needle_len, needle_len);
-
-  return result;
+  return oss.str();
 }
 
-string OtherProducts(const int* numbers, const size_t numbers_size) {
-  if (!numbers_size)
-    return string{"Not possible!"};
+string OtherProducts(const int64_t* numbers, const size_t numbers_size) {
+  if (0U == numbers_size)
+    return "not possible";
 
-  if (1 == numbers_size)
+  if (1U == numbers_size)
     return to_string(numbers[0]);
 
-  vector<int> products(numbers_size);
+  vector<int64_t> products(numbers_size);
 
-  for (size_t i{}; i < numbers_size; i++) {
-    int product{1};
+  for (size_t i{}; i < numbers_size; ++i) {
+    int64_t product{1};
 
-    for (size_t j{}; j < numbers_size; j++) {
-      if (j == i)
+    for (size_t j{}; j < numbers_size; ++j) {
+      if (i == j)
         continue;
 
       product *= numbers[j];
@@ -72,19 +130,19 @@ string OtherProducts(const int* numbers, const size_t numbers_size) {
     products[i] = product;
   }
 
-  return join(products, "-");
+  return join(products, '-');
 }
 
 int main() {
-  // const int A[] = gets(stdin);
+  // const int64_t A[] = gets(stdin);
   // cout << OtherProducts(A, sizeof(A)/sizeof(*A));
-  const int B[] = {1, 2, 3, 4, 5};
+  const int64_t B[]{1, 2, 3, 4, 5};
   cout << OtherProducts(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: "120-60-40-30-24"
-  const int C[] = {1, 4, 3};
+  const int64_t C[]{1, 4, 3};
   cout << OtherProducts(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: "12-3-4"
-  const int D[] = {3, 1, 2, 6};
+  const int64_t D[]{3, 1, 2, 6};
   cout << OtherProducts(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: "12-36-18-6"
 
