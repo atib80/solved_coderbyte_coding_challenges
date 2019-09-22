@@ -71,7 +71,8 @@
             ],
             "cppStandard": "c++17",
             "cStandard": "c11",
-            "windowsSdkVersion": "10.0.18362.0"
+            "windowsSdkVersion": "10.0.18362.0",
+            "configurationProvider": "go2sh.cmake-integration"
         }
     ],
     "version": 4

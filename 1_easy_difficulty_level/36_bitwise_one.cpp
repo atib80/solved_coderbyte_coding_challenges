@@ -18,50 +18,54 @@ Input:  "00011", "01010"
 Output: "01011"
 */
 
-#include <cctype>
+#include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t first{}, last{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (first > last)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return {first, last};
 }
 
 string BitwiseOne_v1(string* binary_numbers, const size_t str_arr_size) {
-  if (str_arr_size < 2)
-    return "Not possible!";
+  if (str_arr_size < 2U)
+    return "not possible";
 
   binary_numbers[0] = trim(binary_numbers[0]);
   binary_numbers[1] = trim(binary_numbers[1]);
 
   if (binary_numbers[0].length() != binary_numbers[1].length())
-    return "Not possible!";
+    return "not possible";
 
-  string result(binary_numbers[0].length(), '0');
+  string result{binary_numbers[0]};
 
   for (size_t i{}; i < binary_numbers[0].length(); i++) {
-    if (('1' == binary_numbers[0][i]) || ('1' == binary_numbers[1][i]))
+    if ('1' == binary_numbers[1][i])
       result[i] = '1';
   }
 
@@ -69,43 +73,45 @@ string BitwiseOne_v1(string* binary_numbers, const size_t str_arr_size) {
 }
 
 string BitwiseOne_v2(const string* binary_numbers, const size_t str_arr_size) {
-  if (str_arr_size < 2)
-    return "Not possible!";
+  if (str_arr_size < 2U)
+    return "not possible";
 
   if (binary_numbers[0].length() != binary_numbers[1].length())
-    return "Not possible!";
+    return "not possible";
 
-  int result{stoi(binary_numbers[0], nullptr, 2) |
-             stoi(binary_numbers[1], nullptr, 2)};
+  int64_t result{stoll(binary_numbers[0], nullptr, 2) |
+                 stoll(binary_numbers[1], nullptr, 2)};
 
   string result_str{};
+  result_str.reserve(binary_numbers[0].length());
 
   while (result) {
-    if (result % 2 == 1)
-      result_str.insert(begin(result_str), '1');
+    if (result % 2)
+      result_str.push_back('1');
     else
-      result_str.insert(begin(result_str), '0');
+      result_str.push_back('0');
 
     result /= 2;
   }
 
-  result_str.insert(begin(result_str),
-                    binary_numbers[0].length() - result_str.length(), '0');
+  if (binary_numbers[0].length() > result_str.length())
+    result_str.append(binary_numbers[0].length() - result_str.length(), '0');
+
+  reverse(begin(result_str), end(result_str));
 
   return result_str;
 }
 
 int main() {
-
-  // const string str_arr1[] = gets(stdin);
+  // string str_arr1[] = gets(stdin);
   // cout << BitwiseOne_v2(str_arr1, sizeof(str_arr1)/sizeof(*str_arr1));
-  string str_arr2[] = {"1001", "0100"};
+  string str_arr2[]{"1001", "0100"};
   cout << BitwiseOne_v2(str_arr2, sizeof(str_arr2) / sizeof(*str_arr2))
        << '\n';  // expected output: "1101"
-  string str_arr3[] = {"100", "000"};
+  string str_arr3[]{"100", "000"};
   cout << BitwiseOne_v2(str_arr3, sizeof(str_arr3) / sizeof(*str_arr3))
        << '\n';  // expected output: "100"
-  string str_arr4[] = {"00011", "01010"};
+  string str_arr4[]{"00011", "01010"};
   cout << BitwiseOne_v2(str_arr4, sizeof(str_arr4) / sizeof(*str_arr4))
        << '\n';  // expected output: "01011"
 
