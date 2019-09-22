@@ -20,6 +20,7 @@ Output: "01011"
 
 #include <algorithm>
 #include <cstring>
+#include <deque>
 #include <iostream>
 #include <string>
 #include <unordered_set>
@@ -82,24 +83,23 @@ string BitwiseOne_v2(const string* binary_numbers, const size_t str_arr_size) {
   int64_t result{stoll(binary_numbers[0], nullptr, 2) |
                  stoll(binary_numbers[1], nullptr, 2)};
 
-  string result_str{};
-  result_str.reserve(binary_numbers[0].length());
+  deque<char> buffer{};
 
   while (result) {
-    if (result % 2)
-      result_str.push_back('1');
+    if (result & 1)
+      buffer.push_front('1');
     else
-      result_str.push_back('0');
+      buffer.push_front('0');
 
-    result /= 2;
+    result >>= 1;
   }
 
-  if (binary_numbers[0].length() > result_str.length())
-    result_str.append(binary_numbers[0].length() - result_str.length(), '0');
+  if (binary_numbers[0].length() > buffer.size()) {
+    for (size_t i{}; i < binary_numbers[0].length() - buffer.size(); ++i)
+      buffer.push_front('0');
+  }
 
-  reverse(begin(result_str), end(result_str));
-
-  return result_str;
+  return {cbegin(buffer), cend(buffer)};
 }
 
 int main() {
