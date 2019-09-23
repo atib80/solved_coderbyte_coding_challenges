@@ -27,19 +27,14 @@ using namespace std;
 
 string WaveSorting(int* arr, const size_t arr_size) {
   sort(arr, arr + arr_size);
-
-  unordered_map<int, size_t> number_freq{};
-  number_freq.insert(make_pair(arr[0], 1));
+  unordered_map<int, size_t> number_freq{{arr[0], 1}};
   int last_counted_num{arr[0]};
   size_t balance{1};
 
-  for (size_t i{1}; i < arr_size; i++) {
-    if (number_freq.find(arr[i]) == end(number_freq))
-      number_freq.insert(make_pair(arr[i], 1));
-    else
-      number_freq[arr[i]]++;
+  for (size_t i{1}; i < arr_size; ++i) {
+    number_freq[arr[i]]++;
 
-    if (!balance) {
+    if (0U == balance) {
       last_counted_num = arr[i];
       balance++;
 
@@ -49,25 +44,22 @@ string WaveSorting(int* arr, const size_t arr_size) {
       balance--;
   }
 
-  if (!balance)
+  if (0U == balance)
     return "true";
 
-  if (number_freq[last_counted_num] > arr_size / 2)
-    return "false";
-
-  return "true";
+  return number_freq[last_counted_num] > arr_size / 2 ? "false" : "true";
 }
 
 int main() {
   // int arr[] = gets(stdin);
   // cout << WaveSorting(arr, sizeof(arr)/sizeof(*arr));
-  int b[] = {0, 1, 2, 4, 1, 4};
+  int b[]{0, 1, 2, 4, 1, 4};
   cout << WaveSorting(b, sizeof(b) / sizeof(*b))
        << '\n';  // expected output: "true"
-  int c[] = {0, 1, 2, 4, 1, 1, 1};
+  int c[]{0, 1, 2, 4, 1, 1, 1};
   cout << WaveSorting(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: "false"
-  int d[] = {0, 4, 22, 4, 14, 4, 2};
+  int d[]{0, 4, 22, 4, 14, 4, 2};
   cout << WaveSorting(d, sizeof(d) / sizeof(*d))
        << '\n';  // expected output: "true"
 
