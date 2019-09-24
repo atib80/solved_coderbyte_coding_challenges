@@ -110,25 +110,25 @@ string ArrayMatching(const string* str_arr, const size_t str_arr_size) {
 int main() {
   // const string A[] = gets(stdin);
   // cout << ArrayMatching(A, sizeof(A)/sizeof(*A));
-  const string b[] = {"[1, 2, 5, 6]", "[5, 2, 8, 11]"};
+  const string b[]{"[1, 2, 5, 6]", "[5, 2, 8, 11]"};
   cout << ArrayMatching(b, sizeof(b) / sizeof(*b))
        << '\n';  // expected output: "6-4-13-17"
-  const string c[] = {"[5, 2, 3]", "[2, 2, 3, 10, 6]"};
+  const string c[]{"[5, 2, 3]", "[2, 2, 3, 10, 6]"};
   cout << ArrayMatching(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: "7-4-6-10-6"
-  const string d[] = {"[1, 2, 1]", "[2, 1, 5, 2]"};
+  const string d[]{"[1, 2, 1]", "[2, 1, 5, 2]"};
   cout << ArrayMatching(d, sizeof(d) / sizeof(*d))
        << '\n';  // expected output: "3-3-6-2"
-  const string e[] = {"[2]", "[1, 1]"};
+  const string e[]{"[2]", "[1, 1]"};
   cout << ArrayMatching(e, sizeof(e) / sizeof(*e))
        << '\n';  // expected output: "3-1"
-  const string f[] = {"[2]", "[2]"};
+  const string f[]{"[2]", "[2]"};
   cout << ArrayMatching(f, sizeof(f) / sizeof(*f))
        << '\n';  // expected output: "4"
-  const string g[] = {"[1]", "[5, 6, 2, 1, 5, 3]"};
+  const string g[]{"[1]", "[5, 6, 2, 1, 5, 3]"};
   cout << ArrayMatching(g, sizeof(g) / sizeof(*g))
        << '\n';  // expected output: "6-6-2-1-5-3"
-  const string h[] = {"[7, 7, 7, 7]", "[2]"};
+  const string h[]{"[7, 7, 7, 7]", "[2]"};
   cout << ArrayMatching(h, sizeof(h) / sizeof(*h))
        << '\n';  // expected output: "9-7-7-7"
 
