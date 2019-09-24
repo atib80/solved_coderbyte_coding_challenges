@@ -26,7 +26,7 @@ Output: "3-3-6-2"
 */
 
 #include <algorithm>
-#include <cctype>
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -34,148 +34,73 @@ Output: "3-3-6-2"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (!str_len)
-    return string{};
-
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
-}
-
-vector<string> split(const string& source,
-                     const char* needle,
-                     size_t const max_count = string::npos) {
-  vector<string> parts{};
-
-  string needle_st{needle};
-
-  const size_t source_len{source.length()};
-
-  const size_t needle_len{needle_st.size()};
-
-  if (!source_len)
-    return parts;
-
-  if (!needle_len) {
-    const size_t upper_limit{max_count < source_len ? max_count : source_len};
-    for (size_t i{}; i < upper_limit; i++)
-      parts.emplace_back(1, source[i]);
-    return parts;
-  }
-
-  size_t number_of_parts{}, prev{};
-
-  while (true) {
-    const size_t current{source.find(needle_st, prev)};
-
-    if (string::npos == current)
-      break;
-
-    number_of_parts++;
-
-    if ((string::npos != max_count) && (parts.size() == max_count))
-      break;
-
-    if ((current - prev) > 0)
-      parts.emplace_back(source.substr(prev, current - prev));
-
-    prev = current + needle_len;
-
-    if (prev >= source_len)
-      break;
-  }
-
-  if (prev < source_len) {
-    if (string::npos == max_count)
-      parts.emplace_back(source.substr(prev));
-
-    else if ((string::npos != max_count) && (parts.size() < max_count))
-      parts.emplace_back(source.substr(prev));
-  }
-
-  return parts;
-}
-
-template <typename _Container>
-string join(const _Container& items, const string& needle) {
+template <typename ContainerType>
+string join(const ContainerType& items, const char* needle) {
   ostringstream oss{};
-
-  auto start = begin(items);
-
-  const auto last = end(items);
+  auto start = cbegin(items);
+  const auto last = cend(items);
 
   while (start != last) {
-    oss << *start << needle;
-
+    oss << *start;
     ++start;
+    if (start != last)
+      oss << needle;
   }
 
-  string result{oss.str()};
-
-  const size_t needle_len{needle.length()};
-
-  result.erase(result.length() - needle_len, needle_len);
-
-  return result;
+  return oss.str();
 }
 
 string ArrayMatching(const string* str_arr, const size_t str_arr_size) {
-  if (str_arr_size < 2)
-    return "Not possible!";
+  if (str_arr_size < 2U)
+    return "not possible";
 
-  string numbers1_str{trim(str_arr[0])};
-  string numbers2_str{trim(str_arr[1])};
+  const auto count_of_numbers_left_str =
+      count(cbegin(str_arr[0]), cend(str_arr[0]), ',') + 1;
+  const auto count_of_numbers_right_str =
+      count(cbegin(str_arr[1]), cend(str_arr[1]), ',') + 1;
 
-  numbers1_str.erase(begin(numbers1_str));
-  numbers1_str.erase(--end(numbers1_str));
+  array<vector<int64_t>, 2U> numbers{
+      {vector<int64_t>(count_of_numbers_left_str),
+       vector<int64_t>(count_of_numbers_right_str)}};
 
-  numbers2_str.erase(begin(numbers2_str));
-  numbers2_str.erase(--end(numbers2_str));
+  for (size_t i{}; i < 2U; ++i) {
+    size_t first{};
+    for (size_t j{}; j < numbers[i].size(); ++j) {
+      first = str_arr[i].find_first_of("-0123456789", first);
 
-  vector<string> numbers_left_str{split(numbers1_str, ", ")};
-  vector<string> numbers_right_str{split(numbers2_str, ", ")};
+      if (string::npos == first)
+        break;
 
-  vector<long> ln(numbers_left_str.size());
-  vector<long> rn(numbers_right_str.size());
+      const size_t last{str_arr[i].find_first_not_of("-0123456789", first + 1)};
 
-  for (size_t i{}; i < numbers_left_str.size(); i++)
-    ln[i] = stol(numbers_left_str[i]);
-  for (size_t i{}; i < numbers_right_str.size(); i++)
-    rn[i] = stol(numbers_right_str[i]);
+      if (string::npos == last) {
+        numbers[i][j] = stoll(str_arr[i].substr(first));
+        break;
+      }
 
-  const size_t ln_size{ln.size()};
-  const size_t rn_size{rn.size()};
+      numbers[i][j] = stoll(str_arr[i].substr(first, last - first));
+
+      first = last + 1;
+    }
+  }
+
+  const size_t ln_size{numbers[0].size()};
+  const size_t rn_size{numbers[1].size()};
 
   const size_t min_len{min(ln_size, rn_size)};
 
-  vector<long> sum(max(ln_size, rn_size));
+  vector<int64_t> sum(max(ln_size, rn_size));
 
-  for (size_t i{}; i < min_len; i++)
-    sum[i] = ln[i] + rn[i];
+  for (size_t i{}; i < min_len; ++i)
+    sum[i] = numbers[0][i] + numbers[1][i];
 
   if (ln_size != rn_size) {
     if (ln_size < rn_size) {
-      for (size_t i{ln_size}; i < rn_size; i++)
-        sum[i] = rn[i];
+      for (size_t i{ln_size}; i < rn_size; ++i)
+        sum[i] = numbers[1][i];
     } else {
-      for (size_t i{rn_size}; i < ln_size; i++)
-        sum[i] = ln[i];
+      for (size_t i{rn_size}; i < ln_size; ++i)
+        sum[i] = numbers[0][i];
     }
   }
 
