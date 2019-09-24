@@ -39,10 +39,8 @@ string BinaryReversal(string str) {
     ++digit_count;
   }
 
-  if (0 != digit_count % 8) {
-    for (size_t i{}; i < (digit_count / 8 + 1) * 8 - digit_count; ++i)
-      reversed_number <<= 1;
-  }
+  if (0 != digit_count % 8)
+    reversed_number <<= (digit_count / 8 + 1) * 8 - digit_count;
 
   return to_string(reversed_number);
 }
