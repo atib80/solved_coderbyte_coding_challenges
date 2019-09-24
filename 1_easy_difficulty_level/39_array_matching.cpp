@@ -54,32 +54,18 @@ string ArrayMatching(const string* str_arr, const size_t str_arr_size) {
   if (str_arr_size < 2U)
     return "not possible";
 
-  const auto count_of_numbers_left_str =
-      count(cbegin(str_arr[0]), cend(str_arr[0]), ',') + 1;
-  const auto count_of_numbers_right_str =
-      count(cbegin(str_arr[1]), cend(str_arr[1]), ',') + 1;
-
-  array<vector<int64_t>, 2U> numbers{
-      {vector<int64_t>(count_of_numbers_left_str),
-       vector<int64_t>(count_of_numbers_right_str)}};
+  array<vector<int64_t>, 2U> numbers{};
 
   for (size_t i{}; i < 2U; ++i) {
     size_t first{};
-    for (size_t j{}; j < numbers[i].size(); ++j) {
+    while (first < str_arr[i].length()) {
       first = str_arr[i].find_first_of("-0123456789", first);
 
       if (string::npos == first)
         break;
 
       const size_t last{str_arr[i].find_first_not_of("-0123456789", first + 1)};
-
-      if (string::npos == last) {
-        numbers[i][j] = stoll(str_arr[i].substr(first));
-        break;
-      }
-
-      numbers[i][j] = stoll(str_arr[i].substr(first, last - first));
-
+      numbers[i].emplace_back(stoll(str_arr[i].substr(first, last - first)));
       first = last + 1;
     }
   }
@@ -89,22 +75,14 @@ string ArrayMatching(const string* str_arr, const size_t str_arr_size) {
 
   const size_t min_len{min(ln_size, rn_size)};
 
-  vector<int64_t> sum(max(ln_size, rn_size));
+  auto& fewer_numbers = !(ln_size > rn_size) ? numbers[0] : numbers[1];
+
+  auto& more_numbers = ln_size > rn_size ? numbers[0] : numbers[1];
 
   for (size_t i{}; i < min_len; ++i)
-    sum[i] = numbers[0][i] + numbers[1][i];
+    more_numbers[i] += fewer_numbers[i];
 
-  if (ln_size != rn_size) {
-    if (ln_size < rn_size) {
-      for (size_t i{ln_size}; i < rn_size; ++i)
-        sum[i] = numbers[1][i];
-    } else {
-      for (size_t i{rn_size}; i < ln_size; ++i)
-        sum[i] = numbers[0][i];
-    }
-  }
-
-  return join(sum, "-");
+  return join(more_numbers, "-");
 }
 
 int main() {
