@@ -51,7 +51,7 @@ string trim(const string& str) {
 bool check_if_num_str_consists_of_two_even_numbers(const string& num_str) {
   size_t num1_ei{};
 
-  for (; num1_ei < num_str.length(); num1_ei++) {
+  for (; num1_ei < num_str.length(); ++num1_ei) {
     if (num_str[num1_ei] % 2 == 0)
       break;
   }
@@ -59,7 +59,7 @@ bool check_if_num_str_consists_of_two_even_numbers(const string& num_str) {
   if (num1_ei >= num_str.length() - 1)
     return false;
 
-  if (num_str[num_str.length() - 1] % 2 == 1)
+  if (num_str.back() % 2 == 1)
     return false;
 
   return true;
@@ -68,7 +68,7 @@ bool check_if_num_str_consists_of_two_even_numbers(const string& num_str) {
 string EvenPairs(string str) {
   str = trim(str);
 
-  if (str.length() < 2)
+  if (str.length() < 2U)
     return "false";
 
   size_t start{};
@@ -99,14 +99,14 @@ string EvenPairs(string str) {
 }
 
 int main() {
-  // cout << EvenPairs(move(string{gets(stdin)}));
-  cout << EvenPairs(move(string{"f178svg3k19k46"}))
+  // cout << EvenPairs(gets(stdin));
+  cout << EvenPairs("f178svg3k19k46")
        << '\n';  // expected output: "true"
-  cout << EvenPairs(move(string{"7r5gg812"}))
+  cout << EvenPairs("7r5gg812")
        << '\n';  // expected output: "true"
-  cout << EvenPairs(move(string{"3gy41d216"}))
+  cout << EvenPairs("3gy41d216")
        << '\n';  // expected output: "true"
-  cout << EvenPairs(move(string{"f09r27i8e67"}))
+  cout << EvenPairs("f09r27i8e67")
        << '\n';  // expected output: "false"
 
   return 0;
