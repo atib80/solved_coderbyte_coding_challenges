@@ -22,9 +22,12 @@ Output: 7
 
 #include <algorithm>
 #include <iostream>
+#include <queue>
 #include <set>
+#include <sstream>
 #include <stack>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -194,30 +197,76 @@ size_t LongestIncreasingSequence_v3(const int* arr, const size_t arr_size) {
   return max_lis_length;
 }
 
+string join(const vector<pair<int, size_t>>& items, const char* needle) {
+  ostringstream oss{};
+  auto start = cbegin(items);
+  const auto last = cend(items);
+
+  while (start != last) {
+    oss << start->first;
+    ++start;
+    if (start != last)
+      oss << needle;
+  }
+
+  return oss.str();
+}
+
+// breadth-first search (bfs) solution using queue based iterative approach
+size_t LongestIncreasingSequence_v4(const int* arr, const size_t arr_size) {
+  queue<pair<size_t, size_t>> nodes{{make_pair(0U, 1U)}};
+  unordered_set<size_t> visited_nodes{0U};
+
+  size_t max_lis_length{1};
+
+  while (!nodes.empty()) {
+    const size_t start_node_index{nodes.front().first};
+    const size_t lis_length{nodes.front().second};
+    nodes.pop();
+
+    const int first_node_value{arr[start_node_index]};
+
+    for (size_t i{start_node_index + 1}; i < arr_size; ++i) {
+      if (arr[i] > first_node_value) {
+        max_lis_length = max(max_lis_length, lis_length + 1);
+        if (arr_size - i + lis_length > max_lis_length && i < arr_size - 1)
+          nodes.emplace(i, lis_length + 1);
+
+      } else if (arr_size - i > max_lis_length && i < arr_size - 1 &&
+                 visited_nodes.find(i) == end(visited_nodes)) {
+        nodes.emplace(i, 1U);
+        visited_nodes.emplace(i);
+      }
+    }
+  }
+
+  return max_lis_length;
+}
+
 int main() {
   // const int A[] = gets(stdin);
-  // cout << LongestIncreasingSequence_v3(A, sizeof(A)/sizeof(*A));
+  // cout << LongestIncreasingSequence_v4(A, sizeof(A)/sizeof(*A));
 
-  const int B[]{4, 3, 5, 1, 6};
-  cout << LongestIncreasingSequence_v3(B, sizeof(B) / sizeof(*B))
+  const int B[]{4, 3, 5, 1, 6};  // ->
+  cout << LongestIncreasingSequence_v4(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 3
   const int C[]{9, 9, 4, 2};
-  cout << LongestIncreasingSequence_v3(C, sizeof(C) / sizeof(*C))
+  cout << LongestIncreasingSequence_v4(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 1
   const int D[]{10, 22, 9, 33, 21, 50, 41, 60, 22, 68, 90};
-  cout << LongestIncreasingSequence_v3(D, sizeof(D) / sizeof(*D))
+  cout << LongestIncreasingSequence_v4(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 7
   const int E[]{2, 4, 3, 5, 1, 7, 6, 9, 8};
-  cout << LongestIncreasingSequence_v3(E, sizeof(E) / sizeof(*E))
+  cout << LongestIncreasingSequence_v4(E, sizeof(E) / sizeof(*E))
        << '\n';  // expected output: 5
   const int F[]{10, 22, 9, 33, 21, 50, 41, 60};
-  cout << LongestIncreasingSequence_v3(F, sizeof(F) / sizeof(*F))
+  cout << LongestIncreasingSequence_v4(F, sizeof(F) / sizeof(*F))
        << '\n';  // expected output: 5
   const int G[]{10, 12, 4, 6, 100, 2, 56, 34, 79};
-  cout << LongestIncreasingSequence_v3(G, sizeof(G) / sizeof(*G))
+  cout << LongestIncreasingSequence_v4(G, sizeof(G) / sizeof(*G))
        << '\n';  // expected output: 4
   const int H[]{10, 12, 4, 6, 100, 2, 56, 34, 79, 45, 33, 12, 45, 67, 89};
-  cout << LongestIncreasingSequence_v3(H, sizeof(H) / sizeof(*H))
+  cout << LongestIncreasingSequence_v4(H, sizeof(H) / sizeof(*H))
        << '\n';  // expected output: 6
 
   return 0;
