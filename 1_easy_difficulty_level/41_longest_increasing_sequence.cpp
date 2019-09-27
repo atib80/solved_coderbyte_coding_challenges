@@ -27,7 +27,6 @@ Output: 7
 #include <sstream>
 #include <stack>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -212,30 +211,82 @@ string join(const vector<pair<int, size_t>>& items, const char* needle) {
   return oss.str();
 }
 
+template <typename ContainerType, typename NeedleType>
+string join(const ContainerType& items, const NeedleType needle) {
+  ostringstream oss{};
+  auto start = cbegin(items);
+  const auto last = cend(items);
+
+  while (start != last) {
+    oss << *start;
+    ++start;
+    if (start != last)
+      oss << needle;
+  }
+
+  return oss.str();
+}
+
 // breadth-first search (bfs) solution using queue based iterative approach
 size_t LongestIncreasingSequence_v4(const int* arr, const size_t arr_size) {
-  queue<pair<size_t, size_t>> nodes{{make_pair(0U, 1U)}};
-  unordered_set<size_t> visited_nodes{0U};
+  vector<vector<int>> node_neighbors{};
+  node_neighbors.reserve(arr_size - 1);
+  vector<string> hash_indices{};
+  hash_indices.reserve(arr_size - 1);
+
+  for (size_t i{}; i < arr_size - 1; ++i) {
+    vector<int> neighbors{};
+    neighbors.reserve(arr_size - i);
+    neighbors.emplace_back(arr[i]);
+    for (size_t j{i + 1}; j < arr_size; ++j) {
+      if (arr[j] > arr[i])
+        neighbors.emplace_back(arr[j]);
+    }
+
+    string hash_index{join(neighbors, ',')};
+    bool found{};
+    for (const string& index : hash_indices) {
+      if (string::npos != index.find(hash_index)) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      hash_indices.push_back(move(hash_index));
+      node_neighbors.push_back(move(neighbors));
+    }
+  }
 
   size_t max_lis_length{1};
 
-  while (!nodes.empty()) {
-    const size_t start_node_index{nodes.front().first};
-    const size_t lis_length{nodes.front().second};
-    nodes.pop();
+  for (const auto& num_seq : node_neighbors) {
+    const size_t num_seq_len{num_seq.size()};
+    if (num_seq_len <= max_lis_length)
+      continue;
 
-    const int first_node_value{arr[start_node_index]};
+    queue<pair<size_t, size_t>> nodes{{make_pair(0U, 1U)}};
+    unordered_set<size_t> visited_nodes{0U};
 
-    for (size_t i{start_node_index + 1}; i < arr_size; ++i) {
-      if (arr[i] > first_node_value) {
-        max_lis_length = max(max_lis_length, lis_length + 1);
-        if (arr_size - i + lis_length > max_lis_length && i < arr_size - 1)
-          nodes.emplace(i, lis_length + 1);
+    while (!nodes.empty()) {
+      const size_t start_node_index{nodes.front().first};
+      const size_t lis_length{nodes.front().second};
+      nodes.pop();
 
-      } else if (arr_size - i > max_lis_length && i < arr_size - 1 &&
-                 visited_nodes.find(i) == end(visited_nodes)) {
-        nodes.emplace(i, 1U);
-        visited_nodes.emplace(i);
+      const int first_node_value{num_seq[start_node_index]};
+
+      for (size_t i{start_node_index + 1}; i < num_seq_len; ++i) {
+        if (num_seq[i] > first_node_value) {
+          max_lis_length = max(max_lis_length, lis_length + 1);
+          if (num_seq_len - i + lis_length > max_lis_length &&
+              i < num_seq_len - 1)
+            nodes.emplace(i, lis_length + 1);
+
+        } else if (num_seq_len - i > max_lis_length && i < num_seq_len - 1 &&
+                   visited_nodes.find(i) == end(visited_nodes)) {
+          nodes.emplace(i, 1U);
+          visited_nodes.emplace(i);
+        }
       }
     }
   }

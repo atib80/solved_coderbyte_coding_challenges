@@ -100,14 +100,10 @@ string EvenPairs(string str) {
 
 int main() {
   // cout << EvenPairs(gets(stdin));
-  cout << EvenPairs("f178svg3k19k46")
-       << '\n';  // expected output: "true"
-  cout << EvenPairs("7r5gg812")
-       << '\n';  // expected output: "true"
-  cout << EvenPairs("3gy41d216")
-       << '\n';  // expected output: "true"
-  cout << EvenPairs("f09r27i8e67")
-       << '\n';  // expected output: "false"
+  cout << EvenPairs("f178svg3k19k46") << '\n';  // expected output: "true"
+  cout << EvenPairs("7r5gg812") << '\n';        // expected output: "true"
+  cout << EvenPairs("3gy41d216") << '\n';       // expected output: "true"
+  cout << EvenPairs("f09r27i8e67") << '\n';     // expected output: "false"
 
   return 0;
 }
