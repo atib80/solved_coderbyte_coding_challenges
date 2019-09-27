@@ -18,51 +18,53 @@ Input:  "f09r27i8e67"
 Output: "false"
 */
 
+#include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t first{}, last{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (first > last)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
+  return {first, last};
 }
 
-bool check_if_num_str_consists_of_two_even_numbers(const string& num_str) {
-  size_t num1_ei{};
-
-  for (; num1_ei < num_str.length(); ++num1_ei) {
-    if (num_str[num1_ei] % 2 == 0)
+bool check_if_num_str_consists_of_two_even_numbers(const string& str,
+                                                   size_t start,
+                                                   const size_t last) {
+  for (; start < last; ++start) {
+    if (str[start] % 2 == 0)
       break;
   }
 
-  if (num1_ei >= num_str.length() - 1)
+  if (start >= last - 1)
     return false;
 
-  if (num_str.back() % 2 == 1)
-    return false;
-
-  return true;
+  return str[last - 1] % 2 == 0 ? true : false;
 }
 
 string EvenPairs(string str) {
@@ -79,22 +81,15 @@ string EvenPairs(string str) {
     if (string::npos == start)
       return "false";
 
-    const size_t last{str.find_first_not_of("0123456789", start + 1)};
+    size_t last{str.find_first_not_of("0123456789", start + 1)};
 
-    if (string::npos == last) {
-      const string num_str{str.substr(start)};
+    if (string::npos == last)
+      last = str.length();
 
-      if (check_if_num_str_consists_of_two_even_numbers(num_str))
-        return "true";
-
-      return "false";
-    }
-    const string num_str{str.substr(start, last - start)};
-
-    if (check_if_num_str_consists_of_two_even_numbers(num_str))
+    if (check_if_num_str_consists_of_two_even_numbers(str, start, last))
       return "true";
 
-    start = last;
+    start = last + 1;
   }
 }
 
