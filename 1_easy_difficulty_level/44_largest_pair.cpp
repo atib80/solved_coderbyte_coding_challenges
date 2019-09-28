@@ -18,6 +18,7 @@ Output: 63
 
 #include <functional>
 #include <iostream>
+#include <queue>
 #include <set>
 #include <string>
 
@@ -28,23 +29,22 @@ int64_t LargestPair_v1(int64_t num) {
 
   string num_str{to_string(num)};
 
-  set<int64_t, greater<int64_t>> two_digit_numbers{};
+  priority_queue<int> two_digit_numbers{};
 
-  for (size_t i{}; i < num_str.length() - 1; i++) {
-    two_digit_numbers.insert(stoi(num_str.substr(i, 2)));
+  for (size_t i{}; i < num_str.length() - 1; ++i) {
+    two_digit_numbers.push((num_str[i] - '0') * 10 + (num_str[i + 1] - '0'));
   }
 
-  return (*begin(two_digit_numbers));
+  return two_digit_numbers.top();
 }
 
-int64_t LargestPair_v2(int64_t num) {
+int LargestPair_v2(int64_t num) {
   num = abs(num);
-  int64_t current_max_num{};
+  int current_max_num{};
 
-  while (num >= 10) {
-    int64_t current_num{num % 10};
+  while (num > 9) {
+    int current_num = num % 100;
     num /= 10;
-    current_num += (num % 10) * 10;
     if (current_num > current_max_num)
       current_max_num = current_num;
   }
@@ -52,14 +52,13 @@ int64_t LargestPair_v2(int64_t num) {
   return current_max_num;
 }
 
-int64_t LargestPair_v3(int64_t num) {
+int LargestPair_v3(int64_t num) {
   num = abs(num);
   string num_str{to_string(num)};
-  int64_t current_max_num{};
+  int current_max_num{};
 
-  for (size_t i{}; i < num_str.length() - 1; i++) {
-    const int64_t current_num{static_cast<int64_t>(num_str[i] - '0') * 10 +
-                              static_cast<int64_t>(num_str[i + 1] - '0')};
+  for (size_t i{}; i < num_str.length() - 1; ++i) {
+    const int current_num{(num_str[i] - '0') * 10 + (num_str[i + 1] - '0')};
     if (current_num > current_max_num)
       current_max_num = current_num;
   }
