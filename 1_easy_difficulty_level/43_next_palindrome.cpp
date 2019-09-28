@@ -15,7 +15,7 @@ Input:  180
 Output: 181
 */
 
-#include <algorithm>
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -23,14 +23,12 @@ Output: 181
 using namespace std;
 
 bool is_next_number_palindrome(const string& num_str) {
-  string reversed_num_str{num_str};
+  for (size_t i{}, j{num_str.length() - 1}; i < j; ++i, --j) {
+    if (num_str[i] != num_str[j])
+      return false;
+  }
 
-  reverse(begin(reversed_num_str), end(reversed_num_str));
-
-  if (num_str == reversed_num_str)
-    return true;
-
-  return false;
+  return true;
 }
 
 int NextPalindrome_v1(int num) {
@@ -39,13 +37,9 @@ int NextPalindrome_v1(int num) {
   if (num < 9)
     return num + 1;
 
-  string num_str{};
-
   do {
-    num++;
-
-    num_str = to_string(num);
-  } while (!is_next_number_palindrome(num_str));
+    ++num;
+  } while (!is_next_number_palindrome(to_string(num)));
 
   return num;
 }
@@ -57,12 +51,12 @@ int NextPalindrome_v2(int num) {
     return num + 1;
 
   do {
-    num++;
+    ++num;
 
     int original_num{num};
     int palindromic_num{};
 
-    while (original_num) {
+    while (0 != original_num) {
       palindromic_num *= 10;
       palindromic_num += original_num % 10;
       original_num /= 10;
@@ -74,11 +68,42 @@ int NextPalindrome_v2(int num) {
   } while (true);
 }
 
+int NextPalindrome_v3(int num) {
+  num = abs(num);
+
+  if (num < 9)
+    return num + 1;
+
+  array<int, 10U> next_num_digits{};
+
+  do {
+    ++num;
+    int next_num{num};
+    size_t last{};
+
+    while (0 != next_num) {
+      next_num_digits[last++] = next_num % 10;
+      next_num /= 10;
+    }
+
+    for (size_t i{}, j{last - 1}; i < j; ++i, --j) {
+      if (next_num_digits[i] != next_num_digits[j]) {
+        next_num = -1;
+        break;
+      }
+    }
+
+    if (0 == next_num)
+      return num;
+
+  } while (true);
+}
+
 int main() {
-  // cout << NextPalindrome_v2(gets(stdin));
-  cout << NextPalindrome_v2(24) << '\n';   // expected output: 33
-  cout << NextPalindrome_v2(2) << '\n';    // expected output: 3
-  cout << NextPalindrome_v2(180) << '\n';  // expected output: 181
+  // cout << NextPalindrome_v3(gets(stdin));
+  cout << NextPalindrome_v3(24) << '\n';   // expected output: 33
+  cout << NextPalindrome_v3(2) << '\n';    // expected output: 3
+  cout << NextPalindrome_v3(180) << '\n';  // expected output: 181
 
   return 0;
 }
