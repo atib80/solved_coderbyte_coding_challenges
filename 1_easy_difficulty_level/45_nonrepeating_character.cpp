@@ -63,27 +63,28 @@ char find_first_non_repeating_character_v2(string str) {
 }
 
 char find_first_non_repeating_character_v3(string str) {
+  if (str.empty())
+    return 0;
   unordered_set<char> visited_chars{' '};
 
-  for (size_t i{}; i < str.length(); ++i) {
+  for (size_t i{}; i < str.length() - 1; ++i) {
     if (0U == visited_chars.count(str[i])) {
-      if ((i == str.length() - 1) ||
-          (i < str.length() - 1 && string::npos == str.find(str[i], i + 1)))
+      if (string::npos == str.find(str[i], i + 1))
         return str[i];
       visited_chars.emplace(str[i]);
     }
   }
 
-  return 0;
+  return str.back();
 }
 
 int main() {
-  // cout << find_first_non_repeating_character_v2(gets(stdin));
-  cout << find_first_non_repeating_character_v2("agettkgaeee")
+  // cout << find_first_non_repeating_character_v3(gets(stdin));
+  cout << find_first_non_repeating_character_v3("agettkgaeee")
        << '\n';  // expected output: 'k'
-  cout << find_first_non_repeating_character_v2("abcdef")
+  cout << find_first_non_repeating_character_v3("abcdef")
        << '\n';  // expected output: 'a'
-  cout << find_first_non_repeating_character_v2("hello world hi hey")
+  cout << find_first_non_repeating_character_v3("hello world hi hey")
        << '\n';  // expected output: 'w'
 
   return 0;
