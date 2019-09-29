@@ -20,53 +20,42 @@ Output: "w"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <queue>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (!str_len)
-    return string{};
-
-  size_t first{}, last{str_len - 1};
-
-  for (; first <= last; ++first) {
-    if (!isspace(str[first]))
-      break;
-  }
-
-  if (first > last)
-    return string{};
-
-  for (; last > first; --last) {
-    if (!isspace(str[last]))
-      break;
-  }
-
-  return str.substr(first, last - first + 1);
-}
-
 char find_first_non_repeating_character_v1(string str) {
-  str = trim(str);
+  unordered_set<char> visited_chars{' '};
 
   for (const char ch : str) {
-    if (!isspace(ch) && (1 == count(begin(str), end(str), ch)))
-      return ch;
+    if (0U == visited_chars.count(ch)) {
+      if (1 == count(begin(str), end(str), ch))
+        return ch;
+      visited_chars.emplace(ch);
+    }
   }
 
   return 0;
 }
 
 char find_first_non_repeating_character_v2(string str) {
-  str = trim(str);
-
-  unordered_multiset<char> char_count(begin(str), end(str));
+  vector<int> char_count(128U, 0);
+  vector<char> char_sequence{};
+  char_sequence.reserve(str.length());
 
   for (const char ch : str) {
-    if (!isspace(ch) && (1 == char_count.count(ch)))
+    if (' ' != ch) {
+      if (0 == char_count[ch])
+        char_sequence.emplace_back(ch);
+      ++char_count[ch];
+    }
+  }
+
+  for (const char ch : char_sequence) {
+    if (1 == char_count[ch])
       return ch;
   }
 
@@ -74,14 +63,14 @@ char find_first_non_repeating_character_v2(string str) {
 }
 
 char find_first_non_repeating_character_v3(string str) {
-  str = trim(str);
+  unordered_set<char> visited_chars{' '};
 
-  for (size_t i{}; i < str.length(); i++) {
-    if (!isspace(str[i]) &&
-        ((i == str.length() - 1 ||
-          (i < str.length() - 1 && string::npos == str.find(str[i], i + 1))) &&
-         (!i || (i > 0 && string::npos == str.rfind(str[i], i - 1))))) {
-      return str[i];
+  for (size_t i{}; i < str.length(); ++i) {
+    if (0U == visited_chars.count(str[i])) {
+      if ((i == str.length() - 1) ||
+          (i < str.length() - 1 && string::npos == str.find(str[i], i + 1)))
+        return str[i];
+      visited_chars.emplace(str[i]);
     }
   }
 
@@ -89,13 +78,12 @@ char find_first_non_repeating_character_v3(string str) {
 }
 
 int main() {
-  // cout << find_first_non_repeating_character_v3(move(string{gets(stdin)}));
-  cout << find_first_non_repeating_character_v3(move(string{"agettkgaeee"}))
+  // cout << find_first_non_repeating_character_v2(gets(stdin));
+  cout << find_first_non_repeating_character_v2("agettkgaeee")
        << '\n';  // expected output: 'k'
-  cout << find_first_non_repeating_character_v3(move(string{"abcdef"}))
+  cout << find_first_non_repeating_character_v2("abcdef")
        << '\n';  // expected output: 'a'
-  cout << find_first_non_repeating_character_v3(
-              move(string{"hello world hi hey"}))
+  cout << find_first_non_repeating_character_v2("hello world hi hey")
        << '\n';  // expected output: 'w'
 
   return 0;
