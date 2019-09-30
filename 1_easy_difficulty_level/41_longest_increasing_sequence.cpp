@@ -211,20 +211,23 @@ string join(const vector<pair<int, size_t>>& items, const char* needle) {
   return oss.str();
 }
 
-template <typename ContainerType, typename NeedleType>
-string join(const ContainerType& items, const NeedleType needle) {
-  ostringstream oss{};
-  auto start = cbegin(items);
-  const auto last = cend(items);
+template <typename ForwardIterType, typename NeedleType>
+string join(ForwardIterType first,
+            const ForwardIterType last,
+            const NeedleType& needle) {
+  ostringstream oss;
+  ostringstream needle_oss;
+  needle_oss << needle;
+  const string needle_str{needle_oss.str()};
 
-  while (start != last) {
-    oss << *start;
-    ++start;
-    if (start != last)
-      oss << needle;
+  while (first != last) {
+    oss << *first << needle_str;
+    ++first;
   }
 
-  return oss.str();
+  string output{oss.str()};
+  output.erase(cend(output) - needle_str.length(), cend(output));
+  return output;
 }
 
 // breadth-first search (bfs) solution using queue based iterative approach
@@ -243,7 +246,7 @@ size_t LongestIncreasingSequence_v4(const int* arr, const size_t arr_size) {
         neighbors.emplace_back(arr[j]);
     }
 
-    string hash_index{join(neighbors, ',')};
+    string hash_index{join(cbegin(neighbors), cend(neighbors), ',')};
     bool found{};
     for (const string& index : hash_indices) {
       if (string::npos != index.find(hash_index)) {
@@ -266,7 +269,6 @@ size_t LongestIncreasingSequence_v4(const int* arr, const size_t arr_size) {
       continue;
 
     queue<pair<size_t, size_t>> nodes{{make_pair(0U, 1U)}};
-    unordered_set<size_t> visited_nodes{0U};
 
     while (!nodes.empty()) {
       const size_t start_node_index{nodes.front().first};
@@ -281,11 +283,6 @@ size_t LongestIncreasingSequence_v4(const int* arr, const size_t arr_size) {
           if (num_seq_len - i + lis_length > max_lis_length &&
               i < num_seq_len - 1)
             nodes.emplace(i, lis_length + 1);
-
-        } else if (num_seq_len - i > max_lis_length && i < num_seq_len - 1 &&
-                   visited_nodes.find(i) == end(visited_nodes)) {
-          nodes.emplace(i, 1U);
-          visited_nodes.emplace(i);
         }
       }
     }
