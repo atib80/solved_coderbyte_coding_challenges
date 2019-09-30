@@ -20,24 +20,24 @@ Input:  7, 6, 4, 1, 7, -2, 3, 12
 Output: "6,1 4,3"
 */
 
-#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
-#include <vector>
+#include <unordered_set>
 
 using namespace std;
 
 string TwoSum_v1(const int* arr, const size_t arr_size) {
-  if (arr_size < 3)
+  if (arr_size < 3U)
     return "-1";
 
+  const int target_num{arr[0]};
   ostringstream oss{};
 
-  for (size_t i{1}; i < arr_size - 1; i++) {
-    for (size_t j{i + 1}; j < arr_size; j++) {
-      if (arr[i] + arr[j] == arr[0]) {
+  for (size_t i{1}; i < arr_size - 1; ++i) {
+    for (size_t j{i + 1}; j < arr_size; ++j) {
+      if (arr[i] + arr[j] == target_num) {
         oss << arr[i] << ',' << arr[j] << ' ';
       }
     }
@@ -48,57 +48,37 @@ string TwoSum_v1(const int* arr, const size_t arr_size) {
   if (result.empty())
     return "-1";
 
-  result.erase(--(end(result)));
+  result.erase(--cend(result));
 
   return result;
 }
 
-template <class ForwardIt, class T>
-size_t bsearch(ForwardIt first, ForwardIt last, const T& value) {
-  using difference_type =
-      typename std::iterator_traits<ForwardIt>::difference_type;
-  const ForwardIt start{first};
-  first = lower_bound(first, last, value);
-  return (!(first == last) && (value == *first)) ? std::distance(start, first)
-                                                 : string::npos;
-}
-
 string TwoSum_v2(const int* arr, const size_t arr_size) {
-  if (arr_size < 3)
+  if (arr_size < 3U)
     return "-1";
 
   const int target_num{arr[0]};
 
-  vector<int> sorted_numbers(arr + 1, arr + arr_size);
-
-  sort(begin(sorted_numbers), end(sorted_numbers));
+  unordered_multiset<int> numbers{arr + 1, arr + arr_size};
 
   ostringstream oss{};
 
-  for (size_t i{1}; i < arr_size; i++) {
-    if (sorted_numbers.empty())
-      break;
+  for (size_t i{1}; i < arr_size; ++i) {
+    const auto left_number_pos = numbers.find(arr[i]);
 
-    const size_t left_number_index{
-        bsearch(begin(sorted_numbers), end(sorted_numbers), arr[i])};
-
-    if (string::npos == left_number_index)
+    if (end(numbers) == left_number_pos)
       continue;
 
-    sorted_numbers.erase(begin(sorted_numbers) + left_number_index);
-
-    if (sorted_numbers.empty())
-      break;
+    numbers.erase(left_number_pos);
 
     const int search_value{target_num - arr[i]};
 
-    const size_t right_number_index{
-        bsearch(begin(sorted_numbers), end(sorted_numbers), search_value)};
+    const auto right_number_pos = numbers.find(search_value);
 
-    if (string::npos == right_number_index)
+    if (end(numbers) == right_number_pos)
       continue;
 
-    sorted_numbers.erase(begin(sorted_numbers) + right_number_index);
+    numbers.erase(right_number_pos);
 
     oss << arr[i] << ',' << search_value << ' ';
   }
@@ -108,13 +88,13 @@ string TwoSum_v2(const int* arr, const size_t arr_size) {
   if (result.empty())
     return "-1";
 
-  result.erase(result.length() - 1, 1);
+  result.erase(--cend(result));
 
   return result;
 }
 
 string TwoSum_v3(const int* arr, const size_t arr_size) {
-  if (arr_size < 3)
+  if (arr_size < 3U)
     return "-1";
 
   const int target_num{arr[0]};
@@ -127,7 +107,7 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
   ostringstream oss{};
 
   for (size_t i{1}; i < arr_size; i++) {
-    if (!numbers_freq.find(arr[i])->second)
+    if (0U == numbers_freq.find(arr[i])->second)
       continue;
 
     numbers_freq[arr[i]]--;
@@ -135,7 +115,7 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
     const int search_value{target_num - arr[i]};
 
     if (numbers_freq.find(search_value) == end(numbers_freq) ||
-        !numbers_freq.find(search_value)->second)
+        0U == numbers_freq.find(search_value)->second)
       continue;
 
     numbers_freq[search_value]--;
@@ -148,7 +128,7 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
   if (result.empty())
     return "-1";
 
-  result.erase(--(end(result)));
+  result.erase(--cend(result));
 
   return result;
 }
@@ -156,22 +136,22 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
 int main() {
   // const int A[] = gets(stdin);
   // cout << TwoSum_v2(A, sizeof(A)/sizeof(*A));
-  const int b[] = {7, 3, 5, 2, -4, 8, 11};
+  const int b[]{7, 3, 5, 2, -4, 8, 11};
   cout << TwoSum_v2(b, sizeof(b) / sizeof(*b))
        << '\n';  // expected output: "5,2 -4,11"
-  const int c[] = {17, 4, 5, 6, 10, 11, 4, -3, -5, 3, 15, 2, 7};
+  const int c[]{17, 4, 5, 6, 10, 11, 4, -3, -5, 3, 15, 2, 7};
   cout << TwoSum_v2(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: "6,11 10,7 15,2"
-  const int d[] = {7, 6, 4, 1, 7, -2, 3, 12};
+  const int d[]{7, 6, 4, 1, 7, -2, 3, 12};
   cout << TwoSum_v2(d, sizeof(d) / sizeof(*d))
        << '\n';  // expected output: "6,1 4,3"
-  const int e[] = {6, 2};
+  const int e[]{6, 2};
   cout << TwoSum_v2(e, sizeof(e) / sizeof(*e))
        << '\n';  // expected output: "-1"
-  const int f[] = {100, 90, 90, 90, 90, 11};
+  const int f[]{100, 90, 90, 90, 90, 11};
   cout << TwoSum_v2(f, sizeof(f) / sizeof(*f))
        << '\n';  // expected output: "-1"
-  const int g[] = {4, 5, 2, 1};
+  const int g[]{4, 5, 2, 1};
   cout << TwoSum_v2(g, sizeof(g) / sizeof(*g))
        << '\n';  // expected output: "-1"
 

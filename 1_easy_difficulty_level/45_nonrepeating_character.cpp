@@ -47,9 +47,10 @@ char find_first_non_repeating_character_v1(string str) {
 char find_first_non_repeating_character_v2(string str) {
   constexpr const size_t buffer_size{256U};
   constexpr const int int_max{numeric_limits<int>::max()};
+
   int char_index[buffer_size];
   fill(char_index, char_index + buffer_size, int_max);
-  map<size_t, char> first_char_index{};
+  map<size_t, char> first_char_index;
 
   for (size_t i{}; i < str.length(); ++i) {
     if (' ' != str[i]) {
@@ -63,8 +64,7 @@ char find_first_non_repeating_character_v2(string str) {
     }
   }
 
-  return cbegin(first_char_index)->second;
-  ;
+  return !first_char_index.empty() ? cbegin(first_char_index)->second : 0;
 }
 
 char find_first_non_repeating_character_v3(string str) {
