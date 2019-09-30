@@ -23,59 +23,51 @@ Output: "10100"
 
 using namespace std;
 
-string BitwiseTwo_v1(const string* binary_numbers, const size_t str_arr_size) {
-  if (!binary_numbers || str_arr_size < 2)
-    return "Not possible!";
+string BitwiseTwo_v1(string* binary_numbers, const size_t str_arr_size) {
+  if (nullptr == binary_numbers || str_arr_size < 2U ||
+      binary_numbers[0].length() != binary_numbers[1].length())
+    return "not possible";
 
-  if (binary_numbers[0].length() != binary_numbers[1].length())
-    return "Not possible!";
-
-  string result(binary_numbers[0].length(), '0');
-
-  for (size_t i{}; i < binary_numbers[0].length(); i++) {
-    if (('1' == binary_numbers[0][i]) && ('1' == binary_numbers[1][i]))
-      result[i] = '1';
+  for (size_t i{}; i < binary_numbers[0].length(); ++i) {
+    if ('0' == binary_numbers[1][i])
+      binary_numbers[0][i] = '0';
   }
 
-  return result;
+  return move(binary_numbers[0]);
 }
 
-string BitwiseTwo_v2(const string* binary_numbers, const size_t str_arr_size) {
-  if (!binary_numbers || str_arr_size < 2)
-    return "Not possible!";
+string BitwiseTwo_v2(string* binary_numbers, const size_t str_arr_size) {
+  if (nullptr == binary_numbers || str_arr_size < 2U ||
+      binary_numbers[0].length() != binary_numbers[1].length())
+    return "not possible";
 
-  if (binary_numbers[0].length() != binary_numbers[1].length())
-    return "Not possible!";
+  unsigned long result{stoul(binary_numbers[0], nullptr, 2) &
+                       stoul(binary_numbers[1], nullptr, 2)};
 
-  int result{stoi(binary_numbers[0], nullptr, 2) &
-             stoi(binary_numbers[1], nullptr, 2)};
+  int index = binary_numbers[0].length();
 
-  size_t index{binary_numbers[0].length()};
-  string result_str(index, '0');
-  index--;
-
-  while (result) {
-    if (result % 2 == 1)
-      result_str[index] = '1';
-
+  while (0U != result) {
+    binary_numbers[0][--index] = '0' + result % 2;
     result /= 2;
-    index--;
   }
 
-  return result_str;
+  while (index > 0)
+    binary_numbers[0][--index] = '0';
+
+  return move(binary_numbers[0]);
 }
 
 int main() {
-  // const string str_arr1[] = gets(stdin);
-  // cout << BitwiseTwo_v2(str_arr1, sizeof(str_arr1)/sizeof(*str_arr1));
-  const string str_arr2[] = {"10111", "01101"};
-  cout << BitwiseTwo_v2(str_arr2, sizeof(str_arr2) / sizeof(*str_arr2))
+  // string str_arr1[] = gets(stdin);
+  // cout << BitwiseTwo_v1(str_arr1, sizeof(str_arr1)/sizeof(*str_arr1));
+  string str_arr2[]{"10111", "01101"};
+  cout << BitwiseTwo_v1(str_arr2, sizeof(str_arr2) / sizeof(*str_arr2))
        << '\n';  // expected output: "00101"
-  const string str_arr3[] = {"100", "000"};
-  cout << BitwiseTwo_v2(str_arr3, sizeof(str_arr3) / sizeof(*str_arr3))
+  string str_arr3[]{"100", "000"};
+  cout << BitwiseTwo_v1(str_arr3, sizeof(str_arr3) / sizeof(*str_arr3))
        << '\n';  // expected output: "000"
-  const string str_arr4[] = {"10100", "11100"};
-  cout << BitwiseTwo_v2(str_arr4, sizeof(str_arr4) / sizeof(*str_arr4))
+  string str_arr4[]{"10100", "11100"};
+  cout << BitwiseTwo_v1(str_arr4, sizeof(str_arr4) / sizeof(*str_arr4))
        << '\n';  // expected output: "10100"
 
   return 0;
