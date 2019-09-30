@@ -20,8 +20,11 @@ Output: "w"
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <limits>
+#include <map>
 #include <queue>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -42,24 +45,26 @@ char find_first_non_repeating_character_v1(string str) {
 }
 
 char find_first_non_repeating_character_v2(string str) {
-  vector<int> char_count(128U, 0);
-  vector<char> char_sequence{};
-  char_sequence.reserve(str.length());
+  constexpr const size_t buffer_size{256U};
+  constexpr const int int_max{numeric_limits<int>::max()};
+  int char_index[buffer_size];
+  fill(char_index, char_index + buffer_size, int_max);
+  map<size_t, char> first_char_index{};
 
-  for (const char ch : str) {
-    if (' ' != ch) {
-      if (0 == char_count[ch])
-        char_sequence.emplace_back(ch);
-      ++char_count[ch];
+  for (size_t i{}; i < str.length(); ++i) {
+    if (' ' != str[i]) {
+      if (int_max == char_index[static_cast<ptrdiff_t>(str[i])]) {
+        first_char_index[i] = str[i];
+        char_index[static_cast<ptrdiff_t>(str[i])] = i;
+      } else if (-1 != char_index[static_cast<ptrdiff_t>(str[i])]) {
+        first_char_index.erase(char_index[static_cast<ptrdiff_t>(str[i])]);
+        char_index[static_cast<ptrdiff_t>(str[i])] = -1;
+      }
     }
   }
 
-  for (const char ch : char_sequence) {
-    if (1 == char_count[ch])
-      return ch;
-  }
-
-  return 0;
+  return cbegin(first_char_index)->second;
+  ;
 }
 
 char find_first_non_repeating_character_v3(string str) {
@@ -80,11 +85,11 @@ char find_first_non_repeating_character_v3(string str) {
 
 int main() {
   // cout << find_first_non_repeating_character_v3(gets(stdin));
-  cout << find_first_non_repeating_character_v3("agettkgaeee")
+  cout << find_first_non_repeating_character_v2("agettkgaeee")
        << '\n';  // expected output: 'k'
-  cout << find_first_non_repeating_character_v3("abcdef")
+  cout << find_first_non_repeating_character_v2("abcdef")
        << '\n';  // expected output: 'a'
-  cout << find_first_non_repeating_character_v3("hello world hi hey")
+  cout << find_first_non_repeating_character_v2("hello world hi hey")
        << '\n';  // expected output: 'w'
 
   return 0;
