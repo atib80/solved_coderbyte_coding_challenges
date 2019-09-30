@@ -29,29 +29,33 @@ Output: 4
 
 #include <cmath>
 #include <iostream>
-#include <string>
 
 using namespace std;
 
 template <typename... Args>
-void unused(const Args&...) {}
+void unused(Args&&...) {}
 
-size_t PowerSetCount(const int* numbers, const size_t numbers_size) {
+size_t PowerSetCount_v1(const int* numbers, const size_t numbers_size) {
   unused(numbers);
-  return static_cast<size_t>(pow(2, numbers_size));
+  return pow(static_cast<size_t>(2U), numbers_size);
+}
+
+size_t PowerSetCount_v2(const int* numbers, const size_t numbers_size) {
+  unused(numbers);
+  return 1U << numbers_size;
 }
 
 int main() {
   // const int A[] = gets(stdin);
-  // cout << PowerSetCount(A, sizeof(A)/sizeof(*A));
-  const int b[] = {1, 2, 3};
-  cout << PowerSetCount(b, sizeof(b) / sizeof(*b))
+  // cout << PowerSetCount_v2(A, sizeof(A)/sizeof(*A));
+  const int b[]{1, 2, 3};
+  cout << PowerSetCount_v2(b, sizeof(b) / sizeof(*b))
        << '\n';  // expected output: 8
-  const int c[] = {1, 2, 3, 4};
-  cout << PowerSetCount(c, sizeof(c) / sizeof(*c))
+  const int c[]{1, 2, 3, 4};
+  cout << PowerSetCount_v2(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: 16
-  const int d[] = {5, 6};
-  cout << PowerSetCount(d, sizeof(d) / sizeof(*d))
+  const int d[]{5, 6};
+  cout << PowerSetCount_v2(d, sizeof(d) / sizeof(*d))
        << '\n';  // expected output: 4
 
   return 0;
