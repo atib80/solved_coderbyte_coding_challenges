@@ -27,6 +27,7 @@ Output: "k"
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <queue>
 #include <stack>
@@ -35,35 +36,73 @@ Output: "k"
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (begin_str > end_str)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return {first, last};
 }
 
-bool is_palindrome(const string& str) {
-  string reversed_str{str};
-  reverse(begin(reversed_str), end(reversed_str));
-  return str == reversed_str;
+bool is_palindrome(const string& str,
+                   size_t ignored_index_a = string::npos,
+                   size_t ignored_index_b = string::npos) {
+  if (ignored_index_a >= str.length())
+    ignored_index_a = string::npos;
+  if (ignored_index_b >= str.length())
+    ignored_index_b = string::npos;
+
+  const size_t min_required_len{3U +
+                                (ignored_index_a != string::npos ? 1U : 0U) +
+                                (ignored_index_b != string::npos ? 1U : 0U)};
+  if (str.length() < min_required_len)
+    return false;
+
+  const bool check_ignored_index_a{string::npos != ignored_index_a};
+  const bool check_ignored_index_b{string::npos != ignored_index_b};
+
+  for (size_t i{}, j{str.length() - 1}; i < j; ++i, --j) {
+    if (check_ignored_index_a) {
+      if (ignored_index_a == i)
+        ++i;
+      if (ignored_index_a == j)
+        --j;
+      if (i >= j)
+        break;
+    }
+
+    if (check_ignored_index_b) {
+      if (ignored_index_b == i)
+        ++i;
+      if (ignored_index_b == j)
+        --j;
+      if (i >= j)
+        break;
+    }
+
+    if (str[i] != str[j])
+      return false;
+  }
+
+  return true;
 }
 
 string PalindromeCreator_v1(string str) {
@@ -74,33 +113,19 @@ string PalindromeCreator_v1(string str) {
 
   const size_t str_len{str.length()};
 
-  for (size_t i{}; i < str_len; i++) {
-    const char needle_char{str[i]};
-
-    str.erase(i, 1);
-
-    if (is_palindrome(str))
-      return string(1, needle_char);
-
-    str.insert(i, 1, needle_char);
+  for (size_t i{}; i < str_len; ++i) {
+    if (is_palindrome(str, i))
+      return string(1, str[i]);
   }
 
-  if (str_len < 5)
-    return "not possible";  // if str's length is less than 5 then we
-                            // can only remove 1 character from it at a time
+  if (str_len < 5U)
+    return "not possible";  // if str's length is less than 5 characters then we
+                            // can remove only 1 character from it at a time
 
-  for (size_t i{}; i < str_len - 1; i++) {
-    for (size_t j{i + 1}; j < str_len; j++) {
-      const string needle{str[i], str[j]};
-
-      str.erase(i, 1);
-      str.erase(j - 1, 1);
-
-      if (is_palindrome(str))
-        return needle;
-
-      str.insert(i, 1, needle[0]);
-      str.insert(j, 1, needle[1]);
+  for (size_t i{}; i < str_len - 1; ++i) {
+    for (size_t j{i + 1}; j < str_len; ++j) {
+      if (is_palindrome(str, i, j))
+        return {str[i], str[j]};
     }
   }
 
@@ -112,15 +137,15 @@ bool is_palindrome(const string& str,
   stack<char> s{};
   queue<char> q{};
 
-  for (size_t i{}; i != str.length(); i++) {
-    if (ignore_indices.count(i))
+  for (size_t i{}; i < str.length(); ++i) {
+    if (1U == ignore_indices.count(i))
       continue;
 
     s.emplace(str[i]);
     q.emplace(str[i]);
   }
 
-  while (!s.empty() && !q.empty()) {
+  while (!s.empty()) {
     if (s.top() != q.front())
       return false;
     s.pop();
@@ -140,8 +165,8 @@ string PalindromeCreator_v2(string str) {
 
   unordered_set<size_t> ignore_indices{};
 
-  for (size_t i{}; i < str_len; i++) {
-    ignore_indices.insert(i);
+  for (size_t i{}; i < str_len; ++i) {
+    ignore_indices.emplace(i);
 
     if (is_palindrome(str, ignore_indices))
       return string(1, str[i]);
@@ -149,30 +174,34 @@ string PalindromeCreator_v2(string str) {
     ignore_indices.erase(i);
   }
 
-  if (str_len < 5)
-    return "not possible";  // if str's length is less than 5 then we
-                            // can only remove 1 character from it at a time
+  if (str_len < 5U)
+    return "not possible";  // if str's length is less than 5 characters then we
+                            // can remove only 1 character from it at a time
 
-  for (size_t i{}; i < str_len - 1; i++) {
-    for (size_t j{i + 1}; j < str_len; j++) {
-      ignore_indices.insert({i, j});
+  for (size_t i{}; i < str_len - 1; ++i) {
+    ignore_indices.emplace(i);
+
+    for (size_t j{i + 1}; j < str_len; ++j) {
+      ignore_indices.emplace(j);
+
       if (is_palindrome(str, ignore_indices))
-        return string({str[i], str[j]});
+        return {str[i], str[j]};
 
-      ignore_indices.erase(i);
       ignore_indices.erase(j);
     }
+
+    ignore_indices.erase(i);
   }
 
   return "not possible";
 }
 
 int main() {
-  // cout << PalindromeCreator_v2(move(string{gets(stdin)}));
-  cout << PalindromeCreator_v2(move(string{"abjchba"})) << '\n';  // "jc"
-  cout << PalindromeCreator_v2(move(string{"mmop"})) << '\n';  // "not possible"
-  cout << PalindromeCreator_v2(move(string{"kjjjhjjj"})) << '\n';      // "k"
-  cout << PalindromeCreator_v2(move(string{"vhhgghhgghhk"})) << '\n';  // "vk"
+  // cout << PalindromeCreator_v1(gets(stdin));
+  cout << PalindromeCreator_v1("abjchba") << '\n';       // "jc"
+  cout << PalindromeCreator_v1("mmop") << '\n';          // "not possible"
+  cout << PalindromeCreator_v1("kjjjhjjj") << '\n';      // "k"
+  cout << PalindromeCreator_v1("vhhgghhgghhk") << '\n';  // "vk"
 
   return 0;
 }
