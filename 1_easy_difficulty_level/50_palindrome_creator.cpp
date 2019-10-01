@@ -83,7 +83,7 @@ bool is_palindrome(const string& str,
     if (check_ignored_index_a) {
       if (ignored_index_a == i)
         ++i;
-      if (ignored_index_a == j)
+      else if (ignored_index_a == j)
         --j;
       if (i >= j)
         break;
@@ -92,7 +92,7 @@ bool is_palindrome(const string& str,
     if (check_ignored_index_b) {
       if (ignored_index_b == i)
         ++i;
-      if (ignored_index_b == j)
+      else if (ignored_index_b == j)
         --j;
       if (i >= j)
         break;
@@ -202,6 +202,7 @@ int main() {
   cout << PalindromeCreator_v1("mmop") << '\n';          // "not possible"
   cout << PalindromeCreator_v1("kjjjhjjj") << '\n';      // "k"
   cout << PalindromeCreator_v1("vhhgghhgghhk") << '\n';  // "vk"
+  cout << PalindromeCreator_v1("romtorn") << '\n';       // "mn"
 
   return 0;
 }
