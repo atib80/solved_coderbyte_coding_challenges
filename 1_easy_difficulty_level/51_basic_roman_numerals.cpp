@@ -21,67 +21,69 @@ Input:  "XLVI"
 Output: 46
 */
 
+#include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
-string trim(const string& str) {
-  const size_t str_len{str.length()};
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (0U == src.length())
+    return {};
 
-  if (!str_len)
-    return string{};
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
 
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
+  if (first == std::cend(src))
+    return {};
 
-  if (begin_str > end_str)
-    return string{};
+  const auto last{std::find_if(std::crbegin(src), std::crend(src),
+                               [&trimmed_chars](const char ch) {
+                                 return trimmed_chars.find(ch) ==
+                                        std::cend(trimmed_chars);
+                               })
+                      .base()};
 
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
+  return {first, last};
 }
 
 string BasicRomanNumerals(string str) {
   str = trim(str);
 
+  if (str.empty())
+    return "0";
+
+  const unordered_map<string_view, size_t> rn{
+      {"M", 1000U}, {"D", 500U}, {"C", 100U}, {"L", 50U},
+      {"X", 10U},   {"V", 5U},   {"I", 1U},   {"IV", 4U},
+      {"IX", 9U},   {"XL", 40U}, {"XC", 90U}};
+
   size_t number{};
 
-  const size_t str_len{str.length()};
+  for (size_t i{}; i < str.length(); ++i) {
+    
+    const size_t needle_len{i < str.length() - 1 ? 2U : 1U};
+    string_view key{&str[i], needle_len};
 
-  for (char& ch : str)
-    ch = static_cast<char>(toupper(ch));
+    if (rn.find(key) != cend(rn)) {
+      number += rn.at(key);  // number += (*rn.find(key)).second;
+      ++i;
 
-  const unordered_map<string, size_t> rn{
-      {"M", 1000}, {"D", 500}, {"C", 100}, {"L", 50},  {"X", 10}, {"V", 5},
-      {"I", 1},    {"IV", 4},  {"IX", 9},  {"XL", 40}, {"XC", 90}};
-
-  for (size_t i{}; i < str_len; i++) {
-    const size_t len = i < str_len - 1 ? 2 : 1;
-
-    string key{str.substr(i, len)};
-
-    if (rn.find(key) != end(rn)) {
-      number += rn.find(key)->second;  // number += (*rn.find(key)).second;
-      i++;
-      continue;
-    }
-
-    key.erase(--end(key));
-
-    if (rn.find(key) != end(rn)) {
-      number += rn.find(key)->second;  // number += (*rn.find(key)).second;
+    } else {
+      key = {&str[i], 1};
+      if (rn.find(key) != cend(rn))
+        number += rn.at(key);
     }
   }
 
@@ -89,16 +91,12 @@ string BasicRomanNumerals(string str) {
 }
 
 int main() {
-  // cout << BasicRomanNumerals(move(string{gets(stdin)}));
-  cout << BasicRomanNumerals(move(string{"XI"}))
-       << '\n';  // expected output: 11
-  cout << BasicRomanNumerals(move(string{"XIX"}))
-       << '\n';  // expected output: 19
-  cout << BasicRomanNumerals(move(string{"XXIV"}))
-       << '\n';  // expected output: 24
-  cout << BasicRomanNumerals(move(string{"IV"})) << '\n';  // expected output: 4
-  cout << BasicRomanNumerals(move(string{"XLVI"}))
-       << '\n';  // expected output: 46
+  // cout << BasicRomanNumerals(gets(stdin));
+  cout << BasicRomanNumerals("XI") << '\n';    // expected output: 11
+  cout << BasicRomanNumerals("XIX") << '\n';   // expected output: 19
+  cout << BasicRomanNumerals("XXIV") << '\n';  // expected output: 24
+  cout << BasicRomanNumerals("IV") << '\n';    // expected output: 4
+  cout << BasicRomanNumerals("XLVI") << '\n';  // expected output: 46
 
   return 0;
 }
