@@ -36,8 +36,8 @@ Output: 4
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <numeric>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -48,40 +48,38 @@ get_final_minimized_hunger_diff_level_by_balancing_hunger_diff_levels_between_ea
     const int* arr,
     const size_t arr_size) {
   int number_of_sandwiches{arr[0]};
-  vector<int> hungry_levels(arr + 1, arr + arr_size);
+  vector<int> hunger_levels(arr + 1, arr + arr_size);
 
   bool is_first_pair{true};
 
-  for (size_t i{}; i < hungry_levels.size() - 1; i++) {
+  for (size_t i{}; i < hunger_levels.size() - 1 && 0 != number_of_sandwiches;
+       ++i) {
     int diff_level_between_neighbors{
-        abs(hungry_levels[i + 1] - hungry_levels[i])};
-
-    if (!number_of_sandwiches)
-      break;
+        abs(hunger_levels[i + 1] - hunger_levels[i])};
 
     if (diff_level_between_neighbors > 0) {
       if (diff_level_between_neighbors > number_of_sandwiches)
         diff_level_between_neighbors = number_of_sandwiches;
 
-      if (is_first_pair && (hungry_levels[i] > hungry_levels[i + 1])) {
+      if (is_first_pair && hunger_levels[i] > hunger_levels[i + 1]) {
         is_first_pair = false;
-        hungry_levels[i] -= diff_level_between_neighbors;
+        hunger_levels[i] -= diff_level_between_neighbors;
         number_of_sandwiches -= diff_level_between_neighbors;
 
-      } else if (hungry_levels[i + 1] > hungry_levels[i]) {
-        hungry_levels[i + 1] -= diff_level_between_neighbors;
+      } else if (hunger_levels[i + 1] > hunger_levels[i]) {
+        hunger_levels[i + 1] -= diff_level_between_neighbors;
         number_of_sandwiches -= diff_level_between_neighbors;
       }
     }
   }
 
-  size_t hungry_level_diff{};
+  size_t hunger_level_diff{};
 
-  for (size_t i{1}; i < hungry_levels.size() - 1; i++) {
-    hungry_level_diff += abs(hungry_levels[i + 1] - hungry_levels[i]);
+  for (size_t i{1}; i < hunger_levels.size() - 1; ++i) {
+    hunger_level_diff += abs(hunger_levels[i + 1] - hunger_levels[i]);
   }
 
-  return hungry_level_diff;
+  return hunger_level_diff;
 }
 
 size_t
@@ -89,52 +87,49 @@ get_final_minimized_diff_level_by_balancing_diff_levels_using_average_hunger_lev
     const int* arr,
     const size_t arr_size) {
   int number_of_sandwiches{arr[0]};
-  vector<int> hungry_levels(arr + 1, arr + arr_size);
+  vector<int> hunger_levels(arr + 1, arr + arr_size);
 
   const int average_hungry_level =
-      accumulate(begin(hungry_levels), end(hungry_levels), 0) /
-      hungry_levels.size();
+      accumulate(cbegin(hunger_levels), cend(hunger_levels), 0) /
+      static_cast<int>(hunger_levels.size());
 
   int prev_level{};
 
-  for (size_t i{}; i < hungry_levels.size(); i++) {
-    if (!number_of_sandwiches)
-      break;
-
-    if (hungry_levels[i] > average_hungry_level) {
-      const int diff_level_between_neighbors{hungry_levels[i] -
+  for (size_t i{}; i < hunger_levels.size() && 0 != number_of_sandwiches; ++i) {
+    if (hunger_levels[i] > average_hungry_level) {
+      const int diff_level_between_neighbors{hunger_levels[i] -
                                              average_hungry_level};
 
       if (diff_level_between_neighbors > number_of_sandwiches) {
-        hungry_levels[i] -= number_of_sandwiches;
+        hunger_levels[i] -= number_of_sandwiches;
         break;
       }
 
-      hungry_levels[i] -= diff_level_between_neighbors;
+      hunger_levels[i] -= diff_level_between_neighbors;
       number_of_sandwiches -= diff_level_between_neighbors;
 
-    } else if (hungry_levels[i] > prev_level) {
-      const int diff_level_between_neighbors{hungry_levels[i] - prev_level};
+    } else if (hunger_levels[i] > prev_level) {
+      const int diff_level_between_neighbors{hunger_levels[i] - prev_level};
 
       if (diff_level_between_neighbors > number_of_sandwiches) {
-        hungry_levels[i] -= number_of_sandwiches;
+        hunger_levels[i] -= number_of_sandwiches;
         break;
       }
 
-      hungry_levels[i] -= diff_level_between_neighbors;
+      hunger_levels[i] -= diff_level_between_neighbors;
       number_of_sandwiches -= diff_level_between_neighbors;
     }
 
-    prev_level = hungry_levels[i];
+    prev_level = hunger_levels[i];
   }
 
-  size_t hungry_level_diff{};
+  size_t hunger_level_diff{};
 
-  for (size_t i{}; i < hungry_levels.size() - 1; i++) {
-    hungry_level_diff += abs(hungry_levels[i + 1] - hungry_levels[i]);
+  for (size_t i{}; i < hunger_levels.size() - 1; ++i) {
+    hunger_level_diff += abs(hunger_levels[i + 1] - hunger_levels[i]);
   }
 
-  return hungry_level_diff;
+  return hunger_level_diff;
 }
 
 size_t
@@ -143,35 +138,32 @@ get_final_minimized_difference_level_by_balancing_sorted_hunger_diff_levels(
     const size_t arr_size) {
   int number_of_sandwiches{arr[0]};
 
-  vector<pair<size_t, int>> hungry_levels{};
-  vector<int> hungry_levels_arr(arr + 1, arr + arr_size);
+  vector<pair<size_t, int>> hunger_levels{};
+  vector<int> hunger_levels_arr(arr + 1, arr + arr_size);
 
-  for (size_t i{1}; i < arr_size; i++)
-    hungry_levels.emplace_back(make_pair(i - 1, arr[i]));
+  for (size_t i{1}; i < arr_size; ++i)
+    hunger_levels.emplace_back(i - 1, arr[i]);
 
-  sort(begin(hungry_levels), end(hungry_levels),
+  sort(begin(hunger_levels), end(hunger_levels),
        [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
          return l.second > r.second;
        });
 
   const int average_hungry_level =
-      accumulate(begin(hungry_levels_arr), end(hungry_levels_arr), 0) /
-      hungry_levels_arr.size();
+      accumulate(begin(hunger_levels_arr), end(hunger_levels_arr), 0) /
+      static_cast<int>(hunger_levels_arr.size());
 
-  for (size_t i{}; i < hungry_levels.size(); i++) {
-    if (!number_of_sandwiches)
-      break;
-
-    if (hungry_levels[i].second > average_hungry_level) {
-      const int diff_level_between_neighbors{hungry_levels[i].second -
+  for (size_t i{}; i < hunger_levels.size() && 0 != number_of_sandwiches; ++i) {
+    if (hunger_levels[i].second > average_hungry_level) {
+      const int diff_level_between_neighbors{hunger_levels[i].second -
                                              average_hungry_level};
 
       if (diff_level_between_neighbors > number_of_sandwiches) {
-        hungry_levels_arr[hungry_levels[i].first] -= number_of_sandwiches;
+        hunger_levels_arr[hunger_levels[i].first] -= number_of_sandwiches;
         break;
       }
 
-      hungry_levels_arr[hungry_levels[i].first] -= diff_level_between_neighbors;
+      hunger_levels_arr[hunger_levels[i].first] -= diff_level_between_neighbors;
 
       number_of_sandwiches -= diff_level_between_neighbors;
     }
@@ -179,8 +171,8 @@ get_final_minimized_difference_level_by_balancing_sorted_hunger_diff_levels(
 
   size_t hungry_level_diff{};
 
-  for (size_t i{}; i < hungry_levels_arr.size() - 1; i++) {
-    hungry_level_diff += abs(hungry_levels_arr[i + 1] - hungry_levels_arr[i]);
+  for (size_t i{}; i < hunger_levels_arr.size() - 1; i++) {
+    hungry_level_diff += abs(hunger_levels_arr[i + 1] - hunger_levels_arr[i]);
   }
 
   return hungry_level_diff;
@@ -189,8 +181,8 @@ get_final_minimized_difference_level_by_balancing_sorted_hunger_diff_levels(
 size_t find_final_minimized_hunger_difference_level(const int* arr,
                                                     const size_t arr_size) {
   vector<pair<size_t, int>> hungry_levels{};
-  for (size_t i{1}; i < arr_size; i++)
-    hungry_levels.emplace_back(make_pair(i - 1, arr[i]));
+  for (size_t i{1U}; i < arr_size; ++i)
+    hungry_levels.emplace_back(i - 1, arr[i]);
 
   sort(begin(hungry_levels), end(hungry_levels),
        [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
@@ -220,39 +212,135 @@ size_t find_final_minimized_hunger_difference_level(const int* arr,
 
   sort(begin(final_hunger_diff_levels), end(final_hunger_diff_levels));
 
-  return *begin(final_hunger_diff_levels);
+  return *cbegin(final_hunger_diff_levels);
 }
 
-size_t FoodDistribution(int* arr, const size_t arr_size) {
+size_t FoodDistribution_v1(const int* arr, const size_t arr_size) {
   return find_final_minimized_hunger_difference_level(arr, arr_size);
+}
+
+void find_minimum_level_of_hunger_difference(
+    vector<int>& hunger_levels,
+    const size_t pos,
+    const vector<int>& remaining_hunger_diff_level_right,
+    int& min_hunger_diff_level,
+    const int number_of_sandwiches,
+    const int accumulated_diff_level = 0) {
+  if (pos == hunger_levels.size() - 1 && 0 == number_of_sandwiches) {
+    int final_diff{};
+
+    if (pos == hunger_levels.size() - 1 && number_of_sandwiches > 0) {
+      final_diff = min(hunger_levels[pos] - hunger_levels[pos - 1],
+                       number_of_sandwiches);
+      if (final_diff < 0)
+        final_diff = 0;
+    }
+
+    hunger_levels[pos] -= final_diff;
+
+    int hunger_diff_level{};
+    for (size_t i{}; i < hunger_levels.size() - 1; ++i)
+      hunger_diff_level += abs(hunger_levels[i] - hunger_levels[i + 1]);
+
+    min_hunger_diff_level = min(hunger_diff_level, min_hunger_diff_level);
+    hunger_levels[pos] += final_diff;
+  }
+
+  for (size_t i{pos}; i < hunger_levels.size() - 1; ++i) {
+    const size_t ti{hunger_levels[i] > hunger_levels[i + 1] ? i : i + 1};
+    const int orig_diff{abs(hunger_levels[i] - hunger_levels[i + 1])};
+    for (int diff{min(orig_diff, number_of_sandwiches)}; diff >= 0; --diff) {
+      hunger_levels[ti] -= diff;
+
+      if (accumulated_diff_level + remaining_hunger_diff_level_right[i] -
+              abs(orig_diff - abs(hunger_levels[i] - hunger_levels[i + 1])) -
+              (number_of_sandwiches - diff) >=
+          min_hunger_diff_level) {
+        hunger_levels[ti] += diff;
+        break;
+      }
+
+      find_minimum_level_of_hunger_difference(
+          hunger_levels, i + 1, remaining_hunger_diff_level_right,
+          min_hunger_diff_level, number_of_sandwiches - diff,
+          accumulated_diff_level +
+              abs(hunger_levels[i] - hunger_levels[i + 1]));
+
+      hunger_levels[ti] += diff;
+    }
+  }
+}
+
+size_t FoodDistribution_v2(const int* arr, const size_t arr_size) {
+  const int needed_number_of_sandwitches = [&]() {
+    int n{};
+    vector<pair<size_t, int>> hunger_levels{};
+    for (size_t i{1U}; i < arr_size; ++i)
+      hunger_levels.emplace_back(i - 1, arr[i]);
+
+    sort(begin(hunger_levels), end(hunger_levels),
+         [](const pair<size_t, int>& l, const pair<size_t, int>& r) {
+           return l.second > r.second;
+         });
+
+    const int min_hungry_level{hunger_levels.back().second};
+
+    for (const auto& h : hunger_levels) {
+      if (min_hungry_level == h.second)
+        break;
+      n += h.second - min_hungry_level;
+    }
+
+    return n;
+  }();
+
+  if (arr[0] >= needed_number_of_sandwitches)
+    return 0U;
+
+  vector<int> hunger_levels(arr + 1, arr + arr_size);
+  vector<int> remaining_hunger_diff_level_right(arr_size - 1);
+  int hunger_diff_level_right{};
+
+  for (size_t i{hunger_levels.size() - 1}; i > 0; --i) {
+    hunger_diff_level_right += abs(hunger_levels[i - 1] - hunger_levels[i]);
+    remaining_hunger_diff_level_right[i - 1] = hunger_diff_level_right;
+  }
+
+  int min_hunger_diff_level{numeric_limits<int>::max()};
+
+  find_minimum_level_of_hunger_difference(hunger_levels, 0U,
+                                          remaining_hunger_diff_level_right,
+                                          min_hunger_diff_level, arr[0]);
+
+  return min_hunger_diff_level;
 }
 
 int main() {
   // int A[] = gets(stdin);
-  // cout << FoodDistribution(A, sizeof(A)/sizeof(*A));
-  int B[] = {5, 3, 1, 2, 1};
-  cout << FoodDistribution(B, sizeof(B) / sizeof(*B))
+  // cout << FoodDistribution_v2(A, sizeof(A)/sizeof(*A));
+  const int B[]{5, 3, 1, 2, 1};
+  cout << FoodDistribution_v2(B, sizeof(B) / sizeof(*B))
        << '\n';  // expected output: 0
-  int C[] = {4, 5, 2, 3, 1, 0};
-  cout << FoodDistribution(C, sizeof(C) / sizeof(*C))
+  const int C[]{4, 5, 2, 3, 1, 0};
+  cout << FoodDistribution_v2(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: 2
-  int D[] = {5, 2, 3, 4, 5};
-  cout << FoodDistribution(D, sizeof(D) / sizeof(*D))
+  const int D[]{5, 2, 3, 4, 5};
+  cout << FoodDistribution_v2(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: 1
-  int E[] = {3, 2, 1, 0, 4, 1, 0};
-  cout << FoodDistribution(E, sizeof(E) / sizeof(*E))
+  const int E[]{3, 2, 1, 0, 4, 1, 0};
+  cout << FoodDistribution_v2(E, sizeof(E) / sizeof(*E))
        << '\n';  // expected output: 4
-  int F[] = {20, 5, 4, 1};
-  cout << FoodDistribution(F, sizeof(F) / sizeof(*F))
+  const int F[]{20, 5, 4, 1};
+  cout << FoodDistribution_v2(F, sizeof(F) / sizeof(*F))
        << '\n';  // expected output: 0
-  int G[] = {4, 2, 3, 2, 1};
-  cout << FoodDistribution(G, sizeof(G) / sizeof(*G))
+  const int G[]{4, 2, 3, 2, 1};
+  cout << FoodDistribution_v2(G, sizeof(G) / sizeof(*G))
        << '\n';  // expected output: 0
-  int H[] = {4, 5, 4, 5, 2, 3, 1, 2};
-  cout << FoodDistribution(H, sizeof(H) / sizeof(*H))
+  const int H[]{4, 5, 4, 5, 2, 3, 1, 2};
+  cout << FoodDistribution_v2(H, sizeof(H) / sizeof(*H))
        << '\n';  // expected output: 3
-  int I[] = {7, 5, 4, 3, 4, 5, 2, 3, 1, 4, 5};
-  cout << FoodDistribution(I, sizeof(I) / sizeof(*I))
+  const int I[]{7, 5, 4, 3, 4, 5, 2, 3, 1, 4, 5};
+  cout << FoodDistribution_v2(I, sizeof(I) / sizeof(*I))
        << '\n';  // expected output: 6
 
   return 0;
