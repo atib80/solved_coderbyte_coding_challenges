@@ -226,24 +226,13 @@ void find_minimum_level_of_hunger_difference(
     int& min_hunger_diff_level,
     const int number_of_sandwiches,
     const int accumulated_diff_level = 0) {
+      
   if (pos == hunger_levels.size() - 1 && 0 == number_of_sandwiches) {
-    int final_diff{};
-
-    if (pos == hunger_levels.size() - 1 && number_of_sandwiches > 0) {
-      final_diff = min(hunger_levels[pos] - hunger_levels[pos - 1],
-                       number_of_sandwiches);
-      if (final_diff < 0)
-        final_diff = 0;
-    }
-
-    hunger_levels[pos] -= final_diff;
-
     int hunger_diff_level{};
     for (size_t i{}; i < hunger_levels.size() - 1; ++i)
       hunger_diff_level += abs(hunger_levels[i] - hunger_levels[i + 1]);
 
     min_hunger_diff_level = min(hunger_diff_level, min_hunger_diff_level);
-    hunger_levels[pos] += final_diff;
   }
 
   for (size_t i{pos}; i < hunger_levels.size() - 1; ++i) {
