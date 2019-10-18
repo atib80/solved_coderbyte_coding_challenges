@@ -30,10 +30,9 @@ Output: "3,6"
 */
 
 #include <algorithm>
-#include <functional>
 #include <iostream>
 #include <string>
-#include <utility>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -84,9 +83,11 @@ pair<int, int> get_left_and_right_scale_weights(const string& str) {
   return left_right_scale_weights;
 }
 
-vector<int> get_available_weights_in_descending_order(const string& str) {
-  vector<int> available_weights_in_desc_order;
-  available_weights_in_desc_order.reserve(10);
+pair<vector<int>, unordered_map<int, size_t>> get_available_weights(
+    const string& str) {
+  vector<int> available_weights{};
+  available_weights.reserve(10);
+  unordered_map<int, size_t> weight_count{};
 
   size_t start{};
 
@@ -97,16 +98,16 @@ vector<int> get_available_weights_in_descending_order(const string& str) {
     size_t last{str.find_first_not_of("0123456789", start + 1)};
     if (string::npos == last)
       last = str.length();
-    available_weights_in_desc_order.emplace_back(
-        get_decimal_value(cbegin(str) + start, cbegin(str) + last));
+    const int weight_value{
+        get_decimal_value(cbegin(str) + start, cbegin(str) + last)};
+    if (0U == weight_count.count(weight_value))
+      available_weights.emplace_back(weight_value);
+    weight_count[weight_value]++;
     start = last + 1;
   }
 
-  sort(begin(available_weights_in_desc_order),
-       end(available_weights_in_desc_order),
-       [](const int ln, const int rn) { return ln > rn; });
-
-  return available_weights_in_desc_order;
+  sort(begin(available_weights), end(available_weights));
+  return {available_weights, weight_count};
 }
 
 string ScaleBalancing(const string* str_arr, const size_t array_size) {
@@ -121,51 +122,46 @@ string ScaleBalancing(const string* str_arr, const size_t array_size) {
   if (left_scale == right_scale)
     return "Scale is already balanced.";
 
-  vector<int> available_weights_in_desc_order{
-      get_available_weights_in_descending_order(str_arr[1])};
+  auto [available_weights, weight_count]{get_available_weights(str_arr[1])};
 
   const int needed_extra_weight{left_scale > right_scale
                                     ? left_scale - right_scale
                                     : right_scale - left_scale};
 
-  if (binary_search(cbegin(available_weights_in_desc_order),
-                    cend(available_weights_in_desc_order), needed_extra_weight,
-                    greater<int>{}))
+  if (weight_count.find(needed_extra_weight) != end(weight_count))
     return to_string(needed_extra_weight);
 
-  auto last_weight_iter{cend(available_weights_in_desc_order)};
-  --last_weight_iter;
-
-  for (auto start{cbegin(available_weights_in_desc_order)};
-       start != last_weight_iter; ++start) {
-    int first_weight{};
-
-    for (auto next = start; next != cend(available_weights_in_desc_order);
-         ++next) {
-      if (*next < needed_extra_weight) {
-        const int current_weight{*next};
-
-        if (0 == first_weight)
-          first_weight = current_weight;
-        else if (first_weight + current_weight == needed_extra_weight)
-          return get_needed_weights_string(first_weight, current_weight);
-      }
-    }
+  for (size_t i{};
+       i < static_cast<size_t>(upper_bound(cbegin(available_weights),
+                                           cend(available_weights),
+                                           needed_extra_weight) -
+                               cbegin(available_weights));
+       ++i) {
+    --weight_count.at(available_weights[i]);
+    const int needed_second_weight{needed_extra_weight - available_weights[i]};
+    if (weight_count.find(needed_second_weight) != end(weight_count) &&
+        0U != weight_count.at(needed_second_weight))
+      return get_needed_weights_string(available_weights[i],
+                                       needed_second_weight);
+    ++weight_count.at(available_weights[i]);
   }
 
-  reverse(begin(available_weights_in_desc_order),
-          end(available_weights_in_desc_order));
+  for (size_t i{}; i < available_weights.size(); ++i) {
+    --weight_count.at(available_weights[i]);
+    const int missing_second_weight1{left_scale + available_weights[i] -
+                                     right_scale};
+    if (weight_count.find(missing_second_weight1) != end(weight_count) &&
+        0U != weight_count.at(missing_second_weight1))
+      return get_needed_weights_string(available_weights[i],
+                                       missing_second_weight1);
+    const int missing_second_weight2{right_scale + available_weights[i] -
+                                     left_scale};
 
-  for (auto start1{cbegin(available_weights_in_desc_order)};
-       start1 != cend(available_weights_in_desc_order); ++start1) {
-    for (auto start2{cbegin(available_weights_in_desc_order)};
-         start2 != cend(available_weights_in_desc_order); ++start2) {
-      if (left_scale + *start1 == right_scale + *start2)
-        return get_needed_weights_string(*start1, *start2);
-
-      if (left_scale + *start2 == right_scale + *start1)
-        return get_needed_weights_string(*start2, *start1);
-    }
+    if (weight_count.find(missing_second_weight2) != end(weight_count) &&
+        0U != weight_count.at(missing_second_weight2))
+      return get_needed_weights_string(available_weights[i],
+                                       missing_second_weight2);
+    ++weight_count.at(available_weights[i]);
   }
 
   return "not possible";
