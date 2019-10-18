@@ -37,29 +37,27 @@ Output: "3,6"
 
 using namespace std;
 
-string get_needed_weights_string(int first_weight, int second_weight) {
-  char buffer[32];
+string get_needed_weights_string(size_t first_weight, size_t second_weight) {
   if (first_weight > second_weight)
     swap(first_weight, second_weight);
-  sprintf(buffer, "%d,%d", first_weight, second_weight);
 
-  return buffer;
+  return to_string(first_weight) + ',' + to_string(second_weight);
 }
 
-template <typename FwIterType, typename T = int>
-T get_decimal_value(FwIterType start, const FwIterType last) {
-  T result{};
+template <typename FwIterType>
+size_t get_decimal_value(FwIterType start, const FwIterType last) {
+  size_t result{};
 
   while (start != last) {
-    result *= 10;
-    result += static_cast<T>(*start - '0');
+    result =
+        (result << 3U) + (result << 1U) + static_cast<size_t>(*start - '0');
     ++start;
   }
 
   return result;
 }
 
-pair<int, int> get_left_and_right_scale_weights(const string& str) {
+pair<size_t, size_t> get_left_and_right_scale_weights(const string& str) {
   size_t start{str.find_first_of("1234567890")};
   if (string::npos == start)
     return {0, 0};
@@ -67,8 +65,8 @@ pair<int, int> get_left_and_right_scale_weights(const string& str) {
   if (string::npos == last)
     last = str.length();
 
-  pair<int, int> left_right_scale_weights{
-      get_decimal_value(cbegin(str) + start, cbegin(str) + last), 0};
+  pair<size_t, size_t> left_right_scale_weights{
+      get_decimal_value(cbegin(str) + start, cbegin(str) + last), 0U};
 
   start = str.find_first_of("1234567890", last + 1);
   if (string::npos == start)
@@ -83,11 +81,11 @@ pair<int, int> get_left_and_right_scale_weights(const string& str) {
   return left_right_scale_weights;
 }
 
-pair<vector<int>, unordered_map<int, size_t>> get_available_weights(
+pair<vector<size_t>, unordered_map<size_t, size_t>> get_available_weights(
     const string& str) {
-  vector<int> available_weights{};
+  vector<size_t> available_weights{};
   available_weights.reserve(10);
-  unordered_map<int, size_t> weight_count{};
+  unordered_map<size_t, size_t> weight_count{};
 
   size_t start{};
 
@@ -98,7 +96,7 @@ pair<vector<int>, unordered_map<int, size_t>> get_available_weights(
     size_t last{str.find_first_not_of("0123456789", start + 1)};
     if (string::npos == last)
       last = str.length();
-    const int weight_value{
+    const size_t weight_value{
         get_decimal_value(cbegin(str) + start, cbegin(str) + last)};
     if (0U == weight_count.count(weight_value))
       available_weights.emplace_back(weight_value);
@@ -114,19 +112,17 @@ string ScaleBalancing(const string* str_arr, const size_t array_size) {
   if (array_size < 2U)
     return "not possible";
 
-  const pair<int, int> left_and_right_scale_weigths{
-      get_left_and_right_scale_weights(str_arr[0])};
+  const auto [left_scale,
+              right_scale]{get_left_and_right_scale_weights(str_arr[0])};
 
-  const int& left_scale{left_and_right_scale_weigths.first};
-  const int& right_scale{left_and_right_scale_weigths.second};
   if (left_scale == right_scale)
     return "Scale is already balanced.";
 
   auto [available_weights, weight_count]{get_available_weights(str_arr[1])};
 
-  const int needed_extra_weight{left_scale > right_scale
-                                    ? left_scale - right_scale
-                                    : right_scale - left_scale};
+  const size_t needed_extra_weight{left_scale > right_scale
+                                       ? left_scale - right_scale
+                                       : right_scale - left_scale};
 
   if (weight_count.find(needed_extra_weight) != end(weight_count))
     return to_string(needed_extra_weight);
@@ -138,7 +134,8 @@ string ScaleBalancing(const string* str_arr, const size_t array_size) {
                                cbegin(available_weights));
        ++i) {
     --weight_count.at(available_weights[i]);
-    const int needed_second_weight{needed_extra_weight - available_weights[i]};
+    const size_t needed_second_weight{needed_extra_weight -
+                                      available_weights[i]};
     if (weight_count.find(needed_second_weight) != end(weight_count) &&
         0U != weight_count.at(needed_second_weight))
       return get_needed_weights_string(available_weights[i],
@@ -148,14 +145,14 @@ string ScaleBalancing(const string* str_arr, const size_t array_size) {
 
   for (size_t i{}; i < available_weights.size(); ++i) {
     --weight_count.at(available_weights[i]);
-    const int missing_second_weight1{left_scale + available_weights[i] -
-                                     right_scale};
+    const size_t missing_second_weight1{left_scale + available_weights[i] -
+                                        right_scale};
     if (weight_count.find(missing_second_weight1) != end(weight_count) &&
         0U != weight_count.at(missing_second_weight1))
       return get_needed_weights_string(available_weights[i],
                                        missing_second_weight1);
-    const int missing_second_weight2{right_scale + available_weights[i] -
-                                     left_scale};
+    const size_t missing_second_weight2{right_scale + available_weights[i] -
+                                        left_scale};
 
     if (weight_count.find(missing_second_weight2) != end(weight_count) &&
         0U != weight_count.at(missing_second_weight2))
