@@ -298,20 +298,21 @@ struct hunger_level_data {
   int prev_level;
   const int number_of_sandwiches;
   const int accumulated_diff_level;
+  vector<int> min_distance_offsets;
 
   hunger_level_data(const size_t index,
                     const int prev_level,
                     const int number_of_sandwiches,
-                    const int accumulated_diff_level)
+                    const int accumulated_diff_level,
+                    vector<int> distance_offsets)
       : index{index},
         prev_level{prev_level},
         number_of_sandwiches{number_of_sandwiches},
-        accumulated_diff_level{accumulated_diff_level} {}
+        accumulated_diff_level{accumulated_diff_level},
+        min_distance_offsets{move(distance_offsets)} {}
 };
 
 size_t FoodDistribution_v3(const int* arr, const size_t arr_size) {
-  const int number_of_sandwiches{arr[0]};
-
   const int needed_number_of_sandwitches{[&]() {
     int n{};
     vector<int> hunger_levels{arr + 1, arr + arr_size};
@@ -325,56 +326,73 @@ size_t FoodDistribution_v3(const int* arr, const size_t arr_size) {
     return n;
   }()};
 
-  if (number_of_sandwiches >= needed_number_of_sandwitches)
+  if (arr[0] >= needed_number_of_sandwitches)
     return 0U;
 
   int min_hunger_diff_level{needed_number_of_sandwitches};
-  queue<hunger_level_data> q{{{2U, arr[1], number_of_sandwiches, 0}}};
+  const int* hunger_levels{arr + 1};
+  const size_t hunger_levels_size{arr_size - 1};
+
+  vector<int> min_distance_offsets(hunger_levels_size, min_hunger_diff_level);
+  min_distance_offsets.front() = -arr[0];
+
+  queue<hunger_level_data> q{
+      {{1U, hunger_levels[0], arr[0], 0, min_distance_offsets}}};
 
   while (!q.empty()) {
     hunger_level_data node{move(q.front())};
     q.pop();
 
-    if (node.accumulated_diff_level >= min_hunger_diff_level) {
+    if (node.accumulated_diff_level >= min_hunger_diff_level)
       continue;
-    }
 
-    if (node.index == arr_size) {
+    if (node.index == hunger_levels_size) {
       min_hunger_diff_level = node.accumulated_diff_level;
+      min_distance_offsets = move(node.min_distance_offsets);
       continue;
     }
 
-    if (node.index < arr_size) {
-      int next_level{arr[node.index]};
-      const int orig_diff{abs(node.prev_level - next_level)};
-      for (int diff{min(orig_diff, node.number_of_sandwiches)}; diff >= 0;
-           --diff) {
-        if (node.prev_level > next_level) {
-          node.prev_level -= diff;
+    int next_level{hunger_levels[node.index]};
+    const int orig_diff{abs(node.prev_level - next_level)};
+    for (int diff{min(orig_diff, node.number_of_sandwiches)}; diff >= 0;
+         --diff) {
+      if (node.prev_level > next_level) {
+        node.prev_level -= diff;
 
-          if (node.accumulated_diff_level + abs(node.prev_level - next_level) +
-                  (node.index > 2U ? diff : 0) <
-              min_hunger_diff_level)
-            q.emplace(node.index + 1, next_level,
-                      node.number_of_sandwiches - diff,
-                      node.accumulated_diff_level +
-                          abs(node.prev_level - next_level) +
-                          (node.index > 2U ? diff : 0));
+        if (node.accumulated_diff_level + abs(node.prev_level - next_level) +
+                (node.index > 1U ? diff : 0) -
+                (node.number_of_sandwiches - diff) <
+            min_distance_offsets[node.index]) {
+          node.min_distance_offsets[node.index] =
+              node.accumulated_diff_level + abs(node.prev_level - next_level) -
+              (node.number_of_sandwiches - diff);
+          q.emplace(
+              node.index + 1, next_level, node.number_of_sandwiches - diff,
+              node.accumulated_diff_level + abs(node.prev_level - next_level) +
+                  (node.index > 1U ? diff : 0),
+              node.min_distance_offsets);
+        } else
+          break;
 
-          node.prev_level += diff;
+        node.prev_level += diff;
 
-        } else {
-          next_level -= diff;
+      } else {
+        next_level -= diff;
 
-          if (node.accumulated_diff_level + abs(next_level - node.prev_level) <
-              min_hunger_diff_level)
-            q.emplace(node.index + 1, next_level,
-                      node.number_of_sandwiches - diff,
-                      node.accumulated_diff_level +
-                          abs(next_level - node.prev_level));
+        if (node.accumulated_diff_level + abs(next_level - node.prev_level) -
+                (node.number_of_sandwiches - diff) <
+            min_distance_offsets[node.index]) {
+          node.min_distance_offsets[node.index] =
+              node.accumulated_diff_level + abs(next_level - node.prev_level) -
+              (node.number_of_sandwiches - diff);
+          q.emplace(
+              node.index + 1, next_level, node.number_of_sandwiches - diff,
+              node.accumulated_diff_level + abs(next_level - node.prev_level),
+              node.min_distance_offsets);
+        } else
+          break;
 
-          next_level += diff;
-        }
+        next_level += diff;
       }
     }
   }
