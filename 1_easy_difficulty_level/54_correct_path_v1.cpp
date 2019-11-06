@@ -29,81 +29,83 @@ Output: "drdruurrdddd"
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
-string trim(const string& input) {
-  string output{input};
-  output.erase(begin(output),
-               find_if(begin(output), end(output),
-                       [](const char ch) { return !isspace(ch); }));
+std::string trim(const std::string& src,
+                 const char* chars_to_trim = " \t\n\f\v\r") {
+  if (src.empty())
+    return {};
 
-  output.erase(find_if(output.rbegin(), output.rend(),
-                       [](const char ch) { return !isspace(ch); })
-                   .base(),
-               end(output));
+  const std::unordered_set<char> trimmed_chars(
+      chars_to_trim, chars_to_trim + strlen(chars_to_trim));
 
-  return output;
+  const auto first{std::find_if(
+      std::cbegin(src), std::cend(src), [&trimmed_chars](const char ch) {
+        return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+      })};
+
+  if (first == std::cend(src))
+    return {};
+
+  const auto last{
+      std::find_if(std::crbegin(src), std::make_reverse_iterator(first),
+                   [&trimmed_chars](const char ch) {
+                     return trimmed_chars.find(ch) == std::cend(trimmed_chars);
+                   })
+          .base()};
+
+  return {first, last};
 }
 
 size_t distance(const size_t x_src,
                 const size_t y_src,
-                const size_t x_dst = 4,
-                const size_t y_dst = 4) {
-  return ((x_src <= x_dst ? x_dst - x_src : x_src - x_dst) +
-          (y_src <= y_dst ? y_dst - y_src : y_src - y_dst));
+                const size_t x_dst,
+                const size_t y_dst) {
+  return (x_src < x_dst ? x_dst - x_src : x_src - x_dst) +
+         (y_src < y_dst ? y_dst - y_src : y_src - y_dst);
 }
 
 bool find_correct_path(vector<vector<int>>& maze,
                        const size_t x,
                        const size_t y,
                        string& path,
-                       const size_t current_path_index) {
-  if (x == 4 && y == 4 && current_path_index == path.length())
+                       const size_t current_path_index = 0) {
+  if (x == 4U && y == 4U && current_path_index == path.length())
     return true;
 
-  if (distance(x, y, 4, 4) > path.length() - current_path_index)
+  if (distance(x, y, 4U, 4U) > path.length() - current_path_index)
     return false;
 
   maze[x][y] = -1;
 
   if ('u' == path[current_path_index]) {
-    if (x > 0 && -1 != maze[x - 1][y] &&
+    if (x > 0U && -1 != maze[x - 1][y] &&
         find_correct_path(maze, x - 1, y, path, current_path_index + 1))
       return true;
-    if (x && y)
-      maze[x][y] = 0;
-    return false;
   }
 
   else if ('d' == path[current_path_index]) {
-    if (x < 4 && -1 != maze[x + 1][y] &&
+    if (x < 4U && -1 != maze[x + 1][y] &&
         find_correct_path(maze, x + 1, y, path, current_path_index + 1))
       return true;
-    if (x && y)
-      maze[x][y] = 0;
-    return false;
   }
 
   else if ('l' == path[current_path_index]) {
-    if (y > 0 && -1 != maze[x][y - 1] &&
+    if (y > 0U && -1 != maze[x][y - 1] &&
         find_correct_path(maze, x, y - 1, path, current_path_index + 1))
       return true;
-    if (x && y)
-      maze[x][y] = 0;
-    return false;
   }
 
   else if ('r' == path[current_path_index]) {
-    if (y < 4 && -1 != maze[x][y + 1] &&
+    if (y < 4U && -1 != maze[x][y + 1] &&
         find_correct_path(maze, x, y + 1, path, current_path_index + 1))
       return true;
-    if (x && y)
-      maze[x][y] = 0;
-    return false;
   }
 
   else if ('?' == path[current_path_index]) {
@@ -136,7 +138,7 @@ bool find_correct_path(vector<vector<int>>& maze,
     }
   }
 
-  if (x && y)
+  if (x != 0U && y != 0U)
     maze[x][y] = 0;
 
   return false;
@@ -144,6 +146,9 @@ bool find_correct_path(vector<vector<int>>& maze,
 
 string CorrectPath_v1(string str) {
   str = trim(str);
+
+  for (char& ch : str)
+    ch = static_cast<char>(tolower(ch));
 
   vector<vector<int>> maze(5, vector<int>(5));
 
@@ -154,18 +159,17 @@ string CorrectPath_v1(string str) {
 }
 
 int main() {
-  // cout << CorrectPath_v1(move(string{gets(stdin)}));
-  cout << CorrectPath_v1(move(string{"r?d?drdd"}))
-       << '\n';  // expected output: "rrdrdrdd"
-  cout << CorrectPath_v1(move(string{"???rrurdr?"}))
+  // cout << CorrectPath_v1(gets(stdin));
+  cout << CorrectPath_v1("r?d?drdd") << '\n';  // expected output: "rrdrdrdd"
+  cout << CorrectPath_v1("???rrurdr?")
        << '\n';  // expected output: "dddrrurdrd"
-  cout << CorrectPath_v1(move(string{"drdr??rrddd?"}))
+  cout << CorrectPath_v1("drdr??rrddd?")
        << '\n';  // expected output: "drdruurrdddd"
-  cout << CorrectPath_v1(move(string{"rd?u??dld?ddrr"}))
+  cout << CorrectPath_v1("rd?u??dld?ddrr")
        << '\n';  // expected output: "rdrurrdldlddrr"
-  cout << CorrectPath_v1(move(string{"ddr?rdrrd?dr"}))
+  cout << CorrectPath_v1("ddr?rdrrd?dr")
        << '\n';  // expected output: "ddrurdrrdldr"
-  cout << CorrectPath_v1(move(string{"rdrdr??rddd?dr"}))
+  cout << CorrectPath_v1("rdrdr??rddd?dr")
        << '\n';  // expected output: "rdrdruurdddldr"
 
   return 0;
