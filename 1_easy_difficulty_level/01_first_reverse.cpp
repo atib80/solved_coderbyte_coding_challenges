@@ -41,6 +41,7 @@ string FirstReverse(string str) {
 }
 
 string FirstReverse_v2(string str) {
+  str = stl::helper::trim(str);
   reverse(begin(str), end(str));
 
   return str;
@@ -48,11 +49,10 @@ string FirstReverse_v2(string str) {
 
 int main() {
   // cout << FirstReverse(gets(stdin));
-  cout << FirstReverse(string{"Hello World and Coders"})
+  cout << FirstReverse("Hello World and Coders")
        << '\n';  // expected output: "sredoC dna dlroW olleH"
-  cout << FirstReverse(string{"coderbyte"})
-       << '\n';  // expected output: "etybredoc"
-  cout << FirstReverse(string{"I Love Code"})
+  cout << FirstReverse("coderbyte") << '\n';  // expected output: "etybredoc"
+  cout << FirstReverse("I Love Code")
        << '\n';  // expected output: "edoC evoL I"
 
   return 0;

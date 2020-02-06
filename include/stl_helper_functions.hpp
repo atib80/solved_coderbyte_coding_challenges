@@ -11,8 +11,8 @@
     "You need a modern compiler that is fully compliant with the c++17 language standard or a newer one in order to use this header-only library!"
 #endif
 
-// #define _CRT_SECURE_NO_WARNINGS
-// #define _SCL_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#define _SCL_SECURE_NO_WARNINGS
 
 #include <algorithm>
 #include <array>
@@ -30,6 +30,7 @@
 #include <locale>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -45,9 +46,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-extern "C" int snprintf(char* s, size_t n, const char* format, ...);
-extern "C" int swprintf(wchar_t* s, size_t n, const wchar_t* format, ...);
 
 #ifdef _MSC_VER
 #include <Strsafe.h>
@@ -897,34 +895,34 @@ struct wchar_t_buffer_deleter {
   void operator()(pointer_type pointer) const noexcept { delete[] pointer; }
 };
 
+std::mutex say_cstr_mu{};
+std::mutex say_wstr_mu{};
+std::mutex say_slow_cstr_mu{};
+std::mutex say_slow_wstr_mu{};
+
 template <typename... Args>
 size_t say_slow(std::ostream& os,
                 const size_t time_delay_in_ms,
                 const char* format_string,
                 Args&&... args) {
-  const size_t buffer_size =
-#ifdef _MSC_VER
-      scprintf(format_string, std::forward<Args>(args)...) + 1;
-#else
-      8192U;
-#endif
+  std::lock_guard<std::mutex> guard{say_slow_cstr_mu};
 
-  std::unique_ptr<char[], char_buffer_deleter> output_buffer_sp(
-      new char[buffer_size], char_buffer_deleter{});
+  const int number_of_chars_written =
+      snprintf(nullptr, 0U, format_string, std::forward<Args>(args)...);
 
-  if (!output_buffer_sp)
-    return std::string::npos;
+  if (number_of_chars_written == -1)
+    return 0U;
 
-  SNPRINTF(output_buffer_sp.get(), buffer_size, format_string,
+  std::vector<char> output_buffer(number_of_chars_written + 1);
+
+  snprintf(&output_buffer[0], output_buffer.size(), format_string,
            std::forward<Args>(args)...);
 
   size_t ch_count{};
 
-  for (size_t i{}; i < len(output_buffer_sp.get()); ++i) {
-    if (os << output_buffer_sp.get()[i])
-      ++ch_count;
-    else
-      return ch_count;
+  for (size_t i{}; i < output_buffer.size() - 1 && os.good(); ++i) {
+    os << output_buffer[i];
+    ++ch_count;
     std::this_thread::sleep_for(std::chrono::milliseconds(time_delay_in_ms));
   }
 
@@ -936,78 +934,81 @@ size_t say_slow(std::wostream& os,
                 const size_t time_delay_in_ms,
                 const wchar_t* format_string,
                 Args&&... args) {
-  const size_t buffer_size =
-#ifdef _MSC_VER
-      scwprintf(format_string, std::forward<Args>(args)...) + 1;
-#else
-      8192U;
-#endif
+  std::lock_guard<std::mutex> guard{say_slow_wstr_mu};
 
-  std::unique_ptr<wchar_t[], wchar_t_buffer_deleter> output_buffer_sp(
-      new wchar_t[buffer_size], wchar_t_buffer_deleter{});
+  int buffer_size{4096};
 
-  if (!output_buffer_sp)
-    return std::wstring::npos;
+  do {
+    std::vector<wchar_t> output_buffer(buffer_size);
 
-  SNWPRINTF(output_buffer_sp.get(), buffer_size, format_string,
-            std::forward<Args>(args)...);
+    const int number_of_chars_written =
+        swprintf(&output_buffer[0], output_buffer.size(), format_string,
+                 std::forward<Args>(args)...);
 
-  size_t ch_count{};
+    if (number_of_chars_written != -1) {
+      size_t ch_count{};
 
-  for (size_t i = 0; i < len(output_buffer_sp.get()); ++i) {
-    if (os << output_buffer_sp.get()[i])
-      ++ch_count;
-    else
+      for (int i{}; i < number_of_chars_written && os.good(); ++i) {
+        os << output_buffer[i];
+        ++ch_count;
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(time_delay_in_ms));
+      }
+
       return ch_count;
+    }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(time_delay_in_ms));
-  }
+    buffer_size *= 2;
 
-  return ch_count;
+  } while (true);
+
+  return 0U;
 }
 
 template <typename... Args>
 size_t say(std::ostream& os, const char* format_string, Args&&... args) {
-  const size_t buffer_size =
-#ifdef _MSC_VER
-      scprintf(format_string, std::forward<Args>(args)...) + 1;
-#else
-      8192U;
-#endif
+  std::lock_guard<std::mutex> guard{say_cstr_mu};
 
-  std::unique_ptr<char[], char_buffer_deleter> output_buffer_sp(
-      new char[buffer_size], char_buffer_deleter{});
+  const int number_of_chars_written =
+      snprintf(nullptr, 0U, format_string, std::forward<Args>(args)...);
 
-  if (!output_buffer_sp)
-    return std::string::npos;
+  if (number_of_chars_written == -1)
+    return 0U;
 
-  SNPRINTF(output_buffer_sp.get(), buffer_size, format_string,
+  std::vector<char> output_buffer(number_of_chars_written + 1);
+
+  snprintf(&output_buffer[0], output_buffer.size(), format_string,
            std::forward<Args>(args)...);
 
-  return (os << output_buffer_sp.get()) ? len(output_buffer_sp.get())
-                                        : std::string::npos;
+  return (os << &output_buffer[0])
+             ? static_cast<size_t>(number_of_chars_written)
+             : 0U;
 }
 
 template <typename... Args>
 size_t say(std::wostream& os, const wchar_t* format_string, Args&&... args) {
-  const size_t buffer_size =
-#ifdef _MSC_VER
-      scwprintf(format_string, std::forward<Args>(args)...) + 1;
-#else
-      8192U;
-#endif
+  std::lock_guard<std::mutex> guard{say_wstr_mu};
 
-  std::unique_ptr<wchar_t[], wchar_t_buffer_deleter> output_buffer_sp(
-      new wchar_t[buffer_size], wchar_t_buffer_deleter{});
+  int buffer_size{4096};
 
-  if (!output_buffer_sp)
-    return std::wstring::npos;
+  do {
+    std::vector<wchar_t> output_buffer(buffer_size);
 
-  SNWPRINTF(output_buffer_sp.get(), buffer_size, format_string,
-            std::forward<Args>(args)...);
+    const int number_of_chars_written =
+        swprintf(&output_buffer[0], output_buffer.size(), format_string,
+                 std::forward<Args>(args)...);
 
-  return (os << output_buffer_sp.get()) ? len(output_buffer_sp.get())
-                                        : std::wstring::npos;
+    if (number_of_chars_written != -1) {
+      return (os << &output_buffer[0])
+                 ? static_cast<size_t>(number_of_chars_written)
+                 : 0U;
+    }
+
+    buffer_size *= 2;
+
+  } while (true);
+
+  return 0U;
 }
 
 template <typename T,
