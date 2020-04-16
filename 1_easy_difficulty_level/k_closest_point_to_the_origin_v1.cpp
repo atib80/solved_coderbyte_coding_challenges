@@ -96,7 +96,8 @@ vector<pair<float, float>> parse_2d_point_coordinates(string input) {
 
 int main() {
   cout << "Enter 2D point coordinates separated by space in the following "
-          "format:\n (1,3) (-7,5) (12,8) ..., etc.\n [Press Enter to process input data.]\n";
+          "format:\n (1,3) (-7,5) (12,8) ..., etc.\n [Press Enter to process "
+          "input data.]\n";
   string input{};
 
   getline(cin, input);

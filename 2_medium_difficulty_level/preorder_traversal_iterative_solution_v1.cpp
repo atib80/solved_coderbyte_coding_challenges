@@ -5,13 +5,11 @@
 using namespace std;
 
 struct tree_node {
-
   int val;
   tree_node* left;
   tree_node* right;
 
   tree_node(const int x) : val{x}, left{}, right{} {}
-
 };
 
 class Solution {
@@ -38,11 +36,9 @@ class Solution {
 
     return output;
   }
-  
 };
 
 int main() {
-  
   tree_node root_node{1};
   tree_node tree_right_node{2};
   tree_node tree_right_node_left_child{3};

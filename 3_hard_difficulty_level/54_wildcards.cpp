@@ -52,8 +52,9 @@ string Wildcards(string str) {
   const size_t sep_char_pos{str.find(' ')};
   string pattern{str.substr(0, sep_char_pos)};
 
-  // Uncommect the following code block if you intend to submit this code solution on coderbyte.
-  /* 
+  // Uncommect the following code block if you intend to submit this code
+  // solution on coderbyte.
+  /*
   for (size_t i{}; i < pattern.length(); i++) {
     if ('$' == pattern[i]) {
       pattern.insert(i, 1, '$');
@@ -89,8 +90,8 @@ string Wildcards(string str) {
           count = stoul(pattern.substr(pi + 2, ei - (pi + 2)));
           pi = ei + 1;
         }
-      } else pi++;
-      
+      } else
+        pi++;
 
       if (ti > text_len - count)
         return "false";

@@ -39,7 +39,7 @@ using namespace std;
 string ArrayCouples(const int* arr, const size_t arr_size) {
   if (1 == arr_size % 2) {
     return "not possible";
-}
+  }
 
   unordered_set<size_t> visited_indices{};
   size_t i{};
@@ -68,7 +68,7 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
         result.push_back(',');
       } else {
         already_found_missing_pair = true;
-}
+      }
       result.append(to_string(arr[i]));
       result.push_back(',');
       result.append(to_string(arr[i + 1]));
@@ -78,7 +78,7 @@ string ArrayCouples(const int* arr, const size_t arr_size) {
 
   if (!already_found_missing_pair) {
     return "yes";
-}
+  }
 
   return result;
 }

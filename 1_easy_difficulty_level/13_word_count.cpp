@@ -289,7 +289,7 @@ std::basic_string<get_char_type_t<FormatStringType>> to_str(
     else
       snwprintf(buffer, buf_size, format_string, std::forward<T>(data));
 
-      return buffer;
+    return buffer;
   }
 
   if constexpr (std::is_integral_v<data_type>) {

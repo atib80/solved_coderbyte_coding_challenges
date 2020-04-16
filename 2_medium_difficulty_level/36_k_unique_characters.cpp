@@ -71,7 +71,6 @@ string KUniqueCharacters_v1(string str) {
 }
 
 string KUniqueCharacters_v2(string str) {
-  
   const size_t k{static_cast<size_t>(str[0] - '0')};
 
   str = trim(str);

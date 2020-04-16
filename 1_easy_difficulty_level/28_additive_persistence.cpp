@@ -21,7 +21,7 @@ Output: 2
 using namespace std;
 
 constexpr int AdditivePersistence(int64_t num) {
-  if (num < 0) 
+  if (num < 0)
     num = -num;
 
   int iter_count{};

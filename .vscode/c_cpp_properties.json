@@ -2,7 +2,7 @@
   "configurations": [
     {
       "name": "MinGW",
-      "includePath": ["${workspaceFolder}/**"],
+      "includePath": ["${workspaceFolder}/**", "C:/MinGW/**"],
       "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
       "compilerPath": "C:\\MinGW\\bin\\g++.exe",
       "cStandard": "c11",

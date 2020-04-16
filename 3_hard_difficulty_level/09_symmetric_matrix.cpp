@@ -49,67 +49,13 @@ string trim(const string& input) {
   return output;
 }
 
-vector<string> split(const string& source,
-                     const char* needle,
-                     size_t const max_count = string::npos) {
-  vector<string> parts{};
-
-  string needle_st{needle};
-
-  const size_t source_len{source.length()};
-
-  const size_t needle_len{needle_st.length()};
-
-  if (!source_len)
-    return parts;
-
-  if (!needle_len) {
-    const size_t upper_limit{max_count < source_len ? max_count : source_len};
-    for (size_t i{}; i < upper_limit; i++)
-      parts.emplace_back(1, source[i]);
-    return parts;
-  }
-
-  size_t number_of_parts{}, prev{};
-
-  while (true) {
-    const size_t current{source.find(needle_st, prev)};
-
-    if (string::npos == current)
-      break;
-
-    number_of_parts++;
-
-    if ((string::npos != max_count) && (parts.size() == max_count))
-      break;
-
-    if (current - prev > 0)
-      parts.emplace_back(source.substr(prev, current - prev));
-
-    prev = current + needle_len;
-
-    if (prev >= source_len)
-      break;
-  }
-
-  if (prev < source_len) {
-    if (string::npos == max_count)
-      parts.emplace_back(source.substr(prev));
-
-    else if (parts.size() < max_count)
-      parts.emplace_back(source.substr(prev));
-  }
-
-  return parts;
-}
-
 template <typename T>
 class symmetric_matrix {
  public:
-  explicit symmetric_matrix(const size_t row_count = 0,
-                            const size_t col_count = 0) {
-    if (!row_count || !col_count)
-      throw invalid_argument{
+  explicit symmetric_matrix(const size_t row_count = 0U,
+                            const size_t col_count = 0U) {
+    if (0U == row_count || 0U == col_count)
+      throw std::invalid_argument{
           "Constructing a symmetrix_matrix object requires row_count and/or "
           "col_count to be >= 1!"};
 
@@ -119,8 +65,8 @@ class symmetric_matrix {
       row.resize(col_count);
   }
 
-  explicit symmetric_matrix(string* str_arr, const size_t str_arr_size) {
-    vector<T> row{};
+  explicit symmetric_matrix(std::string* str_arr, const size_t str_arr_size) {
+    std::vector<T> row{};
 
     size_t prev_col_width{};
 
@@ -133,14 +79,15 @@ class symmetric_matrix {
         if (!prev_col_width)
           prev_col_width = row.size();
         else if (row.size() != prev_col_width)
-          throw runtime_error{"Matrix rows must have equal column widths!"};
+          throw std::runtime_error{
+              "Matrix rows must have equal column widths!"};
         matrix_.emplace_back(row);
         row.clear();
       }
     }
 
     if (prev_col_width && (row.size() != prev_col_width))
-      throw runtime_error{"Matrix rows must have equal column widths!"};
+      throw std::runtime_error{"Matrix rows must have equal column widths!"};
 
     if (!row.empty())
       matrix_.emplace_back(row);
@@ -149,17 +96,17 @@ class symmetric_matrix {
   size_t get_row_count() const noexcept { return matrix_.size(); }
 
   size_t get_col_count() const noexcept {
-    if (!matrix_.size())
-      return 0;
+    if (0U == matrix_.size())
+      return 0U;
 
     return matrix_[0].size();
   }
 
-  symmetric_matrix transpose() const {
+  symmetric_matrix<T> transpose() const {
     const size_t rc{get_row_count()};
     const size_t cc{get_col_count()};
 
-    symmetric_matrix transposed_matrix(cc, rc);
+    symmetric_matrix<T> transposed_matrix(cc, rc);
 
     for (size_t i{}; i < rc; i++) {
       for (size_t j{}; j < cc; j++)
@@ -169,11 +116,11 @@ class symmetric_matrix {
     return transposed_matrix;
   }
 
-  bool operator==(const symmetric_matrix& m) const {
+  bool operator==(const symmetric_matrix<T>& m) const {
     const size_t rc{get_row_count()};
     const size_t cc{get_col_count()};
 
-    if (!m.get_row_count())
+    if (0U == m.get_row_count())
       return false;
     if (m.get_row_count() != rc)
       return false;
@@ -192,15 +139,15 @@ class symmetric_matrix {
 
   T operator()(const size_t i, const size_t j) const {
     if (i >= matrix_.size()) {
-      ostringstream oss{};
+      std::ostringstream oss{};
       oss << "Specified row index (i = " << i << ") is out of bounds!";
-      throw range_error(oss.str());
+      throw std::range_error(oss.str());
     }
 
     if (j >= matrix_[i].size()) {
-      ostringstream oss{};
+      std::ostringstream oss{};
       oss << "Specified column index (j = " << j << ") is out of bounds!";
-      throw range_error(oss.str());
+      throw std::range_error(oss.str());
     }
 
     return matrix_[i][j];
@@ -208,90 +155,89 @@ class symmetric_matrix {
 
   T& operator()(const size_t i, const size_t j) {
     if (i >= matrix_.size()) {
-      ostringstream oss{};
+      std::ostringstream oss{};
       oss << "Specified row index (i = " << i << ") is out of bounds!";
-      throw range_error(oss.str());
+      throw std::range_error(oss.str());
     }
 
     if (j >= matrix_[i].size()) {
-      ostringstream oss{};
+      std::ostringstream oss{};
       oss << "Specified column index (j = " << j << ") is out of bounds!";
-      throw range_error(oss.str());
+      throw std::range_error(oss.str());
     }
 
     return matrix_[i][j];
   }
 
-  explicit operator string() const {
-    ostringstream ss{};
+  operator std::string() const { return to_string(); }
+
+  std::string to_string() const {
+    std::ostringstream oss{};
+
+    oss << '\n';
 
     for (const auto& row : matrix_) {
-      for (const auto& element : row)
-        ss << element;
+      oss << '|';
+      if (row.empty()) {
+        oss << "[]|\n";
+        continue;
+      }
+      for (size_t i{}; i < row.size() - 1; ++i)
+        oss << row.at(i) << ',';
+
+      oss << row.back() << "|\n";
     }
 
-    return ss.str();
+    return oss.str();
   }
 
-  string to_string() const {
-    ostringstream ss{};
+  std::istream& create_symmetric_matrix_from_input_stream(
+      std::istream& is) const {
+    matrix_.clear();
 
-    for (const auto& row : matrix_) {
-      for (const auto& element : row)
-        ss << element;
+    std::vector<T> row{};
+    std::string line{};
+    size_t prev_col_width{};
+
+    while (std::getline(is, line)) {
+      line = trim(line);
+
+      if (line != "<>") {
+        row.emplace_back(stoi(line));
+      } else {
+        if (!prev_col_width)
+          prev_col_width = row.size();
+        else if (row.size() != prev_col_width)
+          throw std::runtime_error{
+              "The rows of matrix must have equal column widths!"};
+        matrix_.emplace_back(row);
+        row.clear();
+      }
+
+      if (prev_col_width && (row.size() != prev_col_width))
+        throw std::runtime_error{
+            "The rows of matrix must have equal column widths!"};
+
+      if (!row.empty())
+        matrix_.emplace_back(row);
     }
 
-    return ss.str();
+    return is;
   }
-
-  friend istream& operator>>(istream&, symmetric_matrix&);
-  friend ostream& operator<<(ostream&, const symmetric_matrix&);
 
  private:
   vector<vector<T>> matrix_;
 };
 
 template <typename T>
-ostream& operator<<(ostream& ostr, const symmetric_matrix<T>& m) {
-  for (const auto& row : m.matrix_) {
-    for (const auto& element : row)
-      ostr << element;
-  }
-
-  return ostr;
+std::ostream& operator<<(std::ostream& os, const symmetric_matrix<T>& m) {
+  os << m.to_string();
+  return os;
 }
 
 template <typename T>
-istream& operator>>(istream& istr, symmetric_matrix<T>& m) {
-  m.matrix_.clear();
-
-  vector<T> row{};
-  string line{};
-  size_t prev_col_width{};
-
-  while (getline(istr, line)) {
-    line = trim(line);
-
-    if (line != "<>") {
-      row.emplace_back(stoi(line));
-    } else {
-      if (!prev_col_width)
-        prev_col_width = row.size();
-      else if (row.size() != prev_col_width)
-        throw runtime_error{
-            "The rows of matrix must have equal column widths!"};
-      m.matrix_.emplace_back(row);
-      row.clear();
-    }
-
-    if (prev_col_width && (row.size() != prev_col_width))
-      throw runtime_error{"The rows of matrix must have equal column widths!"};
-
-    if (!row.empty())
-      m.matrix_.emplace_back(row);
-  }
-
-  return istr;
+std::istream& operator>>(std::istream& is, symmetric_matrix<T>& m) {
+  return m.create_symmetric_matrix_from_input_stream(is);
 }
 
 string SymmetricMatrix(string* str_arr, const size_t str_arr_size) {

@@ -79,7 +79,6 @@ string TreeConstructor(string* str_arr, const size_t str_arr_size) {
 
   sort(begin(child_parent_value_pairs), end(child_parent_value_pairs),
        [](const pair<int, int>& lp, const pair<int, int>& rp) {
-
          return lp.second < rp.second;
        });
 

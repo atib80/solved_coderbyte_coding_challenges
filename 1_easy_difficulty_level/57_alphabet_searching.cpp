@@ -122,7 +122,8 @@ string AlphabetSearching_v2(string str) {
 
   for (const char ch : str) {
     ch = static_cast<char>(tolower(ch));
-    if (dict.find(ch) != end(dict)) dict[ch]++;
+    if (dict.find(ch) != end(dict))
+      dict[ch]++;
   }
 
   for (const auto& char_freq : dict) {

@@ -43,9 +43,8 @@ bool is_prime_number(long n) {
     k = divisor_factors[index++];
 
     if (index > 3) {
-
       index = 0;
-      
+
       for (auto& factor : divisor_factors)
         factor += 10;
     }

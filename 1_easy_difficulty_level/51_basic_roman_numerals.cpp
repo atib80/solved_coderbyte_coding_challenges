@@ -72,7 +72,6 @@ string BasicRomanNumerals(string str) {
   size_t number{};
 
   for (size_t i{}; i < str.length(); ++i) {
-    
     const size_t needle_len{i < str.length() - 1 ? 2U : 1U};
     string_view key{&str[i], needle_len};
 

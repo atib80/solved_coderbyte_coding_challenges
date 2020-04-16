@@ -21,7 +21,6 @@ Output: 0
 using namespace std;
 
 int ThreeFiveMultiples(const int num) {
-
   int sum{};
 
   for (int i{3}; i < num; i++) {

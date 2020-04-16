@@ -88,7 +88,7 @@ bool is_matrix_path_connected(const vector<vector<bool>>& matrix) {
   queue<tuple<size_t, size_t, unordered_set<size_t>>> q{
       {make_tuple(0, 0, unordered_set<size_t>{})}};
 
-  while (!q.empty()) {      
+  while (!q.empty()) {
     const size_t x{get<0>(q.front())};
     const size_t y{get<1>(q.front())};
     unordered_set<size_t> already_visited{move(get<2>(q.front()))};

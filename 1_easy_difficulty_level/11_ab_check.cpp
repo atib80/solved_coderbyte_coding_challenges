@@ -316,8 +316,7 @@ string ABCheck_v1(string str) {
 
   const int str_len{static_cast<int>(str.length())};
 
-  for (int i{}, j{str_len - 1}; i < str_len - 4 && j > 3 && i < j;
-       i++, j--) {
+  for (int i{}, j{str_len - 1}; i < str_len - 4 && j > 3 && i < j; i++, j--) {
     if (('a' == str[i] && 'b' == str[i + 4]) ||
         ('b' == str[i] && 'a' == str[i + 4]) ||
         ('a' == str[j] && 'b' == str[j - 4]) ||

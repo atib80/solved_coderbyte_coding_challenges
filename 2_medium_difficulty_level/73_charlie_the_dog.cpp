@@ -93,9 +93,7 @@ size_t CharlietheDog_v1(string* str_arr, const size_t arr_size) {
 
   sort(begin(food_positions), end(food_positions),
        [](const pair<size_t, size_t>& x, const pair<size_t, size_t>& y) {
-
          return x.first < y.first && x.second < y.second;
-
        });
 
   size_t index{};
@@ -154,9 +152,7 @@ size_t CharlietheDog_v2(string* str_arr, const size_t arr_size) {
 
   sort(begin(food_positions), end(food_positions),
        [](const pair<size_t, size_t>& x, const pair<size_t, size_t>& y) {
-
          return x.first < y.first && x.second < y.second;
-
        });
 
   do {
@@ -233,9 +229,7 @@ size_t CharlietheDog_v3(string* str_arr, const size_t arr_size) {
 
   sort(begin(food_positions), end(food_positions),
        [&dog](const pair<size_t, size_t>& x, const pair<size_t, size_t>& y) {
-
          return calculate_distance(x, dog) < calculate_distance(y, dog);
-
        });
 
   const unordered_map<string, size_t> precalculated_food_position_distances{

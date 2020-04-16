@@ -55,7 +55,10 @@ string join(const _Container& items, const string& needle) {
   return result;
 }
 
-void find_incorrect_max_heap_values(const int* arr, const size_t arr_size, const size_t pos, vector<int>& found_elements) {
+void find_incorrect_max_heap_values(const int* arr,
+                                    const size_t arr_size,
+                                    const size_t pos,
+                                    vector<int>& found_elements) {
   if (pos >= arr_size)
     return;
 
@@ -69,17 +72,20 @@ void find_incorrect_max_heap_values(const int* arr, const size_t arr_size, const
     find_incorrect_max_heap_values(arr, arr_size, 2 * pos + 1, found_elements);
 
   if (2 * (pos + 1) + 1 < arr_size)
-    find_incorrect_max_heap_values(arr, arr_size, 2 * (pos + 1) + 1, found_elements);
+    find_incorrect_max_heap_values(arr, arr_size, 2 * (pos + 1) + 1,
+                                   found_elements);
 }
 
 string MaxHeapChecker(const int* arr, const size_t arr_size) {
-  if (1 == arr_size) return "max";
+  if (1 == arr_size)
+    return "max";
 
   vector<int> found_elements{};
 
   find_incorrect_max_heap_values(arr, arr_size, 1, found_elements);
 
-  if (found_elements.empty()) return "max";
+  if (found_elements.empty())
+    return "max";
 
   return join(found_elements, ",");
 }

@@ -42,14 +42,14 @@ string Primes(int64_t num) {
 
 int main() {
   // cout << Primes(gets(stdin));
-  cout << Primes(3) << '\n';    // expected output: "true"
-  cout << Primes(4) << '\n';    // expected output: "false"
-  cout << Primes(5) << '\n';    // expected output: "true"
-  cout << Primes(7) << '\n';    // expected output: "true"
-  cout << Primes(19) << '\n';   // expected output: "true"
-  cout << Primes(110) << '\n';  // expected output: "false"
-  cout << Primes(71) << '\n';   // expected output: "true"
-  cout << Primes(1709) << '\n'; // expected output: "true"
+  cout << Primes(3) << '\n';     // expected output: "true"
+  cout << Primes(4) << '\n';     // expected output: "false"
+  cout << Primes(5) << '\n';     // expected output: "true"
+  cout << Primes(7) << '\n';     // expected output: "true"
+  cout << Primes(19) << '\n';    // expected output: "true"
+  cout << Primes(110) << '\n';   // expected output: "false"
+  cout << Primes(71) << '\n';    // expected output: "true"
+  cout << Primes(1709) << '\n';  // expected output: "true"
 
   return 0;
 }

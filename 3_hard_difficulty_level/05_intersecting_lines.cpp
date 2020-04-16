@@ -200,7 +200,8 @@ string find_intersection_point_coordinates_of_two_lines(
 }
 
 string IntersectingLines(string* str_arr, const size_t str_arr_size) {
-  const vector<pair<int, int>> points { parse_2d_coordinate_pairs(str_arr, str_arr_size) };
+  const vector<pair<int, int>> points{
+      parse_2d_coordinate_pairs(str_arr, str_arr_size)};
 
   if (4 != points.size())
     return "no intersection";

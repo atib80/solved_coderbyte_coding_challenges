@@ -82,9 +82,9 @@ string CaesarCipher(string str, size_t num) {
 int main() {
   // cout << CaesarCipher(gets(stdin));
   cout << CaesarCipher("Caesar Cipher", 2)
-       << '\n';                                  // expected output: "Ecguct Ekrjgt"
-  cout << CaesarCipher("Hello", 4) << '\n';      // expected output: "Lipps"
-  cout << CaesarCipher("abc", 0) << '\n';        // expected output: "abc"
+       << '\n';                              // expected output: "Ecguct Ekrjgt"
+  cout << CaesarCipher("Hello", 4) << '\n';  // expected output: "Lipps"
+  cout << CaesarCipher("abc", 0) << '\n';    // expected output: "abc"
   cout << CaesarCipher("coderBYTE", 2) << '\n';  // expected output: "eqfgtDAVG"
   cout << CaesarCipher("dogs", 8) << '\n';       // expected output: "lwoa"
   cout << CaesarCipher("byte", 13) << '\n';      // expected output: "olgr"

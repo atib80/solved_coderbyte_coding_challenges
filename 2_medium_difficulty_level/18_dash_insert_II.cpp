@@ -24,7 +24,6 @@ Output: "56*6*47-304"
 using namespace std;
 
 string trim(const string& input) {
-  
   string output{input};
   output.erase(begin(output),
                find_if(begin(output), end(output),
