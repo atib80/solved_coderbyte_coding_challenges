@@ -30,17 +30,16 @@ Output: "love"
 #include "../include/stl_helper_functions.hpp"
 
 using namespace std;
-using namespace stl::helper;
 
 string LongestWord_v1(string sen) {
   size_t longest_first_word_length{}, longest_first_word_start_index{};
   size_t word_len{}, start_index{string::npos};
 
-  for (size_t i{}; i < sen.length(); i++) {
+  for (size_t i{}; i < sen.length(); ++i) {
     if (isalnum(sen[i])) {
       if (string::npos == start_index)
         start_index = i;
-      word_len++;
+      ++word_len;
     } else {
       if (word_len > longest_first_word_length) {
         longest_first_word_start_index = start_index;
@@ -89,6 +88,129 @@ string LongestWord_v2(string sen) {
   return sen.substr(longest_first_word_start_index, longest_first_word_length);
 }
 
+/* find_first_sequence_of_allowed_elements function template is
+ * a less generic version of the std::search algorithm function template,
+ * which allows the user to find in the input source range a consequtive
+ * sequence of elements which are all present in the provided @haystack
+ * container.
+ */
+template <typename ForwardIterType, typename ContainerType>
+std::pair<ForwardIterType, ForwardIterType>
+find_first_sequence_of_allowed_elements(ForwardIterType start,
+                                        ForwardIterType last,
+                                        const ContainerType& haystack,
+                                        const bool is_haystack_sorted = false) {
+  using T = typename std::iterator_traits<ForwardIterType>::value_type;
+
+  if (start == last)
+    return {last, last};
+
+  if constexpr (stl::helper::has_find_member_function_v<ContainerType, T>) {
+    const auto first{
+        std::find_if(start, last, [&haystack](const auto& current_element) {
+          return std::cend(haystack) != haystack.find(current_element);
+        })};
+    if (first == last)
+      return {last, last};
+    auto second{first};
+    ++second;
+    second =
+        std::find_if(second, last, [&haystack](const auto& current_element) {
+          return std::cend(haystack) == haystack.find(current_element);
+        });
+    return {first, second};
+
+  } else {
+    if (is_haystack_sorted) {
+      const auto first{
+          find_if(start, last, [&haystack](const auto& current_element) {
+            return std::binary_search(std::cbegin(haystack),
+                                      std::cend(haystack), current_element);
+          })};
+      if (last == first)
+        return {last, last};
+      auto second{first};
+      ++second;
+      second =
+          std::find_if(second, last, [&haystack](const auto& current_element) {
+            return !std::binary_search(std::cbegin(haystack),
+                                       std::cend(haystack), current_element);
+          });
+
+      return {first, second};
+    } else {
+      const auto first{
+          std::find_if(start, last, [&haystack](const auto& current_element) {
+            return std::cend(haystack) != std::find(std::cbegin(haystack),
+                                                    std::cend(haystack),
+                                                    current_element);
+          })};
+      if (last == first)
+        return {last, last};
+      auto second{first};
+      ++second;
+      second =
+          std::find_if(second, last, [&haystack](const auto& current_element) {
+            return std::cend(haystack) == std::find(std::cbegin(haystack),
+                                                    std::cend(haystack),
+                                                    current_element);
+          });
+
+      return {first, second};
+    }
+  }
+}
+
+/* find_longest_word function template finds the longest word in the provided
+ * [first, last) source range of characters. The longest word may be comprised
+ * of elements that are contained in the provided @haystack container only.
+ */
+template <typename IterType, typename ContainerType>
+std::pair<IterType, IterType> find_longest_word(IterType first,
+                                                const IterType last,
+                                                ContainerType& haystack) {
+  using T = typename std::iterator_traits<IterType>::value_type;
+  using U = typename ContainerType::value_type;
+
+  bool is_haystack_sorted{
+      stl::helper::has_find_member_function_v<ContainerType, T>};
+
+  if constexpr (!stl::helper::has_find_member_function_v<ContainerType, T> &&
+                ((stl::helper::has_sort_member_function_v<ContainerType> &&
+                  stl::helper::is_operator_less_than_defined_v<U>) ||
+                 stl::helper::is_operator_less_than_defined_v<U>)) {
+    if constexpr (stl::helper::has_sort_member_function_v<ContainerType>)
+      haystack.sort();
+    else
+      std::sort(std::begin(haystack), std::end(haystack));
+    is_haystack_sorted = true;
+  }
+
+  decltype(std::distance(first, last)) longest_first_word_length{};
+  auto longest_first_word_start_iter = first;
+  auto longest_first_word_last_iter = first;
+
+  while (first != last) {
+    const auto [seq_first, seq_last] = find_first_sequence_of_allowed_elements(
+        first, last, haystack, is_haystack_sorted);
+
+    if (seq_first == seq_last)
+      break;
+
+    const auto current_distance{std::distance(seq_first, seq_last)};
+
+    if (current_distance > longest_first_word_length) {
+      longest_first_word_length = current_distance;
+      longest_first_word_start_iter = seq_first;
+      longest_first_word_last_iter = seq_last;
+    }
+
+    first = seq_last;
+  }
+
+  return {longest_first_word_start_iter, longest_first_word_last_iter};
+}
+
 string LongestWord_v3(string sen) {
   static std::random_device rd{};
   static constexpr const array<char, 63> allowed_chars{
@@ -107,10 +229,17 @@ string LongestWord_v3(string sen) {
   unordered_set<char> allowed_chars_hash_set{cbegin(allowed_chars),
                                              cend(allowed_chars)};
 
-  vector<string> results(3);
-  results[0] = find_longest_word(sen, allowed_chars_hash_set);
-  results[1] = find_longest_word(sen, vector_of_allowed_chars_unsorted);
-  results[2] = find_longest_word(sen, list_of_allowed_chars_unsorted);
+  vector<string> results{};
+  results.reserve(3U);
+  auto first_last_iter =
+      find_longest_word(cbegin(sen), cend(sen), allowed_chars_hash_set);
+  results.emplace_back(first_last_iter.first, first_last_iter.second);
+  first_last_iter = find_longest_word(cbegin(sen), cend(sen),
+                                      vector_of_allowed_chars_unsorted);
+  results.emplace_back(first_last_iter.first, first_last_iter.second);
+  first_last_iter =
+      find_longest_word(cbegin(sen), cend(sen), list_of_allowed_chars_unsorted);
+  results.emplace_back(first_last_iter.first, first_last_iter.second);
 
   // sort(begin(results), end(results), [](const string& lhs, const string& rhs)
   // {
