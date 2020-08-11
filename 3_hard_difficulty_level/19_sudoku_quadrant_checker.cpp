@@ -28,6 +28,7 @@ then your program should return 3,4,5,9.
 */
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstring>
 #include <iostream>
@@ -37,7 +38,6 @@ then your program should return 3,4,5,9.
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -204,7 +204,9 @@ auto str_join(const ContainerType& items, const StringType& needle, true_type) {
 }
 
 template <typename ContainerType, typename CharacterPointerType>
-auto str_join(const ContainerType& items, CharacterPointerType needle, false_type) {
+auto str_join(const ContainerType& items,
+              CharacterPointerType needle,
+              false_type) {
   using char_type = remove_const_t<remove_pointer_t<CharacterPointerType>>;
 
   // puts(__PRETTY_FUNCTION__);
@@ -241,163 +243,14 @@ auto str_join(const ContainerType& items, CharacterPointerType needle, false_typ
 template <typename ContainerType, typename NeedleType>
 auto str_join(const ContainerType& items, const NeedleType& needle) {
   // puts(__PRETTY_FUNCTION__);
-  return str_join(items, needle,
-              conditional_t<is_class_v<NeedleType>, true_type, false_type>{});
+  return str_join(
+      items, needle,
+      conditional_t<is_class_v<NeedleType>, true_type, false_type>{});
 }
 
-void check_sudoku_row(const vector<vector<int>>& sudoku,
-                      const size_t row_index,
-                      set<size_t>& found_invalid_grid_indices) {
-  if (row_index >= 9) {
-    ostringstream oss{};
-    oss << "You've specified an invalid row index (" << row_index
-        << ")!\nRow index must safisfy the following rule: 0 <= row_index < 9!";
-    throw invalid_argument{oss.str()};
-  }
-
-  if (9 != sudoku.size()) {
-    ostringstream oss{};
-    oss << "Invalid row count (" << sudoku.size()
-        << ")!\nSudoku matrix must have 9 rows!";
-    throw invalid_argument{oss.str()};
-  }
-
-  if (9 != sudoku[0].size()) {
-    ostringstream oss{};
-    oss << "Invalid column count (" << sudoku[0].size()
-        << ")!\nSudoku matrix must have 9 columns!";
-    throw invalid_argument{oss.str()};
-  }
-
-  unordered_set<int> found_values{};
-
-  for (size_t y{}; y < 9; ++y) {
-    if (-1 == sudoku[row_index][y])
-      continue;
-
-    if (!found_values.count(sudoku[row_index][y])) {
-      found_values.insert(sudoku[row_index][y]);
-
-      if (1 != count(begin(sudoku[row_index]), end(sudoku[row_index]),
-                     sudoku[row_index][y])) {
-        for (size_t column_index{}; column_index < 9; ++column_index) {
-          if (sudoku[row_index][y] == sudoku[row_index][column_index])
-            found_invalid_grid_indices.insert(row_index / 3 * 3 +
-                                              column_index / 3 + 1);
-        }
-      }
-    }
-  }
-}
-
-void check_sudoku_column(const vector<vector<int>>& sudoku,
-                         const size_t column_index,
-                         set<size_t>& found_invalid_grid_indices) {
-  if (column_index >= 9) {
-    ostringstream oss{};
-    oss << "You've specified an invalid column index (" << column_index
-        << ")!\nColumn index must safisfy the following rule: 0 <= "
-           "column_index < 9!";
-    throw invalid_argument{oss.str()};
-  }
-
-  if (9 != sudoku.size()) {
-    ostringstream oss{};
-    oss << "Invalid row count (" << sudoku.size()
-        << ")!\nSudoku matrix must have 9 rows!";
-    throw invalid_argument{oss.str()};
-  }
-
-  if (9 != sudoku[0].size()) {
-    ostringstream oss{};
-    oss << "Invalid column count (" << sudoku[0].size()
-        << ")!\nSudoku matrix must have 9 columns!";
-    throw invalid_argument{oss.str()};
-  }
-
-  vector<int> column(9);
-
-  for (size_t row_index{}; row_index < 9; ++row_index) {
-    column[row_index] = sudoku[row_index][column_index];
-  }
-
-  unordered_set<int> found_values{};
-
-  for (size_t x{}; x < 9; ++x) {
-    if (-1 == column[x])
-      continue;
-
-    if (!found_values.count(column[x])) {
-      found_values.insert(column[x]);
-
-      if (1 != count(begin(column), end(column), column[x])) {
-        for (size_t row_index{}; row_index < 9; ++row_index) {
-          if (column[x] == column[row_index])
-            found_invalid_grid_indices.insert(row_index / 3 * 3 +
-                                              column_index / 3 + 1);
-        }
-      }
-    }
-  }
-}
-
-void check_sudoku_sub_grid(const vector<vector<int>>& sudoku,
-                           const size_t sub_grid_index,
-                           set<size_t>& found_invalid_grid_indices) {
-  if (sub_grid_index >= 9) {
-    ostringstream oss{};
-    oss << "You've specified an invalid sub-grid index index ("
-        << sub_grid_index
-        << ")!\nSub-grid index index must safisfy the following rule: 0 <= "
-           "sub_grid_index < 9!";
-    throw invalid_argument{oss.str()};
-  }
-
-  if (9 != sudoku.size()) {
-    ostringstream oss{};
-    oss << "Invalid row count (" << sudoku.size()
-        << ")!\nSudoku matrix must have 9 rows!";
-    throw invalid_argument{oss.str()};
-  }
-
-  if (9 != sudoku[0].size()) {
-    ostringstream oss{};
-    oss << "Invalid column count (" << sudoku[0].size()
-        << ")!\nSudoku matrix must have 9 columns!";
-    throw invalid_argument{oss.str()};
-  }
-
-  vector<int> sub_grid_numbers(9);
-
-  for (size_t row_index{sub_grid_index / 3 * 3}, i{};
-       row_index < sub_grid_index / 3 * 3 + 3; ++row_index) {
-    for (size_t column_index{sub_grid_index % 3 * 3};
-         column_index < sub_grid_index % 3 * 3 + 3; ++column_index) {
-      sub_grid_numbers[i++] = sudoku[row_index][column_index];
-    }
-  }
-
-  unordered_set<int> found_values{};
-
-  for (size_t i{}; i < 9; ++i) {
-    if (-1 == sub_grid_numbers[i])
-      continue;
-
-    if (!found_values.count(sub_grid_numbers[i])) {
-      found_values.insert(sub_grid_numbers[i]);
-
-      if (1 != count(begin(sub_grid_numbers), end(sub_grid_numbers),
-                     sub_grid_numbers[i])) {
-        found_invalid_grid_indices.insert(sub_grid_index + 1);
-        return;
-      }
-    }
-  }
-}
-
-vector<vector<int>> create_sudoku_game_board(string* str_arr,
-                                             const size_t str_arr_size) {
-  vector<vector<int>> sudoku(9, vector<int>(9));
+array<array<int, 9>, 9> create_sudoku_game_board(string* str_arr,
+                                                 const size_t str_arr_size) {
+  array<array<int, 9>, 9> sudoku{{}};
 
   for (size_t i{}; i < str_arr_size; ++i) {
     str_arr[i] = str_trim(str_arr[i]);
@@ -419,20 +272,57 @@ vector<vector<int>> create_sudoku_game_board(string* str_arr,
 }
 
 string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
-  const vector<vector<int>> sudoku{
+  const array<array<int, 9>, 9> sudoku{
       create_sudoku_game_board(str_arr, str_arr_size)};
+
+  std::array<std::array<size_t, 10>, 9> sudoku_rows_number_frequency{{}};
+  std::array<std::array<std::vector<size_t>, 10>, 9>
+      sudoku_row_numbers_subgrid_indices{{}};
+
+  std::array<std::array<size_t, 10>, 9> sudoku_columns_number_frequency{{}};
+  std::array<std::array<std::vector<size_t>, 10>, 9>
+      sudoku_column_numbers_subgrid_indices{{}};
+
+  std::array<std::array<size_t, 10>, 9> sudoku_subgrids_number_frequency{{}};
+
+  for (size_t i{}; i < 9; ++i) {
+    for (size_t j{}; j < 9; ++j) {
+      if (-1 != sudoku[i][j]) {
+        ++sudoku_rows_number_frequency[i][sudoku[i][j]];
+        sudoku_row_numbers_subgrid_indices[i][sudoku[i][j]].emplace_back(
+            i / 3 * 3 + j / 3 + 1);
+
+        ++sudoku_columns_number_frequency[j][sudoku[i][j]];
+        sudoku_column_numbers_subgrid_indices[j][sudoku[i][j]].emplace_back(
+            i / 3 * 3 + j / 3 + 1);
+
+        ++sudoku_subgrids_number_frequency[i / 3 * 3 + j / 3][sudoku[i][j]];
+      }
+    }
+  }
+
   set<size_t> found_invalid_grid_indices{};
 
   for (size_t i{}; i < 9; ++i) {
-    check_sudoku_row(sudoku, i, found_invalid_grid_indices);
-    check_sudoku_column(sudoku, i, found_invalid_grid_indices);
-    check_sudoku_sub_grid(sudoku, i, found_invalid_grid_indices);
+    for (size_t number{1}; number <= 9; ++number) {
+      if (sudoku_rows_number_frequency[i][number] > 1U)
+        found_invalid_grid_indices.insert(
+            cbegin(sudoku_row_numbers_subgrid_indices[i][number]),
+            cend(sudoku_row_numbers_subgrid_indices[i][number]));
+
+      if (sudoku_columns_number_frequency[i][number] > 1U)
+        found_invalid_grid_indices.insert(
+            cbegin(sudoku_column_numbers_subgrid_indices[i][number]),
+            cend(sudoku_column_numbers_subgrid_indices[i][number]));
+
+      if (sudoku_subgrids_number_frequency[i][number] > 1U)
+        found_invalid_grid_indices.emplace(i + 1);
+    }
   }
 
-  if (found_invalid_grid_indices.empty())
-    return "legal";
-
-  return str_join(found_invalid_grid_indices, ",");
+  return !found_invalid_grid_indices.empty()
+             ? str_join(found_invalid_grid_indices, ",")
+             : "legal";
 }
 
 int main() {
@@ -450,6 +340,13 @@ int main() {
       "(x,x,x,x,x,x,x,x,x)", "(x,x,x,x,x,x,x,x,x)", "(x,x,x,x,x,x,x,x,9)"};
   cout << SudokuQuadrantChecker(C, sizeof(C) / sizeof(*C))
        << '\n';  // expected output: "3,4,5,9"
+
+  string D[] = {
+      "(1,2,3,4,5,6,7,8,9)", "(4,5,6,7,8,9,1,2,3)", "(7,8,9,1,2,3,4,5,6)",
+      "(x,x,x,x,x,x,x,x,x)", "(x,x,x,x,x,x,x,x,x)", "(x,x,x,x,x,x,x,x,x)",
+      "(x,x,x,x,x,x,x,x,x)", "(x,x,x,x,x,x,x,x,x)", "(x,x,x,x,x,x,x,x,x)"};
+  cout << SudokuQuadrantChecker(D, sizeof(D) / sizeof(*D))
+       << '\n';  // expected output: "legal"
 
   return 0;
 }
