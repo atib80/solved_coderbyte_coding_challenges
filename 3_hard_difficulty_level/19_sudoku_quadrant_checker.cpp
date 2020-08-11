@@ -43,7 +43,7 @@ then your program should return 3,4,5,9.
 
 using namespace std;
 
-std::string trim(const std::string& input) {
+std::string str_trim(const std::string& input) {
   std::string output{input};
   output.erase(std::cbegin(output),
                std::find_if(std::cbegin(output), std::cend(output),
@@ -172,7 +172,7 @@ std::vector<std::string> str_split(const std::string& src,
 }
 
 template <typename ContainerType, typename StringType>
-auto join(const ContainerType& items, const StringType& needle, true_type) {
+auto str_join(const ContainerType& items, const StringType& needle, true_type) {
   // puts(__PRETTY_FUNCTION__);
 
   static_assert(
@@ -204,7 +204,7 @@ auto join(const ContainerType& items, const StringType& needle, true_type) {
 }
 
 template <typename ContainerType, typename CharacterPointerType>
-auto join(const ContainerType& items, CharacterPointerType needle, false_type) {
+auto str_join(const ContainerType& items, CharacterPointerType needle, false_type) {
   using char_type = remove_const_t<remove_pointer_t<CharacterPointerType>>;
 
   // puts(__PRETTY_FUNCTION__);
@@ -239,9 +239,9 @@ auto join(const ContainerType& items, CharacterPointerType needle, false_type) {
 }
 
 template <typename ContainerType, typename NeedleType>
-auto join(const ContainerType& items, const NeedleType& needle) {
+auto str_join(const ContainerType& items, const NeedleType& needle) {
   // puts(__PRETTY_FUNCTION__);
-  return join(items, needle,
+  return str_join(items, needle,
               conditional_t<is_class_v<NeedleType>, true_type, false_type>{});
 }
 
@@ -400,7 +400,7 @@ vector<vector<int>> create_sudoku_game_board(string* str_arr,
   vector<vector<int>> sudoku(9, vector<int>(9));
 
   for (size_t i{}; i < str_arr_size; ++i) {
-    str_arr[i] = trim(str_arr[i]);
+    str_arr[i] = str_trim(str_arr[i]);
     str_arr[i].erase(begin(str_arr[i]));
     str_arr[i].erase(--end(str_arr[i]));
 
@@ -432,7 +432,7 @@ string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
   if (found_invalid_grid_indices.empty())
     return "legal";
 
-  return join(found_invalid_grid_indices, ",");
+  return str_join(found_invalid_grid_indices, ",");
 }
 
 int main() {
