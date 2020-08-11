@@ -29,11 +29,13 @@ then your program should return 3,4,5,9.
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iostream>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_set>
 #include <utility>
@@ -41,89 +43,143 @@ then your program should return 3,4,5,9.
 
 using namespace std;
 
-string trim(const string& input) {
-  string output{input};
-  output.erase(begin(output),
-               find_if(begin(output), end(output),
-                       [](const char ch) { return !isspace(ch); }));
+std::string trim(const std::string& input) {
+  std::string output{input};
+  output.erase(std::cbegin(output),
+               std::find_if(std::cbegin(output), std::cend(output),
+                            [](const char ch) { return !isspace(ch); }));
 
-  output.erase(find_if(output.rbegin(), output.rend(),
-                       [](const char ch) { return !isspace(ch); })
+  output.erase(std::find_if(output.crbegin(), output.crend(),
+                            [](const char ch) { return !isspace(ch); })
                    .base(),
-               end(output));
+               std::cend(output));
 
   return output;
 }
 
-vector<string> split(const string& source,
-                     const char* needle,
-                     size_t const max_count = string::npos) {
-  vector<string> parts{};
+std::pair<std::size_t, std::size_t> str_find_first_needle_position(
+    std::string_view src_sv,
+    const std::vector<std::string_view>& needle_parts,
+    const size_t start_pos = 0U) {
+  size_t first_needle_pos{std::string_view::npos};
+  size_t needle_len{};
 
-  string needle_st{needle};
+  for (const auto& needle_sv : needle_parts) {
+    const size_t needle_start_pos = src_sv.find(needle_sv, start_pos);
+    if (needle_start_pos < first_needle_pos) {
+      first_needle_pos = needle_start_pos;
+      needle_len = needle_sv.length();
+    }
+  }
 
-  const size_t source_len{source.length()};
+  return {first_needle_pos, needle_len};
+}
 
-  const size_t needle_len{needle_st.length()};
+std::vector<std::string> str_split(const std::string& src,
+                                   const char* needle,
+                                   const char* needle_parts_separator_token,
+                                   const bool split_on_whole_needle = false,
+                                   const bool ignore_empty_string = true,
+                                   size_t const max_count = std::string::npos) {
+  const size_t src_len{src.length()};
 
-  if (!source_len)
-    return parts;
+  if (0U == src_len)
+    return {};
 
-  if (!needle_len) {
-    const size_t upper_limit{max_count < source_len ? max_count : source_len};
-    for (size_t i{}; i < upper_limit; i++)
-      parts.emplace_back(1, source[i]);
+  std::string_view src_sv{src};
+
+  if (nullptr == needle)
+    return {};
+
+  const size_t needle_len = std::strlen(needle);
+
+  if (0U == needle_len) {
+    const size_t upper_limit{max_count < src_len ? max_count : src_len};
+    std::vector<std::string> parts{};
+    parts.reserve(upper_limit);
+    for (size_t i{}; i < upper_limit; ++i)
+      parts.emplace_back(1, src_sv[i]);
     return parts;
   }
 
+  std::string_view needle_sv{needle, needle_len};
+
+  const size_t needle_parts_separator_token_len =
+      needle_parts_separator_token != nullptr
+          ? std::strlen(needle_parts_separator_token)
+          : 0;
+
+  std::string_view needle_parts_separator_token_sv{
+      needle_parts_separator_token, needle_parts_separator_token_len};
+
+  std::vector<std::string_view> needle_parts{};
+
+  if (needle_parts_separator_token_len > 0U && !split_on_whole_needle) {
+    size_t start_pos{};
+
+    while (true) {
+      const size_t next_pos{
+          needle_sv.find(needle_parts_separator_token_sv, start_pos)};
+
+      if (std::string_view::npos == next_pos) {
+        needle_parts.emplace_back(needle_sv.data() + start_pos,
+                                  needle_len - start_pos);
+        break;
+      }
+
+      needle_parts.emplace_back(needle_sv.data() + start_pos,
+                                next_pos - start_pos);
+
+      start_pos = next_pos + needle_parts_separator_token_len;
+    }
+  } else
+    needle_parts.emplace_back(needle_sv);
+
+  std::vector<std::string> parts{};
   size_t number_of_parts{}, prev{};
 
   while (true) {
-    const size_t current{source.find(needle_st, prev)};
+    const auto [current, needle_part_len] =
+        str_find_first_needle_position(src_sv, needle_parts, prev);
 
-    if (string::npos == current)
+    if (std::string_view::npos == current || 0U == needle_part_len ||
+        parts.size() == max_count)
       break;
 
-    number_of_parts++;
+    if (current - prev > 0U) {
+      parts.emplace_back(std::cbegin(src_sv) + prev,
+                         std::cbegin(src_sv) + current);
+      ++number_of_parts;
+    } else if (!ignore_empty_string) {
+      parts.emplace_back();
+      ++number_of_parts;
+    }
 
-    if (string::npos != max_count && parts.size() == max_count)
-      break;
+    prev = current + needle_part_len;
 
-    if (current - prev > 0)
-      parts.emplace_back(source.substr(prev, current - prev));
-
-    prev = current + needle_len;
-
-    if (prev >= source_len)
+    if (prev >= src_len)
       break;
   }
 
-  if (prev < source_len) {
-    if (string::npos == max_count)
-      parts.emplace_back(source.substr(prev));
-
-    else if (parts.size() < max_count)
-      parts.emplace_back(source.substr(prev));
+  if (parts.size() < max_count) {
+    if (prev < src_len)
+      parts.emplace_back(std::cbegin(src_sv) + prev, std::cend(src_sv));
+    else if (!ignore_empty_string)
+      parts.emplace_back();
   }
 
   return parts;
 }
 
-template <typename ContainerType, typename NeedleType>
-auto join(const ContainerType& items, NeedleType needle) {
-  return join(items, needle,
-              typename conditional<is_class<NeedleType>::value, true_type,
-                                   false_type>::type{});
-}
-
 template <typename ContainerType, typename StringType>
 auto join(const ContainerType& items, const StringType& needle, true_type) {
-  static_assert(is_same<string, StringType>::value ||
-                    is_same<wstring, StringType>::value ||
-                    is_same<u16string, StringType>::value ||
-                    is_same<u32string, StringType>::value,
-                "StringType must correspond to one of the existing C++ "
-                "basic_string<T> types!");
+  // puts(__PRETTY_FUNCTION__);
+
+  static_assert(
+      is_same_v<string, StringType> || is_same_v<wstring, StringType> ||
+          is_same_v<u16string, StringType> || is_same_v<u32string, StringType>,
+      "StringType must correspond to one of the existing C++ "
+      "basic_string<T> types!");
 
   using char_type = typename StringType::value_type;
 
@@ -149,13 +205,14 @@ auto join(const ContainerType& items, const StringType& needle, true_type) {
 
 template <typename ContainerType, typename CharacterPointerType>
 auto join(const ContainerType& items, CharacterPointerType needle, false_type) {
-  using char_type =
-      remove_const<remove_pointer<CharacterPointerType>::type>::type;
+  using char_type = remove_const_t<remove_pointer_t<CharacterPointerType>>;
 
-  static_assert(is_same<const char*, CharacterPointerType>::value ||
-                    is_same<const wchar_t*, CharacterPointerType>::value ||
-                    is_same<const char16_t*, CharacterPointerType>::value ||
-                    is_same<const char32_t*, CharacterPointerType>::value,
+  // puts(__PRETTY_FUNCTION__);
+
+  static_assert(is_same_v<const char*, CharacterPointerType> ||
+                    is_same_v<const wchar_t*, CharacterPointerType> ||
+                    is_same_v<const char16_t*, CharacterPointerType> ||
+                    is_same_v<const char32_t*, CharacterPointerType>,
                 "CharacterPointerType must correspond to one of the existing "
                 "const character pointer types!");
 
@@ -179,6 +236,13 @@ auto join(const ContainerType& items, CharacterPointerType needle, false_type) {
   result.erase(result.length() - needle_len, needle_len);
 
   return result;
+}
+
+template <typename ContainerType, typename NeedleType>
+auto join(const ContainerType& items, const NeedleType& needle) {
+  // puts(__PRETTY_FUNCTION__);
+  return join(items, needle,
+              conditional_t<is_class_v<NeedleType>, true_type, false_type>{});
 }
 
 void check_sudoku_row(const vector<vector<int>>& sudoku,
@@ -207,7 +271,7 @@ void check_sudoku_row(const vector<vector<int>>& sudoku,
 
   unordered_set<int> found_values{};
 
-  for (size_t y{}; y < 9; y++) {
+  for (size_t y{}; y < 9; ++y) {
     if (-1 == sudoku[row_index][y])
       continue;
 
@@ -216,7 +280,7 @@ void check_sudoku_row(const vector<vector<int>>& sudoku,
 
       if (1 != count(begin(sudoku[row_index]), end(sudoku[row_index]),
                      sudoku[row_index][y])) {
-        for (size_t column_index{}; column_index < 9; column_index++) {
+        for (size_t column_index{}; column_index < 9; ++column_index) {
           if (sudoku[row_index][y] == sudoku[row_index][column_index])
             found_invalid_grid_indices.insert(row_index / 3 * 3 +
                                               column_index / 3 + 1);
@@ -253,13 +317,13 @@ void check_sudoku_column(const vector<vector<int>>& sudoku,
 
   vector<int> column(9);
 
-  for (size_t row_index{}; row_index < 9; row_index++) {
+  for (size_t row_index{}; row_index < 9; ++row_index) {
     column[row_index] = sudoku[row_index][column_index];
   }
 
   unordered_set<int> found_values{};
 
-  for (size_t x{}; x < 9; x++) {
+  for (size_t x{}; x < 9; ++x) {
     if (-1 == column[x])
       continue;
 
@@ -267,7 +331,7 @@ void check_sudoku_column(const vector<vector<int>>& sudoku,
       found_values.insert(column[x]);
 
       if (1 != count(begin(column), end(column), column[x])) {
-        for (size_t row_index{}; row_index < 9; row_index++) {
+        for (size_t row_index{}; row_index < 9; ++row_index) {
           if (column[x] == column[row_index])
             found_invalid_grid_indices.insert(row_index / 3 * 3 +
                                               column_index / 3 + 1);
@@ -306,16 +370,16 @@ void check_sudoku_sub_grid(const vector<vector<int>>& sudoku,
   vector<int> sub_grid_numbers(9);
 
   for (size_t row_index{sub_grid_index / 3 * 3}, i{};
-       row_index < sub_grid_index / 3 * 3 + 3; row_index++) {
+       row_index < sub_grid_index / 3 * 3 + 3; ++row_index) {
     for (size_t column_index{sub_grid_index % 3 * 3};
-         column_index < sub_grid_index % 3 * 3 + 3; column_index++) {
+         column_index < sub_grid_index % 3 * 3 + 3; ++column_index) {
       sub_grid_numbers[i++] = sudoku[row_index][column_index];
     }
   }
 
   unordered_set<int> found_values{};
 
-  for (size_t i{}; i < 9; i++) {
+  for (size_t i{}; i < 9; ++i) {
     if (-1 == sub_grid_numbers[i])
       continue;
 
@@ -335,14 +399,15 @@ vector<vector<int>> create_sudoku_game_board(string* str_arr,
                                              const size_t str_arr_size) {
   vector<vector<int>> sudoku(9, vector<int>(9));
 
-  for (size_t i{}; i < str_arr_size; i++) {
+  for (size_t i{}; i < str_arr_size; ++i) {
     str_arr[i] = trim(str_arr[i]);
     str_arr[i].erase(begin(str_arr[i]));
     str_arr[i].erase(--end(str_arr[i]));
 
-    const vector<string> row_values_str{split(str_arr[i], ",", 9)};
+    const vector<string> row_values_str{
+        str_split(str_arr[i], ",", nullptr, true, true, 9)};
 
-    for (size_t j{}; j < 9; j++) {
+    for (size_t j{}; j < 9; ++j) {
       if ("x" != row_values_str[j] && "X" != row_values_str[j])
         sudoku[i][j] = stoi(row_values_str[j]);
       else
@@ -358,7 +423,7 @@ string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
       create_sudoku_game_board(str_arr, str_arr_size)};
   set<size_t> found_invalid_grid_indices{};
 
-  for (size_t i{}; i < 9; i++) {
+  for (size_t i{}; i < 9; ++i) {
     check_sudoku_row(sudoku, i, found_invalid_grid_indices);
     check_sudoku_column(sudoku, i, found_invalid_grid_indices);
     check_sudoku_sub_grid(sudoku, i, found_invalid_grid_indices);
