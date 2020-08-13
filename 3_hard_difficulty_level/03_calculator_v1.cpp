@@ -37,16 +37,16 @@ Output: "1"
 
 using namespace std;
 
-string trim(const string& input) {
-  string output{input};
-  output.erase(begin(output),
-               find_if(begin(output), end(output),
-                       [](const char ch) { return !isspace(ch); }));
+std::string str_trim(const std::string& input) {
+  std::string output{input};
+  output.erase(std::cbegin(output),
+               std::find_if(std::cbegin(output), std::cend(output),
+                            [](const char ch) { return !isspace(ch); }));
 
-  output.erase(find_if(output.rbegin(), output.rend(),
-                       [](const char ch) { return !isspace(ch); })
+  output.erase(std::find_if(output.crbegin(), output.crend(),
+                            [](const char ch) { return !isspace(ch); })
                    .base(),
-               end(output));
+               std::cend(output));
 
   return output;
 }
@@ -55,10 +55,10 @@ string remove_unnecessary_white_space_characters(string str) {
   string cleaned_str{};
   cleaned_str.reserve(str.length());
 
-  for (size_t i{}; i < str.length(); i++) {
-    if (!isspace(str[i]))
-      cleaned_str.push_back(str[i]);
-  }
+  for_each(cbegin(str), cend(str), [&cleaned_str](const auto ch) {
+    if (!isspace(ch))
+      cleaned_str.push_back(ch);
+  });
 
   return cleaned_str;
 }
@@ -77,19 +77,6 @@ void insert_missing_multiplication_symbols(string& str) {
     current_pos += 3;
   }
 
-  current_pos = 0u;
-
-  while (true) {
-    current_pos = str.find(") (", current_pos);
-
-    if (string::npos == current_pos)
-      break;
-
-    str[current_pos + 1] = '*';
-
-    current_pos += 3;
-  }
-
   size_t number_end_pos{};
 
   while (true) {
@@ -98,18 +85,13 @@ void insert_missing_multiplication_symbols(string& str) {
     if (string::npos == number_end_pos)
       break;
 
-    number_end_pos = str.find_first_not_of("0123456789", number_end_pos);
+    number_end_pos = str.find_first_not_of("0123456789", number_end_pos + 1);
 
     if (string::npos == number_end_pos)
       break;
 
     if ('(' == str[number_end_pos]) {
       str.insert(number_end_pos, 1, '*');
-
-      number_end_pos += 2;
-    } else if (number_end_pos < str.length() - 1 &&
-               ' ' == str[number_end_pos] && '(' == str[number_end_pos + 1]) {
-      str[number_end_pos] = '*';
 
       number_end_pos += 2;
     }
@@ -133,9 +115,6 @@ void insert_missing_multiplication_symbols(string& str) {
       str.insert(number_start_pos, 1, '*');
 
       number_end_pos += 2;
-    } else if (' ' == str[number_start_pos - 1] &&
-               ')' == str[number_start_pos - 2]) {
-      str[number_start_pos - 1] = '*';
     }
 
     prnths_end_pos += 2;
@@ -147,28 +126,22 @@ enum class operation { plus, minus, multiplies, divides };
 bool is_math_expression_correctly_formatted(const string& expression) {
   int prnths_balance_count{};
 
-  if (')' == expression.front())
+  if (')' == expression.front() || '(' == expression.back())
     return false;
 
-  if ('(' == expression.back())
-    return false;
-
-  for (size_t i{}; i < expression.length(); i++) {
+  for (size_t i{}; i < expression.length(); ++i) {
     if ('(' == expression[i])
-      prnths_balance_count++;
+      ++prnths_balance_count;
 
     else if (')' == expression[i]) {
-      if (!prnths_balance_count)
+      if (0 == prnths_balance_count)
         return false;
 
-      prnths_balance_count--;
+      --prnths_balance_count;
     }
   }
 
-  if (prnths_balance_count)
-    return false;
-
-  return true;
+  return 0 == prnths_balance_count ? true : false;
 }
 
 double evaluate_simple_math_expression(string expression) {
@@ -180,7 +153,7 @@ double evaluate_simple_math_expression(string expression) {
   const char* expression_iter{expression.c_str()};
   const char* expression_last{expression_iter + expression.length()};
 
-  while (true) {
+  while (expression_iter < expression_last) {
     char* last_iter{};
     sub_expression_results.emplace_back(strtod(expression_iter, &last_iter));
     expression_iter = last_iter;
@@ -213,54 +186,39 @@ double evaluate_simple_math_expression(string expression) {
           throw runtime_error{oss.str()};
       }
 
-      expression_iter++;
-    } else
-      break;
+      ++expression_iter;
+    }
   }
 
   size_t i{};
-  while (multiply_divide_op_count && i < sub_expression_results.size() - 1) {
+  while (0u != multiply_divide_op_count &&
+         i < sub_expression_results.size() - 1) {
     if (operation::multiplies == operations[i]) {
-      sub_expression_results[i] *= sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      multiply_divide_op_count--;
-      continue;
+      sub_expression_results[0] *= sub_expression_results[i + 1];
+      --multiply_divide_op_count;
+    } else if (operation::divides == operations[i]) {
+      sub_expression_results[0] /= sub_expression_results[i + 1];
+      --multiply_divide_op_count;
     }
 
-    if (operation::divides == operations[i]) {
-      sub_expression_results[i] /= sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      multiply_divide_op_count--;
-      continue;
-    }
-
-    i++;
+    ++i;
   }
 
   i = 0;
-  while (plus_minus_op_count && i < sub_expression_results.size() - 1) {
+
+  while (0u != plus_minus_op_count && i < sub_expression_results.size() - 1) {
     if (operation::plus == operations[i]) {
-      sub_expression_results[i] += sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      plus_minus_op_count--;
-      continue;
+      sub_expression_results[0] += sub_expression_results[i + 1];
+      --plus_minus_op_count;
+    } else if (operation::minus == operations[i]) {
+      sub_expression_results[0] -= sub_expression_results[i + 1];
+      --plus_minus_op_count;
     }
 
-    if (operation::minus == operations[i]) {
-      sub_expression_results[i] -= sub_expression_results[i + 1];
-      sub_expression_results.erase(begin(sub_expression_results) + i + 1);
-      operations.erase(begin(operations) + i);
-      plus_minus_op_count--;
-      continue;
-    }
-
-    i++;
+    ++i;
   }
 
-  return sub_expression_results.front();
+  return sub_expression_results[0];
 }
 
 string evaluate_math_expression(
@@ -268,19 +226,20 @@ string evaluate_math_expression(
     const bool is_round_to_nearest_whole_number = false) {
   size_t open_prnths_count{}, close_prnths_count{};
 
-  for (size_t i{}; i < expression.length(); i++) {
+  for (size_t i{}; i < expression.length(); ++i) {
     if ('(' == expression[i])
-      open_prnths_count++;
+      ++open_prnths_count;
     else if (')' == expression[i])
-      close_prnths_count++;
+      ++close_prnths_count;
   }
 
-  if (!open_prnths_count && !close_prnths_count) {
+  if (0U == open_prnths_count && 0U == close_prnths_count) {
     const auto result = evaluate_simple_math_expression(move(expression));
-    if (is_round_to_nearest_whole_number)
-      return to_string(static_cast<int64_t>(round(result)));
-    return to_string(result);
+    return is_round_to_nearest_whole_number
+               ? to_string(static_cast<int64_t>(round(result)))
+               : to_string(result);
   }
+
   if (open_prnths_count != close_prnths_count ||
       !is_math_expression_correctly_formatted(expression))
     throw invalid_argument(
@@ -299,19 +258,21 @@ string evaluate_math_expression(
       continue;
     }
 
-    string sub_expression_result{to_string(evaluate_simple_math_expression(move(
+    string sub_expression_result{to_string(evaluate_simple_math_expression(
         expression.substr(opening_prnths_positions.top() + 1,
-                          next_pos - (opening_prnths_positions.top() + 1)))))};
+                          next_pos - (opening_prnths_positions.top() + 1))))};
+
     prev_pos = opening_prnths_positions.top() + sub_expression_result.length();
     expression.replace(opening_prnths_positions.top(),
                        next_pos - opening_prnths_positions.top() + 1,
                        move(sub_expression_result));
     opening_prnths_positions.pop();
 
-    if (opening_prnths_positions.empty() &&
-        string::npos != expression.find('(', prev_pos + 1)) {
-      prev_pos = expression.find('(', prev_pos + 1);
-      opening_prnths_positions.emplace(prev_pos);
+    if (const size_t next_open_prnths_pos = expression.find('(', prev_pos + 1);
+        opening_prnths_positions.empty() &&
+        string::npos != next_open_prnths_pos) {
+      prev_pos = next_open_prnths_pos;
+      opening_prnths_positions.emplace(next_open_prnths_pos);
     }
   }
 
@@ -328,20 +289,16 @@ string calculator(string str) {
 }
 
 int main() {
-  // cout << calculator(move(string{gets(stdin)}));
-  cout << calculator(move(string{"2+(3-1)*3"}))
-       << '\n';  // expected output: "8"
-  cout << calculator(move(string{"(2-0)*(6/2)"}))
-       << '\n';  // expected output: "6"
-  cout << calculator(move(string{"6*(4/2)+3*1"}))
-       << '\n';                                       // expected output: "15"
-  cout << calculator(move(string{"6/3-1"})) << '\n';  // expected output: "1"
-  cout << calculator(move(string{"7-4-1+8(3)/2"}))
-       << '\n';                                       // expected output: "14"
-  cout << calculator(move(string{"20"})) << '\n';     // expected output: "20"
-  cout << calculator(move(string{"(20)"})) << '\n';   // expected output: "20"
-  cout << calculator(move(string{"-20"})) << '\n';    // expected output: "-20"
-  cout << calculator(move(string{"(-20)"})) << '\n';  // expected output: "-20"
+  // cout << calculator(gets(stdin));
+  cout << calculator("2+(3-1)*3") << '\n';     // expected output: "8"
+  cout << calculator("(2-0)*(6/2)") << '\n';   // expected output: "6"
+  cout << calculator("6*(4/2)+3*1") << '\n';   // expected output: "15"
+  cout << calculator("6/3-1") << '\n';         // expected output: "1"
+  cout << calculator("7-4-1+8(3)/2") << '\n';  // expected output: "14"
+  cout << calculator("20") << '\n';            // expected output: "20"
+  cout << calculator("(20)") << '\n';          // expected output: "20"
+  cout << calculator("-20") << '\n';           // expected output: "-20"
+  cout << calculator("(-20)") << '\n';         // expected output: "-20"
 
   return 0;
 }
