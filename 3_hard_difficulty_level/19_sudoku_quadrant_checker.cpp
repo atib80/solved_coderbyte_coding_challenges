@@ -284,16 +284,19 @@ string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
 
   std::array<std::array<size_t, 10>, 9> sudoku_subgrids_number_frequency{{}};
 
+  constexpr const array<size_t, 9> mask_steps{
+      {1, 2, 4, 8, 16, 32, 64, 128, 256}};
+
   for (size_t i{}; i < 9; ++i) {
     for (size_t j{}; j < 9; ++j) {
       if (-1 != sudoku[i][j]) {
         ++sudoku_rows_number_frequency[i][sudoku[i][j]];
         sudoku_row_numbers_subgrid_indices[i][sudoku[i][j]] |=
-            (1U << (i / 3 * 3 + j / 3));
+            mask_steps[i / 3 * 3 + j / 3];
 
         ++sudoku_columns_number_frequency[j][sudoku[i][j]];
         sudoku_column_numbers_subgrid_indices[j][sudoku[i][j]] |=
-            (1U << (i / 3 * 3 + j / 3));
+            mask_steps[i / 3 * 3 + j / 3];
 
         ++sudoku_subgrids_number_frequency[i / 3 * 3 + j / 3][sudoku[i][j]];
       }
@@ -305,35 +308,28 @@ string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
   for (size_t i{}; i < 9; ++i) {
     for (size_t number{1}; number <= 9; ++number) {
       if (sudoku_rows_number_frequency[i][number] > 1U) {
-        for (size_t j{}, mask{1}; j < 9; ++j) {
-          const size_t index =
-              sudoku_row_numbers_subgrid_indices[i][number] & (mask << j);
-
-          if (0U != index)
-            found_invalid_grid_indices |= (mask << j);
-        }
+        for (size_t j{(i / 3) * 3}; j < (i / 3) * 3 + 3; ++j)
+          found_invalid_grid_indices |=
+              (sudoku_row_numbers_subgrid_indices[i][number] & mask_steps[j]);
       }
 
       if (sudoku_columns_number_frequency[i][number] > 1U) {
-        for (size_t j{}, mask{1}; j < 9; ++j) {
-          const size_t index =
-              sudoku_column_numbers_subgrid_indices[i][number] & (mask << j);
-
-          if (0U != index)
-            found_invalid_grid_indices |= (mask << j);
-        }
+        for (size_t j{i / 3}; j <= (i / 3) + 6; j += 3)
+          found_invalid_grid_indices |=
+              (sudoku_column_numbers_subgrid_indices[i][number] &
+               mask_steps[j]);
       }
 
       if (sudoku_subgrids_number_frequency[i][number] > 1U)
-        found_invalid_grid_indices |= (1U << i);
+        found_invalid_grid_indices |= mask_steps[i];
     }
   }
 
   if (0U != found_invalid_grid_indices) {
     string output{};
 
-    for (size_t i{}, mask{1}; i < 9; ++i) {
-      if ((found_invalid_grid_indices & (mask << i)) != 0U) {
+    for (size_t i{}; i < mask_steps.size(); ++i) {
+      if ((found_invalid_grid_indices & mask_steps[i]) != 0U) {
         output.append({static_cast<char>('1' + i), ','});
       }
     }
