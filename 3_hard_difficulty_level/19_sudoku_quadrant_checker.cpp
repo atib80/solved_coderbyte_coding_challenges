@@ -276,12 +276,11 @@ string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
       create_sudoku_game_board(str_arr, str_arr_size)};
 
   std::array<std::array<size_t, 10>, 9> sudoku_rows_number_frequency{{}};
-  std::array<std::array<std::vector<size_t>, 10>, 9>
-      sudoku_row_numbers_subgrid_indices{{}};
+  std::array<std::array<size_t, 10>, 9> sudoku_row_numbers_subgrid_indices{{}};
 
   std::array<std::array<size_t, 10>, 9> sudoku_columns_number_frequency{{}};
-  std::array<std::array<std::vector<size_t>, 10>, 9>
-      sudoku_column_numbers_subgrid_indices{{}};
+  std::array<std::array<size_t, 10>, 9> sudoku_column_numbers_subgrid_indices{
+      {}};
 
   std::array<std::array<size_t, 10>, 9> sudoku_subgrids_number_frequency{{}};
 
@@ -289,40 +288,61 @@ string SudokuQuadrantChecker(string* str_arr, const size_t str_arr_size) {
     for (size_t j{}; j < 9; ++j) {
       if (-1 != sudoku[i][j]) {
         ++sudoku_rows_number_frequency[i][sudoku[i][j]];
-        sudoku_row_numbers_subgrid_indices[i][sudoku[i][j]].emplace_back(
-            i / 3 * 3 + j / 3 + 1);
+        sudoku_row_numbers_subgrid_indices[i][sudoku[i][j]] |=
+            (1U << (i / 3 * 3 + j / 3));
 
         ++sudoku_columns_number_frequency[j][sudoku[i][j]];
-        sudoku_column_numbers_subgrid_indices[j][sudoku[i][j]].emplace_back(
-            i / 3 * 3 + j / 3 + 1);
+        sudoku_column_numbers_subgrid_indices[j][sudoku[i][j]] |=
+            (1U << (i / 3 * 3 + j / 3));
 
         ++sudoku_subgrids_number_frequency[i / 3 * 3 + j / 3][sudoku[i][j]];
       }
     }
   }
 
-  set<size_t> found_invalid_grid_indices{};
+  size_t found_invalid_grid_indices{};
 
   for (size_t i{}; i < 9; ++i) {
     for (size_t number{1}; number <= 9; ++number) {
-      if (sudoku_rows_number_frequency[i][number] > 1U)
-        found_invalid_grid_indices.insert(
-            cbegin(sudoku_row_numbers_subgrid_indices[i][number]),
-            cend(sudoku_row_numbers_subgrid_indices[i][number]));
+      if (sudoku_rows_number_frequency[i][number] > 1U) {
+        for (size_t j{}, mask{1}; j < 9; ++j) {
+          const size_t index =
+              sudoku_row_numbers_subgrid_indices[i][number] & (mask << j);
 
-      if (sudoku_columns_number_frequency[i][number] > 1U)
-        found_invalid_grid_indices.insert(
-            cbegin(sudoku_column_numbers_subgrid_indices[i][number]),
-            cend(sudoku_column_numbers_subgrid_indices[i][number]));
+          if (0U != index)
+            found_invalid_grid_indices |= (mask << j);
+        }
+      }
+
+      if (sudoku_columns_number_frequency[i][number] > 1U) {
+        for (size_t j{}, mask{1}; j < 9; ++j) {
+          const size_t index =
+              sudoku_column_numbers_subgrid_indices[i][number] & (mask << j);
+
+          if (0U != index)
+            found_invalid_grid_indices |= (mask << j);
+        }
+      }
 
       if (sudoku_subgrids_number_frequency[i][number] > 1U)
-        found_invalid_grid_indices.emplace(i + 1);
+        found_invalid_grid_indices |= (1U << i);
     }
   }
 
-  return !found_invalid_grid_indices.empty()
-             ? str_join(found_invalid_grid_indices, ",")
-             : "legal";
+  if (0U != found_invalid_grid_indices) {
+    string output{};
+
+    for (size_t i{}, mask{1}; i < 9; ++i) {
+      if ((found_invalid_grid_indices & (mask << i)) != 0U) {
+        output.append({static_cast<char>('1' + i), ','});
+      }
+    }
+
+    output.pop_back();
+    return output;
+  }
+
+  return "legal";
 }
 
 int main() {
