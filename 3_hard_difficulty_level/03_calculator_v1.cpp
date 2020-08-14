@@ -52,15 +52,11 @@ std::string str_trim(const std::string& input) {
 }
 
 string remove_unnecessary_white_space_characters(string str) {
-  string cleaned_str{};
-  cleaned_str.reserve(str.length());
+  str.erase(std::remove_if(begin(str), end(str),
+                           [](const char ch) { return ::isspace(ch); }),
+            end(str));
 
-  for_each(cbegin(str), cend(str), [&cleaned_str](const auto ch) {
-    if (!isspace(ch))
-      cleaned_str.push_back(ch);
-  });
-
-  return cleaned_str;
+  return str;
 }
 
 void insert_missing_multiplication_symbols(string& str) {
@@ -290,15 +286,19 @@ string calculator(string str) {
 
 int main() {
   // cout << calculator(gets(stdin));
-  cout << calculator("2+(3-1)*3") << '\n';     // expected output: "8"
-  cout << calculator("(2-0)*(6/2)") << '\n';   // expected output: "6"
-  cout << calculator("6*(4/2)+3*1") << '\n';   // expected output: "15"
-  cout << calculator("6/3-1") << '\n';         // expected output: "1"
-  cout << calculator("7-4-1+8(3)/2") << '\n';  // expected output: "14"
-  cout << calculator("20") << '\n';            // expected output: "20"
-  cout << calculator("(20)") << '\n';          // expected output: "20"
-  cout << calculator("-20") << '\n';           // expected output: "-20"
-  cout << calculator("(-20)") << '\n';         // expected output: "-20"
+  cout << calculator("2+(3-1)*3") << '\n';              // expected output: "8"
+  cout << calculator("(2-0)*(6/2)") << '\n';            // expected output: "6"
+  cout << calculator("6*(4/2)+3*1") << '\n';            // expected output: "15"
+  cout << calculator("6/3-1") << '\n';                  // expected output: "1"
+  cout << calculator("7 - 4 - 1 + 8 * (3)/2") << '\n';  // expected output: "14"
+  cout << calculator("7 - 4 - 1 + 8 ( 3 ) / 2")
+       << '\n';                                         // expected output: "14"
+  cout << calculator("7 - 4 - 1 + 8 * 3 / 2") << '\n';  // expected output: "14"
+  cout << calculator("7-4-1+8*3/2") << '\n';            // expected output: "14"
+  cout << calculator("20") << '\n';                     // expected output: "20"
+  cout << calculator("(20)") << '\n';                   // expected output: "20"
+  cout << calculator("-20") << '\n';    // expected output: "-20"
+  cout << calculator("(-20)") << '\n';  // expected output: "-20"
 
   return 0;
 }
