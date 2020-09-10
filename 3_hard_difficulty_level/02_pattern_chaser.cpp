@@ -103,21 +103,14 @@ string pattern_chaser(string str) {
 }
 
 int main() {
-  // cout << pattern_chaser(move(string{gets(stdin)}));
-  cout << pattern_chaser(move(string{"aabecaa"}))
-       << '\n';  // expected output: "yes aa"
-  cout << pattern_chaser(move(string{"abbbaac"}))
-       << '\n';  // expected output: "no null"
-  cout << pattern_chaser(move(string{"aabejiabkfabed"}))
-       << '\n';  // expected output: "yes abe"
-  cout << pattern_chaser(move(string{"123224"}))
-       << '\n';  // expected output: "no null"
-  cout << pattern_chaser(move(string{"aa2bbbaacbbb"}))
-       << '\n';  // expected output: "yes bbb"
-  cout << pattern_chaser(move(string{"da2kr32a2"}))
-       << '\n';  // expected output: "yes a2"
-  cout << pattern_chaser(move(string{"sskfssbbb9bbb"}))
-       << '\n';  // expected output: "yes bbb"
+  // cout << pattern_chaser(gets(stdin));
+  cout << pattern_chaser("aabecaa") << '\n';  // expected output: "yes aa"
+  cout << pattern_chaser("abbbaac") << '\n';  // expected output: "no null"
+  cout << pattern_chaser("aabejiabkfabed") << '\n';  // expected output: "yes abe"
+  cout << pattern_chaser("123224") << '\n';  // expected output: "no null"
+  cout << pattern_chaser("aa2bbbaacbbb") << '\n';  // expected output: "yes bbb"
+  cout << pattern_chaser("da2kr32a2") << '\n';  // expected output: "yes a2"
+  cout << pattern_chaser("sskfssbbb9bbb") << '\n';  // expected output: "yes bbb"
 
   return 0;
 }

@@ -1,44 +1,38 @@
-#include <conio.h>
-
 #include <algorithm>
-#include <cmath>
+#include <array>
 #include <iostream>
 #include <iterator>
 #include <type_traits>
-#include <unordered_map>
 #include <vector>
 
 template <class ForwardIt, class T>
-size_t bsearch(ForwardIt first, ForwardIt last, const T& value) {
-  using difference_type =
-      typename std::iterator_traits<ForwardIt>::difference_type;
-  const ForwardIt start{first};
-  first = std::lower_bound(first, last, value);
-  return (!(first == last) && (value == *first)) ? std::distance(start, first)
-                                                 : string::npos;
+typename std::iterator_traits<ForwardIt>::difference_type
+bsearch(ForwardIt first, ForwardIt last, const T& value) {
+  const ForwardIt lb_pos = std::lower_bound(first, last, value);
+  return !(lb_pos == last) && (*lb_pos == value) ? std::distance(first, lb_pos)
+                                                 : -1;
 }
 
 template <class BidirIt>
-bool next_permutation(BidirIt first, BidirIt last) {
+bool next_permutation(const BidirIt first, const BidirIt last) {
   if (first == last)
     return false;
-  BidirIt i = last;
+  BidirIt i{last};
   if (first == --i)
     return false;
 
   while (true) {
-    BidirIt i1, i2;
+    BidirIt i1{i};
 
-    i1 = i;
     if (*--i < *i1) {
-      i2 = last;
+      BidirIt i2{last};
       while (!(*i < *--i2))
         ;
       std::iter_swap(i, i2);
       std::reverse(i1, last);
       return true;
     }
-    if (i == first) {
+    if (first == i) {
       std::reverse(first, last);
       return false;
     }
@@ -46,26 +40,26 @@ bool next_permutation(BidirIt first, BidirIt last) {
 }
 
 template <class BidirIt>
-bool prev_permutation(BidirIt first, BidirIt last) {
+bool prev_permutation(const BidirIt first, const BidirIt last) {
   if (first == last)
     return false;
-  BidirIt i = last;
+
+  BidirIt i{last};
+
   if (first == --i)
     return false;
 
-  while (1) {
-    BidirIt i1, i2;
-
-    i1 = i;
+  while (true) {
+    BidirIt i1{i};
     if (*i1 < *--i) {
-      i2 = last;
+      BidirIt i2{last};
       while (!(*--i2 < *i))
         ;
       std::iter_swap(i, i2);
       std::reverse(i1, last);
       return true;
     }
-    if (i == first) {
+    if (first == i) {
       std::reverse(first, last);
       return false;
     }
@@ -79,54 +73,17 @@ int main() {
 
   sort(begin(numbers), end(numbers));
 
-  int target{1};
+  const array<int, 7> values{1, 15, 17, 23, 26, 52, 53};
 
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
-
-  target = 15;
-
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
-
-  target = 17;
-
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
-
-  target = 23;
-
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
-
-  target = 26;
-
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
-
-  target = 52;
-
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
-
-  target = 53;
-
-  if (string::npos != bsearch(begin(numbers), end(numbers), target))
-    cout << "Found target number: " << target << '\n';
-  else
-    cout << "Target number (" << target << ") could not be found!\n";
+  for (const auto target : values) {
+    const std::iterator_traits<decltype(cbegin(numbers))>::difference_type
+        position = bsearch(cbegin(numbers), cend(numbers), target);
+    if (-1 != position)
+      cout << "Found target number: " << target << " at position: " << position
+           << '\n';
+    else
+      cout << "Target number (" << target << ") could not be found!\n";
+  }
 
   return 0;
 }

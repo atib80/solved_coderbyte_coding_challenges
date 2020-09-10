@@ -46,6 +46,14 @@ Output: "-1"
 #include <unordered_set>
 #include <vector>
 
+constexpr double calculate_tax_amount(const size_t product_index) {
+
+  if (0 == product_index) 
+    throw std::invalid_argument("Provided product index is invalid!");
+
+  return (product_index * 8.0) / 100;
+}
+
 using namespace std;
 
 string trim(const string& input) {

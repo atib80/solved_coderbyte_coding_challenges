@@ -49,6 +49,7 @@
 
 #ifdef _MSC_VER
 #include <Strsafe.h>
+#include <windows.h>
 #define SNPRINTF StringCchPrintfA
 #define SNWPRINTF StringCchPrintfW
 #else
@@ -56,12 +57,51 @@
 #define SNWPRINTF swprintf
 #endif
 
+#if defined(_MSC_VER)
+#include <crtdbg.h>
+#define ASSERT _ASSERTE_
+#else
+#include <cassert>
+#define ASSERT assert
+#endif
+
+#define VERIFY ASSERT
+#define VERIFY_(result, expression) ASSERT(result == expression)
+
 #define PRINT_VAR_NAME(arg) std::cout << #arg << ' '
 #define PRINT_VAR_NAMEW(arg) std::wcout << #arg << L' '
 
 namespace stl::helper {
 
 constexpr const char* __stl_helper_utility_library_version__{"0.0.1-devel"};
+
+struct tracer {
+  std::ostream& output_stream;
+  const char* m_filename;
+  const size_t m_line_number;
+
+  tracer(std::ostream& os, const char* filename, const size_t line_number)
+      : output_stream{os}, m_filename{filename}, m_line_number{line_number} {}
+
+  template <typename... Args>
+  std::string operator()(const char* format, Args&&... args) const {
+    const size_t buffer_len{1024U};
+    char buffer[buffer_len];
+
+    const auto count = snprintf(buffer, buffer_len, "%s (line no.: %lu) -> ",
+                                m_filename, m_line_number);
+
+    snprintf(buffer + count, buffer_len - count, format,
+             std::forward<Args>(args)...);
+
+    output_stream << buffer;
+
+    return buffer;
+  }
+};
+
+#define trace_to_cout tracer(std::cout, __FILE__, __LINE__)
+#define trace_to_cerr tracer(std::cerr, __FILE__, __LINE__)
 
 template <typename... Args>
 constexpr void unused_args(Args&&...) {}
@@ -897,28 +937,13 @@ size_t len(const T& src) {
   return src.length();
 }
 
-struct char_buffer_deleter {
-  using pointer_type = const char*;
-
-  void operator()(pointer_type pointer) const noexcept { delete[] pointer; }
-};
-
-struct wchar_t_buffer_deleter {
-  using pointer_type = const wchar_t*;
-
-  void operator()(pointer_type pointer) const noexcept { delete[] pointer; }
-};
-
-std::mutex say_cstr_mu{};
-std::mutex say_wstr_mu{};
-std::mutex say_slow_cstr_mu{};
-std::mutex say_slow_wstr_mu{};
-
 template <typename... Args>
 size_t say_slow(std::ostream& os,
                 const size_t time_delay_in_ms,
                 const char* format_string,
                 Args&&... args) {
+  static std::mutex say_slow_cstr_mu{};
+
   std::lock_guard<std::mutex> guard{say_slow_cstr_mu};
 
   const int number_of_chars_written =
@@ -948,6 +973,8 @@ size_t say_slow(std::wostream& os,
                 const size_t time_delay_in_ms,
                 const wchar_t* format_string,
                 Args&&... args) {
+  static std::mutex say_slow_wstr_mu;
+
   std::lock_guard<std::mutex> guard{say_slow_wstr_mu};
 
   int buffer_size{4096};
@@ -981,6 +1008,8 @@ size_t say_slow(std::wostream& os,
 
 template <typename... Args>
 size_t say(std::ostream& os, const char* format_string, Args&&... args) {
+  static std::mutex say_cstr_mu;
+
   std::lock_guard<std::mutex> guard{say_cstr_mu};
 
   const int number_of_chars_written =
@@ -1001,6 +1030,8 @@ size_t say(std::ostream& os, const char* format_string, Args&&... args) {
 
 template <typename... Args>
 size_t say(std::wostream& os, const wchar_t* format_string, Args&&... args) {
+  static std::mutex say_wstr_mu;
+
   std::lock_guard<std::mutex> guard{say_wstr_mu};
 
   int buffer_size{4096};
@@ -1826,113 +1857,163 @@ constexpr SrcIterType find_last_any_of(SrcIterType src_first,
   }
 }
 
+/* function template 'find_first_sequence_of_allowed_elements' is
+ * a less generic version of the std::search algorithm function template,
+ * which allows the user to find in the input source range a consequtive
+ * sequence of elements which are all present in the provided @haystack
+ * container.
+ *
+ * @param ForwardIterType first -> an iterator value (of a forward,
+ * bidirectional or random access iterator type) which points to the first
+ * element of a range of elements
+ * @param ForwardIterType last -> an iterator value (of a forward, bidirectional
+ *       or random access iterator type) which points to the last element of a
+ * range of elements
+ *
+ * @param ContainerType haystack -> an instance of a known STL container type
+ * which contains elements that are related or implicitly convertible to the
+ * type of values contained in the specified input source range of elements
+ * [first, last].
+ *
+ * @return std::pair<ForwardIterType, ForwardIterType> -> a pair of iterators of
+ * type ForwardIterType (forward, bidirectional or random access iterator type)
+ * pointing the first found range of consecutive elements which are all
+ * contained in the provided @haystack of allowed elements.
+ */
+
 template <typename ForwardIterType, typename ContainerType>
-std::pair<ForwardIterType, ForwardIterType> find_first_sequence_of_allowed_elements(
-    ForwardIterType start,
-    ForwardIterType last,
-    const ContainerType& haystack,
-    const bool is_haystack_sorted = false) {
+std::pair<ForwardIterType, ForwardIterType>
+find_first_sequence_of_allowed_elements(ForwardIterType first,
+                                        ForwardIterType last,
+                                        const ContainerType& haystack,
+                                        const bool is_haystack_sorted = false) {
   using T = typename std::iterator_traits<ForwardIterType>::value_type;
 
-  if (start == last)
+  if (first == last)
     return {last, last};
 
-  if constexpr (has_find_member_function_v<ContainerType, T>) {
-    const auto first{
-        std::find_if(start, last, [&haystack](const auto& current_element) {
+  if constexpr (stl::helper::has_find_member_function_v<ContainerType, T>) {
+    const auto found{
+        std::find_if(first, last, [&haystack](const auto& current_element) {
           return std::cend(haystack) != haystack.find(current_element);
         })};
-    if (first == last)
+    if (found == last)
       return {last, last};
-    auto second{first};
+    auto second{found};
     ++second;
-    second = std::find_if(second, last, [&haystack](const auto& current_element) {
-      return std::cend(haystack) == haystack.find(current_element);
-    });
-    return {first, second};
+    second =
+        std::find_if(second, last, [&haystack](const auto& current_element) {
+          return std::cend(haystack) == haystack.find(current_element);
+        });
+    return {found, second};
 
   } else {
     if (is_haystack_sorted) {
-      const auto first{
-          find_if(start, last, [&haystack](const auto& current_element) {
-            return std::binary_search(std::cbegin(haystack), std::cend(haystack),
-                                 current_element);
+      const auto found{
+          find_if(first, last, [&haystack](const auto& current_element) {
+            return std::binary_search(std::cbegin(haystack),
+                                      std::cend(haystack), current_element);
           })};
-      if (last == first)
+      if (found == last)
         return {last, last};
-      auto second{first};
+      auto second{found};
       ++second;
-      second = std::find_if(second, last, [&haystack](const auto& current_element) {
-        return !std::binary_search(std::cbegin(haystack), std::cend(haystack),
-                              current_element);
-      });
+      second =
+          std::find_if(second, last, [&haystack](const auto& current_element) {
+            return !std::binary_search(std::cbegin(haystack),
+                                       std::cend(haystack), current_element);
+          });
 
-      return {first, second};
+      return {found, second};
     } else {
-      const auto first{
-          std::find_if(start, last, [&haystack](const auto& current_element) {
-            return std::cend(haystack) !=
-                   std::find(std::cbegin(haystack), std::cend(haystack), current_element);
+      const auto found{
+          std::find_if(first, last, [&haystack](const auto& current_element) {
+            return std::cend(haystack) != std::find(std::cbegin(haystack),
+                                                    std::cend(haystack),
+                                                    current_element);
           })};
-      if (last == first)
+      if (found == last)
         return {last, last};
-      auto second{first};
+      auto second{found};
       ++second;
-      second = std::find_if(second, last, [&haystack](const auto& current_element) {
-        return std::cend(haystack) ==
-               std::find(std::cbegin(haystack), std::cend(haystack), current_element);
-      });
+      second =
+          std::find_if(second, last, [&haystack](const auto& current_element) {
+            return std::cend(haystack) == std::find(std::cbegin(haystack),
+                                                    std::cend(haystack),
+                                                    current_element);
+          });
 
-      return {first, second};
+      return {found, second};
     }
   }
 }
 
-template <typename StringType, typename ContainerType>
-StringType find_longest_word(const StringType& src, ContainerType& haystack) {
-  using T = typename StringType::value_type;
+/* function template 'find_longest_word' finds the longest word in the provided
+ * [first, last) input source range of character like elements.
+ * The longest word may be comprised
+ * of elements that are contained in the provided @haystack container only.
+ *
+ * @param ForwardIterType first -> an iterator value (of a forward,
+ * bidirectional or random access iterator type) which points to the first
+ * element of a range of elements
+ * @param ForwardIterType last -> an iterator value (of a forward, bidirectional
+ *      or random access iterator type) which points to the last element of a
+ * range of elements
+ *
+ * @param ContainerType haystack -> an instance of a known STL container type
+ * which contains elements that are related or implicitly convertible to the
+ * type of values contained in the specified input source range [first, last].
+ *
+ * @return std::pair<ForwardIterType, ForwardIterType> -> a pair of iterators of
+ * type ForwardIterType (forward, bidirectional or random access iterator type)
+ * pointing the first found range of consecutive elements which form the longest
+ * word of elements that are all contained in the provided @haystack of allowed
+ * elements.
+ */
+template <typename IterType, typename ContainerType>
+std::pair<IterType, IterType> find_longest_word(IterType first,
+                                                const IterType last,
+                                                ContainerType& haystack) {
+  using T = typename std::iterator_traits<IterType>::value_type;
   using U = typename ContainerType::value_type;
 
-  bool is_haystack_sorted{has_find_member_function_v<ContainerType, T>};
+  bool is_haystack_sorted{
+      stl::helper::has_find_member_function_v<ContainerType, T>};
 
-  if constexpr (!has_find_member_function_v<ContainerType, T> &&
-                ((has_sort_member_function_v<ContainerType> &&
-                  is_operator_less_than_defined_v<U>) ||
-                 is_operator_less_than_defined_v<U>)) {
-    if constexpr (has_sort_member_function_v<ContainerType>)
+  if constexpr (!stl::helper::has_find_member_function_v<ContainerType, T> &&
+                ((stl::helper::has_sort_member_function_v<ContainerType> &&
+                  stl::helper::is_operator_less_than_defined_v<U>) ||
+                 stl::helper::is_operator_less_than_defined_v<U>)) {
+    if constexpr (stl::helper::has_sort_member_function_v<ContainerType>)
       haystack.sort();
     else
       std::sort(std::begin(haystack), std::end(haystack));
     is_haystack_sorted = true;
   }
 
-  auto next_iter = std::cbegin(src);
-  const auto last_iter = std::cend(src);
+  decltype(std::distance(first, last)) longest_first_word_length{};
+  auto longest_first_word_start_iter = first;
+  auto longest_first_word_last_iter = first;
 
-  decltype(std::distance(next_iter, last_iter)) longest_first_word_length{};
-  auto longest_first_word_start_iter = next_iter;
-  auto longest_first_word_last_iter = next_iter;
+  while (first != last) {
+    const auto [seq_first, seq_last] = find_first_sequence_of_allowed_elements(
+        first, last, haystack, is_haystack_sorted);
 
-  while (next_iter != last_iter) {
-    const auto [first, last] = find_first_sequence_of_allowed_elements(
-        next_iter, last_iter, haystack, is_haystack_sorted);
-
-    if (first == last)
+    if (seq_first == seq_last)
       break;
 
-    const auto current_distance{std::distance(first, last)};
+    const auto current_distance{std::distance(seq_first, seq_last)};
 
     if (current_distance > longest_first_word_length) {
       longest_first_word_length = current_distance;
-      longest_first_word_start_iter = first;
-      longest_first_word_last_iter = last;
+      longest_first_word_start_iter = seq_first;
+      longest_first_word_last_iter = seq_last;
     }
 
-    next_iter = last;
+    first = seq_last;
   }
 
-  return StringType(longest_first_word_start_iter,
-                    longest_first_word_last_iter);
+  return {longest_first_word_start_iter, longest_first_word_last_iter};
 }
 
 template <
@@ -11566,33 +11647,41 @@ std::vector<std::basic_string<get_char_type_t<T>>> str_split(
     return parts;
   }
 
-  char_type needle_buffer[2]{};
+  char_type needle_buffer[2];
   std::basic_string_view<char_type> needle_sv{};
 
-  if constexpr (is_char_pointer_type_v<U> || is_char_array_type_v<U>)
+  if constexpr (is_char_pointer_type_v<U> || is_char_array_type_v<U>) {
     needle_sv = {needle, needle_len};
-  else if constexpr (is_valid_char_type_v<U>) {
-    needle_buffer[0U] = needle;
+    unused_args(needle_buffer);
+  } else if constexpr (is_valid_char_type_v<U>) {
+    needle_buffer[0] = needle;
+    needle_buffer[1] = static_cast<char_type>(0);
     needle_sv = {needle_buffer, 1U};
-  } else
+  } else {
     needle_sv = needle;
+    unused_args(needle_buffer);
+  }
 
-  char_type needle_parts_separator_token_buffer[2]{};
+  char_type needle_parts_separator_token_buffer[2];
   std::basic_string_view<char_type> needle_parts_separator_token_sv{};
 
   const size_t needle_parts_separator_token_len{
       len(needle_parts_separator_token)};
 
   if (needle_parts_separator_token_len > 0U) {
-    if constexpr (is_char_pointer_type_v<V> || is_char_array_type_v<V>)
+    if constexpr (is_char_pointer_type_v<V> || is_char_array_type_v<V>) {
       needle_parts_separator_token_sv = {needle_parts_separator_token,
                                          needle_parts_separator_token_len};
-    else if constexpr (is_valid_char_type_v<V>) {
-      needle_parts_separator_token_buffer[0U] = needle_parts_separator_token;
+      unused_args(needle_parts_separator_token_buffer);
+    } else if constexpr (is_valid_char_type_v<V>) {
+      needle_parts_separator_token_buffer[0] = needle_parts_separator_token;
+      needle_parts_separator_token_buffer[1] = static_cast<char_type>(0);
       needle_parts_separator_token_sv = {needle_parts_separator_token_buffer,
                                          1U};
-    } else
+    } else {
       needle_parts_separator_token_sv = needle_parts_separator_token;
+      unused_args(needle_parts_separator_token_buffer);
+    }
   }
 
   std::vector<std::basic_string_view<char_type>> needle_parts{};
@@ -11701,19 +11790,23 @@ str_split_range(IteratorType first,
     return parts;
   }
 
-  char_type needle_buffer[2]{};
+  char_type needle_buffer[2];
   std::basic_string_view<char_type> needle_sv{};
 
   if constexpr (is_char_pointer_type_v<NeedleType> ||
-                is_char_array_type_v<NeedleType>)
+                is_char_array_type_v<NeedleType>) {
     needle_sv = {needle, needle_len};
-  else if constexpr (is_valid_char_type_v<NeedleType>) {
-    needle_buffer[0U] = needle;
+    unused_args(needle_buffer);
+  } else if constexpr (is_valid_char_type_v<NeedleType>) {
+    needle_buffer[0] = needle;
+    needle_buffer[1] = static_cast<char_type>(0);
     needle_sv = {needle_buffer, 1U};
-  } else
+  } else {
     needle_sv = needle;
+    unused_args(needle_buffer);
+  }
 
-  char_type needle_parts_separator_token_buffer[2]{};
+  char_type needle_parts_separator_token_buffer[2];
   std::basic_string_view<char_type> needle_parts_separator_token_sv{};
 
   std::vector<std::basic_string_view<char_type>> needle_parts{};
@@ -11723,15 +11816,19 @@ str_split_range(IteratorType first,
 
   if (needle_parts_separator_token_len > 0U) {
     if constexpr (is_char_pointer_type_v<NeedleSeparatorType> ||
-                  is_char_array_type_v<NeedleSeparatorType>)
+                  is_char_array_type_v<NeedleSeparatorType>) {
       needle_parts_separator_token_sv = {needle_parts_separator_token,
                                          needle_parts_separator_token_len};
-    else if constexpr (is_valid_char_type_v<NeedleSeparatorType>) {
-      needle_parts_separator_token_buffer[0U] = needle_parts_separator_token;
+      unused_args(needle_parts_separator_token_buffer);
+    } else if constexpr (is_valid_char_type_v<NeedleSeparatorType>) {
+      needle_parts_separator_token_buffer[0] = needle_parts_separator_token;
+      needle_parts_separator_token_buffer[1] = static_cast<char_type>(0);
       needle_parts_separator_token_sv = {needle_parts_separator_token_buffer,
                                          1U};
-    } else
+    } else {
       needle_parts_separator_token_sv = needle_parts_separator_token;
+      unused_args(needle_parts_separator_token_buffer);
+    }
   }
 
   if (needle_parts_separator_token_len > 0U && !split_on_whole_needle) {
@@ -11974,59 +12071,151 @@ str_join(FwIterType first, const FwIterType last, const NeedleType& needle) {
 
 template <typename ForwardIterType1,
           typename ForwardIterType2,
-          typename Predicate,
-          typename = std::enable_if_t<std::is_assignable_v<
-              std::add_lvalue_reference_t<
-                  typename std::iterator_traits<ForwardIterType2>::value_type>,
-              std::add_lvalue_reference_t<const typename std::iterator_traits<
-                  ForwardIterType1>::value_type>>>>
-constexpr std::pair<ForwardIterType1, ForwardIterType2> copy_while(
+          typename Predicate>
+constexpr std::pair<ForwardIterType1, ForwardIterType2> copy_forward_while_true(
     ForwardIterType1 src_first,
     const ForwardIterType1 src_last,
     ForwardIterType2 dst_first,
-    Predicate p) noexcept(std::
-                              is_nothrow_assignable_v<
-                                  std::add_lvalue_reference_t<
-                                      typename std::iterator_traits<
-                                          ForwardIterType2>::value_type>,
-                                  std::add_lvalue_reference_t<
-                                      const typename std::iterator_traits<
-                                          ForwardIterType1>::value_type>>&&
-                                  std::is_nothrow_invocable_r_v<
-                                      bool,
-                                      Predicate,
-                                      std::add_lvalue_reference_t<
-                                          const typename std::iterator_traits<
-                                              ForwardIterType1>::value_type>>) {
+    Predicate p) {
   while (src_first != src_last && p(*src_first)) {
     *dst_first = *src_first;
     ++src_first;
     ++dst_first;
   }
 
-  return std::make_pair(src_first, dst_first);
+  return {src_first, dst_first};
+}
+
+template <typename BidirIterType1, typename BidirIterType2, typename Predicate>
+constexpr std::pair<BidirIterType1, BidirIterType2> copy_backward_while_true(
+    const BidirIterType1 src_first,
+    BidirIterType1 src_last,
+    BidirIterType2 dst_last,
+    Predicate p) {
+  bool is_copied{true};
+
+  while (src_first != src_last) {
+    is_copied = p(*(--src_last));
+    if (is_copied)
+      *(--dst_last) = *src_last;
+    else
+      break;
+  }
+
+  if (!is_copied)
+    ++src_last;
+
+  return {src_last, dst_last};
 }
 
 template <typename ForwardIterType1,
           typename ForwardIterType2,
-          typename Predicate,
-          typename = std::enable_if_t<std::is_assignable_v<
-              std::add_lvalue_reference_t<
-                  typename std::iterator_traits<ForwardIterType2>::value_type>,
-              std::add_lvalue_reference_t<const typename std::iterator_traits<
-                  ForwardIterType1>::value_type>>>>
-constexpr std::pair<ForwardIterType1, ForwardIterType2> copy_until(
+          typename Predicate>
+constexpr std::pair<ForwardIterType1, ForwardIterType2>
+copy_forward_while_false(ForwardIterType1 src_first,
+                         const ForwardIterType1 src_last,
+                         ForwardIterType2 dst_first,
+                         Predicate p) {
+  while (src_first != src_last && !p(*src_first)) {
+    *dst_first = *src_first;
+    ++src_first;
+    ++dst_first;
+  }
+
+  return {src_first, dst_first};
+}
+
+template <typename BidirIterType1, typename BidirIterType2, typename Predicate>
+constexpr std::pair<BidirIterType1, BidirIterType2> copy_backward_while_false(
+    const BidirIterType1 src_first,
+    BidirIterType1 src_last,
+    BidirIterType2 dst_last,
+    Predicate p) {
+  bool is_copied{true};
+
+  while (src_first != src_last) {
+    is_copied = !p(*(--src_last));
+    if (is_copied)
+      *(--dst_last) = *src_last;
+    else
+      break;
+  }
+
+  if (!is_copied)
+    ++src_last;
+
+  return {src_last, dst_last};
+}
+
+template <typename ForwardIterType1,
+          typename ForwardIterType2,
+          typename Predicate>
+constexpr std::pair<ForwardIterType1, ForwardIterType2> move_forward_while_true(
     ForwardIterType1 src_first,
     const ForwardIterType1 src_last,
     ForwardIterType2 dst_first,
     Predicate p) noexcept(std::
-                              is_nothrow_assignable_v<
-                                  std::add_lvalue_reference_t<
-                                      typename std::iterator_traits<
-                                          ForwardIterType2>::value_type>,
-                                  std::add_lvalue_reference_t<
-                                      const typename std::iterator_traits<
-                                          ForwardIterType1>::value_type>>&&
+                              is_nothrow_move_assignable_v<
+                                  typename std::iterator_traits<
+                                      ForwardIterType1>::value_type>&&
+                                  std::is_nothrow_invocable_r_v<
+                                      bool,
+                                      Predicate,
+                                      std::add_lvalue_reference_t<
+                                          const typename std::iterator_traits<
+                                              ForwardIterType1>::value_type>>) {
+  while (src_first != src_last && p(*src_first)) {
+    *dst_first = std::move(*src_first);
+    ++src_first;
+    ++dst_first;
+  }
+
+  return {src_first, dst_first};
+}
+
+template <typename BidirIterType1, typename BidirIterType2, typename Predicate>
+constexpr std::pair<BidirIterType1, BidirIterType2> move_backward_while_true(
+    const BidirIterType1 src_first,
+    BidirIterType1 src_last,
+    BidirIterType2 dst_last,
+    Predicate p) noexcept(std::
+                              is_nothrow_move_assignable_v<
+                                  typename std::iterator_traits<
+                                      BidirIterType1>::value_type>&&
+                                  std::is_nothrow_invocable_r_v<
+                                      bool,
+                                      Predicate,
+                                      std::add_lvalue_reference_t<
+                                          const typename std::iterator_traits<
+                                              BidirIterType1>::value_type>>) {
+  bool is_moved{true};
+
+  while (src_first != src_last) {
+    is_moved = p(*(--src_last));
+    if (is_moved)
+      *(--dst_last) = std::move(*src_last);
+    else
+      break;
+  }
+
+  if (!is_moved)
+    ++src_last;
+
+  return {src_last, dst_last};
+}
+
+template <typename ForwardIterType1,
+          typename ForwardIterType2,
+          typename Predicate>
+constexpr std::pair<ForwardIterType1, ForwardIterType2>
+move_forward_while_false(
+    ForwardIterType1 src_first,
+    const ForwardIterType1 src_last,
+    ForwardIterType2 dst_first,
+    Predicate p) noexcept(std::
+                              is_nothrow_move_assignable_v<
+                                  typename std::iterator_traits<
+                                      ForwardIterType1>::value_type>&&
                                   std::is_nothrow_invocable_r_v<
                                       bool,
                                       Predicate,
@@ -12034,110 +12223,43 @@ constexpr std::pair<ForwardIterType1, ForwardIterType2> copy_until(
                                           const typename std::iterator_traits<
                                               ForwardIterType1>::value_type>>) {
   while (src_first != src_last && !p(*src_first)) {
-    *dst_first = *src_first;
-    ++src_first;
-    ++dst_first;
-  }
-
-  return std::make_pair(src_first, dst_first);
-}
-
-template <
-    typename ForwardIterType1,
-    typename ForwardIterType2,
-    typename Predicate,
-    typename = std::enable_if_t<
-        std::is_assignable_v<
-            std::add_lvalue_reference_t<
-                typename std::iterator_traits<ForwardIterType2>::value_type>,
-            std::add_rvalue_reference_t<
-                typename std::iterator_traits<ForwardIterType1>::value_type>> ||
-        std::is_assignable_v<
-            std::add_lvalue_reference_t<
-                typename std::iterator_traits<ForwardIterType2>::value_type>,
-            std::add_lvalue_reference_t<const typename std::iterator_traits<
-                ForwardIterType1>::value_type>>>>
-constexpr std::pair<ForwardIterType1, ForwardIterType2> move_while(
-    ForwardIterType1 src_first,
-    const ForwardIterType1 src_last,
-    ForwardIterType2 dst_first,
-    Predicate p) noexcept((std::
-                               is_nothrow_move_assignable_v<
-                                   std::add_lvalue_reference_t<
-                                       typename std::iterator_traits<
-                                           ForwardIterType2>::value_type>,
-                                   std::add_lvalue_reference_t<
-                                       const typename std::iterator_traits<
-                                           ForwardIterType1>::value_type>> ||
-                           std::is_nothrow_assignable_v<
-                               std::add_lvalue_reference_t<
-                                   typename std::iterator_traits<
-                                       ForwardIterType2>::value_type>,
-                               std::add_lvalue_reference_t<
-                                   const typename std::iterator_traits<
-                                       ForwardIterType1>::value_type>>)&&std::
-                              is_nothrow_invocable_r_v<
-                                  bool,
-                                  Predicate,
-                                  std::add_lvalue_reference_t<
-                                      const typename std::iterator_traits<
-                                          ForwardIterType1>::value_type>>) {
-  while (src_first != src_last && p(*src_first)) {
     *dst_first = std::move(*src_first);
     ++src_first;
     ++dst_first;
   }
 
-  return std::make_pair(src_first, dst_first);
+  return {src_first, dst_first};
 }
 
-template <
-    typename ForwardIterType1,
-    typename ForwardIterType2,
-    typename Predicate,
-    typename = std::enable_if_t<
-        std::is_assignable_v<
-            std::add_lvalue_reference_t<
-                typename std::iterator_traits<ForwardIterType2>::value_type>,
-            std::add_rvalue_reference_t<
-                typename std::iterator_traits<ForwardIterType1>::value_type>> ||
-        std::is_assignable_v<
-            std::add_lvalue_reference_t<
-                typename std::iterator_traits<ForwardIterType2>::value_type>,
-            std::add_lvalue_reference_t<const typename std::iterator_traits<
-                ForwardIterType1>::value_type>>>>
-constexpr std::pair<ForwardIterType1, ForwardIterType2> move_until(
-    ForwardIterType1 src_first,
-    const ForwardIterType1 src_last,
-    ForwardIterType2 dst_first,
-    Predicate p) noexcept((std::
-                               is_nothrow_move_assignable_v<
-                                   std::add_lvalue_reference_t<
-                                       typename std::iterator_traits<
-                                           ForwardIterType2>::value_type>,
-                                   std::add_lvalue_reference_t<
-                                       const typename std::iterator_traits<
-                                           ForwardIterType1>::value_type>> ||
-                           std::is_nothrow_assignable_v<
-                               std::add_lvalue_reference_t<
-                                   typename std::iterator_traits<
-                                       ForwardIterType2>::value_type>,
-                               std::add_lvalue_reference_t<
-                                   const typename std::iterator_traits<
-                                       ForwardIterType1>::value_type>>)&&std::
-                              is_nothrow_invocable_r_v<
-                                  bool,
-                                  Predicate,
-                                  std::add_lvalue_reference_t<
-                                      const typename std::iterator_traits<
-                                          ForwardIterType1>::value_type>>) {
-  while (src_first != src_last && !p(*src_first)) {
-    *dst_first = std::move(*src_first);
-    ++src_first;
-    ++dst_first;
+template <typename BidirIterType1, typename BidirIterType2, typename Predicate>
+constexpr std::pair<BidirIterType1, BidirIterType2> move_backward_while_false(
+    const BidirIterType1 src_first,
+    BidirIterType1 src_last,
+    BidirIterType2 dst_last,
+    Predicate p) noexcept(std::
+                              is_nothrow_move_assignable_v<
+                                  typename std::iterator_traits<
+                                      BidirIterType1>::value_type>&&
+                                  std::is_nothrow_invocable_r_v<
+                                      bool,
+                                      Predicate,
+                                      std::add_lvalue_reference_t<
+                                          const typename std::iterator_traits<
+                                              BidirIterType1>::value_type>>) {
+  bool is_moved{true};
+
+  while (src_first != src_last) {
+    is_moved = !p(*(--src_last));
+    if (is_moved)
+      *(--dst_last) = std::move(*src_last);
+    else
+      break;
   }
 
-  return std::make_pair(src_first, dst_first);
+  if (!is_moved)
+    ++src_last;
+
+  return {src_last, dst_last};
 }
 
 }  // namespace stl::helper
