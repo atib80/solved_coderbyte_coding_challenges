@@ -157,35 +157,73 @@ ForwardIter optimal_bsearch(ForwardIter first,
   return value == *first ? first : orig_last;
 }
 
+bool check_if_found_number_has_not_been_used(
+    const size_t index,
+    const int target_number,
+    const vector<int>& sorted_numbers,
+    unordered_set<size_t>& ignored_indices) {
+  bool illegal_index = false;
+
+  if (0U != ignored_indices.count(index)) {
+    illegal_index = true;
+    for (size_t x{index}, y{index + 1}; x > 0U || y < sorted_numbers.size();) {
+      if (target_number == sorted_numbers[x - 1] &&
+          0U == ignored_indices.count(x - 1)) {
+        ignored_indices.emplace(x - 1);
+        illegal_index = false;
+        break;
+      } else if (target_number == sorted_numbers[y] &&
+                 0U == ignored_indices.count(y)) {
+        ignored_indices.emplace(y);
+        illegal_index = false;
+        break;
+      } else if (target_number != sorted_numbers[x - 1] &&
+                 target_number != sorted_numbers[y])
+        break;
+
+      if (x > 0U)
+        --x;
+    }
+  }
+
+  return illegal_index;
+}
+
 string TwoSum_v4(const int* arr, const size_t arr_size) {
   if (arr_size < 3U)
     return "-1";
 
   const auto target_num{arr[0]};
-  const int skip_item_value{arr[1] - 1};
   vector<int> sorted_numbers(arr + 1, arr + arr_size);
   sort(begin(sorted_numbers), end(sorted_numbers));
+  unordered_set<size_t> ignored_indices{};
 
   ostringstream oss{};
 
   for (size_t i{}; i < sorted_numbers.size(); ++i) {
-    if (skip_item_value == sorted_numbers[i])
-      continue;
     const auto second_number{target_num - sorted_numbers[i]};
+    if (1U == ignored_indices.count(i))
+      continue;
+
+    ignored_indices.emplace(i);
 
     if (second_number < sorted_numbers[i]) {
       const auto iter = optimal_bsearch(
           begin(sorted_numbers), begin(sorted_numbers) + i, second_number);
-      if (iter != begin(sorted_numbers) + i) {
+      if (iter != begin(sorted_numbers) + i &&
+          !check_if_found_number_has_not_been_used(
+              static_cast<size_t>(iter - begin(sorted_numbers)), second_number,
+              sorted_numbers, ignored_indices)) {
         oss << second_number << ',' << sorted_numbers[i] << ' ';
-        sorted_numbers[i] = *iter = skip_item_value;
       }
     } else {
       const auto iter = optimal_bsearch(begin(sorted_numbers) + i + 1,
                                         end(sorted_numbers), second_number);
-      if (iter != end(sorted_numbers)) {
+      if (iter != end(sorted_numbers) &&
+          !check_if_found_number_has_not_been_used(
+              static_cast<size_t>(iter - begin(sorted_numbers)), second_number,
+              sorted_numbers, ignored_indices)) {
         oss << sorted_numbers[i] << ',' << second_number << ' ';
-        sorted_numbers[i] = *iter = skip_item_value;
       }
     }
   }
