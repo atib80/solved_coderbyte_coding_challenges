@@ -157,15 +157,16 @@ ForwardIter optimal_bsearch(ForwardIter first,
   return value == *first ? first : orig_last;
 }
 
-bool check_if_found_number_has_not_been_used(
+bool check_if_found_number_has_been_used(
     const size_t index,
-    const int target_number,
     const vector<int>& sorted_numbers,
     unordered_set<size_t>& ignored_indices) {
   bool illegal_index = false;
 
   if (0U != ignored_indices.count(index)) {
+    const int target_number{sorted_numbers.at(index)};
     illegal_index = true;
+
     for (size_t x{index}, y{index + 1}; x > 0U || y < sorted_numbers.size();) {
       if (target_number == sorted_numbers[x - 1] &&
           0U == ignored_indices.count(x - 1)) {
@@ -209,33 +210,32 @@ string TwoSum_v4(const int* arr, const size_t arr_size) {
 
     if (second_number < sorted_numbers[i]) {
       const auto iter = optimal_bsearch(
-          begin(sorted_numbers), begin(sorted_numbers) + i, second_number);
-      if (iter != begin(sorted_numbers) + i &&
-          !check_if_found_number_has_not_been_used(
-              static_cast<size_t>(iter - begin(sorted_numbers)), second_number,
+          cbegin(sorted_numbers), cbegin(sorted_numbers) + i, second_number);
+      if (iter != cbegin(sorted_numbers) + i &&
+          !check_if_found_number_has_been_used(
+              static_cast<size_t>(iter - cbegin(sorted_numbers)),
               sorted_numbers, ignored_indices)) {
         oss << second_number << ',' << sorted_numbers[i] << ' ';
       }
     } else {
-      const auto iter = optimal_bsearch(begin(sorted_numbers) + i + 1,
-                                        end(sorted_numbers), second_number);
-      if (iter != end(sorted_numbers) &&
-          !check_if_found_number_has_not_been_used(
-              static_cast<size_t>(iter - begin(sorted_numbers)), second_number,
+      const auto iter = optimal_bsearch(cbegin(sorted_numbers) + i + 1,
+                                        cend(sorted_numbers), second_number);
+      if (iter != cend(sorted_numbers) &&
+          !check_if_found_number_has_been_used(
+              static_cast<size_t>(iter - cbegin(sorted_numbers)),
               sorted_numbers, ignored_indices)) {
         oss << sorted_numbers[i] << ',' << second_number << ' ';
       }
     }
   }
 
-  string result{oss.str()};
+  if (oss.tellp() != 0) {
+    string result{oss.str()};
+    result.pop_back();
+    return result;
+  }
 
-  if (result.empty())
-    return "-1";
-
-  result.erase(--cend(result));
-
-  return result;
+  return "-1";
 }
 
 int main() {

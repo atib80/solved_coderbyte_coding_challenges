@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 if (MSVC)
     add_compile_options(/nologo /W4 /EHsc /Ot /Ox /Ob2 /Oy /Oi)
 else ()
-    add_compile_options(-Wall -Wextra -Wpedantic -O0 -g)
+    add_compile_options(-Wall -Wextra -Wpedantic -O3 -Ofast)
 endif ()
 
 include(CTest)
