@@ -20,6 +20,7 @@ Input:  7, 6, 4, 1, 7, -2, 3, 12
 Output: "6,1 4,3"
 */
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -32,7 +33,7 @@ string TwoSum_v1(const int* arr, const size_t arr_size) {
   if (arr_size < 3U)
     return "-1";
 
-  const int target_num{arr[0]};
+  const int target_num{*arr};
   ostringstream oss{};
 
   for (size_t i{1}; i < arr_size - 1; ++i) {
@@ -133,26 +134,92 @@ string TwoSum_v3(const int* arr, const size_t arr_size) {
   return result;
 }
 
+template <typename ForwardIter, typename T>
+ForwardIter optimal_bsearch(ForwardIter first,
+                            ForwardIter last,
+                            const T& value) {
+  const ForwardIter orig_last{last};
+  ForwardIter next{first};
+
+  while (++next != last) {
+    ForwardIter current{first};
+
+    std::advance(current, std::distance(first, last) / 2);
+
+    if (value < *current)
+      last = current;
+    else
+      first = current;
+
+    next = first;
+  }
+
+  return value == *first ? first : orig_last;
+}
+
+string TwoSum_v4(const int* arr, const size_t arr_size) {
+  if (arr_size < 3U)
+    return "-1";
+
+  const auto target_num{arr[0]};
+  const int skip_item_value{arr[1] - 1};
+  vector<int> sorted_numbers(arr + 1, arr + arr_size);
+  sort(begin(sorted_numbers), end(sorted_numbers));
+
+  ostringstream oss{};
+
+  for (size_t i{}; i < sorted_numbers.size(); ++i) {
+    if (skip_item_value == sorted_numbers[i])
+      continue;
+    const auto second_number{target_num - sorted_numbers[i]};
+
+    if (second_number < sorted_numbers[i]) {
+      const auto iter = optimal_bsearch(
+          begin(sorted_numbers), begin(sorted_numbers) + i, second_number);
+      if (iter != begin(sorted_numbers) + i) {
+        oss << second_number << ',' << sorted_numbers[i] << ' ';
+        sorted_numbers[i] = *iter = skip_item_value;
+      }
+    } else {
+      const auto iter = optimal_bsearch(begin(sorted_numbers) + i + 1,
+                                        end(sorted_numbers), second_number);
+      if (iter != end(sorted_numbers)) {
+        oss << sorted_numbers[i] << ',' << second_number << ' ';
+        sorted_numbers[i] = *iter = skip_item_value;
+      }
+    }
+  }
+
+  string result{oss.str()};
+
+  if (result.empty())
+    return "-1";
+
+  result.erase(--cend(result));
+
+  return result;
+}
+
 int main() {
   // const int A[] = gets(stdin);
-  // cout << TwoSum_v2(A, sizeof(A)/sizeof(*A));
+  // cout << TwoSum_v4(A, sizeof(A)/sizeof(*A));
   const int b[]{7, 3, 5, 2, -4, 8, 11};
-  cout << TwoSum_v2(b, sizeof(b) / sizeof(*b))
+  cout << TwoSum_v4(b, sizeof(b) / sizeof(*b))
        << '\n';  // expected output: "5,2 -4,11"
   const int c[]{17, 4, 5, 6, 10, 11, 4, -3, -5, 3, 15, 2, 7};
-  cout << TwoSum_v2(c, sizeof(c) / sizeof(*c))
+  cout << TwoSum_v4(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: "6,11 10,7 15,2"
   const int d[]{7, 6, 4, 1, 7, -2, 3, 12};
-  cout << TwoSum_v2(d, sizeof(d) / sizeof(*d))
+  cout << TwoSum_v4(d, sizeof(d) / sizeof(*d))
        << '\n';  // expected output: "6,1 4,3"
   const int e[]{6, 2};
-  cout << TwoSum_v2(e, sizeof(e) / sizeof(*e))
+  cout << TwoSum_v4(e, sizeof(e) / sizeof(*e))
        << '\n';  // expected output: "-1"
   const int f[]{100, 90, 90, 90, 90, 11};
-  cout << TwoSum_v2(f, sizeof(f) / sizeof(*f))
+  cout << TwoSum_v4(f, sizeof(f) / sizeof(*f))
        << '\n';  // expected output: "-1"
   const int g[]{4, 5, 2, 1};
-  cout << TwoSum_v2(g, sizeof(g) / sizeof(*g))
+  cout << TwoSum_v4(g, sizeof(g) / sizeof(*g))
        << '\n';  // expected output: "-1"
 
   return 0;

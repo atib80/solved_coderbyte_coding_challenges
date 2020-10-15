@@ -10,7 +10,7 @@ ForwardIter optimal_bsearch(ForwardIter first,
   const ForwardIter orig_last{last};
   ForwardIter next{first};
 
-  while (++next < last) {
+  while (++next != last) {
     ForwardIter current{first};
 
     std::advance(current, std::distance(first, last) / 2);

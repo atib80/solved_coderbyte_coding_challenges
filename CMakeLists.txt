@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 if (MSVC)
     add_compile_options(/nologo /W4 /EHsc /Ot /Ox /Ob2 /Oy /Oi)
 else ()
-    add_compile_options(-Wall -Wextra -Wpedantic -O3 -Ofast)
+    add_compile_options(-Wall -Wextra -Wpedantic -O0 -g)
 endif ()
 
 include(CTest)
@@ -18,7 +18,7 @@ set(headers
         )
 
 set(sources
-        1_easy_difficulty_level/01_first_reverse.cpp
+        1_easy_difficulty_level/46_two_sum.cpp
         )
 
 add_executable(${This} ${headers} ${sources})
