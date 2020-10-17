@@ -44,14 +44,13 @@ string TwoSum_v1(const int* arr, const size_t arr_size) {
     }
   }
 
-  string result{oss.str()};
+  if (oss.tellp() != 0) {
+    string result{oss.str()};
+    result.pop_back();
+    return result;
+  }
 
-  if (result.empty())
-    return "-1";
-
-  result.erase(--cend(result));
-
-  return result;
+  return "-1";
 }
 
 string TwoSum_v2(const int* arr, const size_t arr_size) {
@@ -60,78 +59,30 @@ string TwoSum_v2(const int* arr, const size_t arr_size) {
 
   const int target_num{arr[0]};
 
-  unordered_multiset<int> numbers{arr + 1, arr + arr_size};
+  unordered_map<int, size_t> numbers_freq{};
 
   ostringstream oss{};
 
   for (size_t i{1}; i < arr_size; ++i) {
-    const auto left_number_pos = numbers.find(arr[i]);
-
-    if (end(numbers) == left_number_pos)
-      continue;
-
-    numbers.erase(left_number_pos);
-
     const int search_value{target_num - arr[i]};
+    const auto search_value_iter = numbers_freq.find(search_value);
 
-    const auto right_number_pos = numbers.find(search_value);
-
-    if (end(numbers) == right_number_pos)
-      continue;
-
-    numbers.erase(right_number_pos);
-
-    oss << arr[i] << ',' << search_value << ' ';
+    if (end(numbers_freq) == search_value_iter ||
+        0U == numbers_freq.at(search_value)) {
+      ++numbers_freq[arr[i]];
+    } else {
+      --numbers_freq[search_value];
+      oss << arr[i] << ',' << search_value << ' ';
+    }
   }
 
-  string result{oss.str()};
-
-  if (result.empty())
-    return "-1";
-
-  result.erase(--cend(result));
-
-  return result;
-}
-
-string TwoSum_v3(const int* arr, const size_t arr_size) {
-  if (arr_size < 3U)
-    return "-1";
-
-  const int target_num{arr[0]};
-
-  unordered_map<int, size_t> numbers_freq{};
-
-  for (size_t i{1}; i < arr_size; i++)
-    numbers_freq[arr[i]]++;
-
-  ostringstream oss{};
-
-  for (size_t i{1}; i < arr_size; i++) {
-    if (0U == numbers_freq.find(arr[i])->second)
-      continue;
-
-    numbers_freq[arr[i]]--;
-
-    const int search_value{target_num - arr[i]};
-
-    if (numbers_freq.find(search_value) == end(numbers_freq) ||
-        0U == numbers_freq.find(search_value)->second)
-      continue;
-
-    numbers_freq[search_value]--;
-
-    oss << arr[i] << ',' << search_value << ' ';
+  if (oss.tellp() != 0) {
+    string result{oss.str()};
+    result.pop_back();
+    return result;
   }
 
-  string result{oss.str()};
-
-  if (result.empty())
-    return "-1";
-
-  result.erase(--cend(result));
-
-  return result;
+  return "-1";
 }
 
 template <typename ForwardIter, typename T>
@@ -185,12 +136,14 @@ bool check_if_found_number_has_been_used(
       if (x > 0U)
         --x;
     }
+  } else {
+    ignored_indices.emplace(index);
   }
 
   return illegal_index;
 }
 
-string TwoSum_v4(const int* arr, const size_t arr_size) {
+string TwoSum_v3(const int* arr, const size_t arr_size) {
   if (arr_size < 3U)
     return "-1";
 
@@ -203,8 +156,6 @@ string TwoSum_v4(const int* arr, const size_t arr_size) {
 
   for (size_t i{}; i < sorted_numbers.size(); ++i) {
     const auto second_number{target_num - sorted_numbers[i]};
-    if (1U == ignored_indices.count(i))
-      continue;
 
     ignored_indices.emplace(i);
 
@@ -240,24 +191,24 @@ string TwoSum_v4(const int* arr, const size_t arr_size) {
 
 int main() {
   // const int A[] = gets(stdin);
-  // cout << TwoSum_v4(A, sizeof(A)/sizeof(*A));
+  // cout << TwoSum_v2(A, sizeof(A)/sizeof(*A));
   const int b[]{7, 3, 5, 2, -4, 8, 11};
-  cout << TwoSum_v4(b, sizeof(b) / sizeof(*b))
+  cout << TwoSum_v3(b, sizeof(b) / sizeof(*b))
        << '\n';  // expected output: "5,2 -4,11"
   const int c[]{17, 4, 5, 6, 10, 11, 4, -3, -5, 3, 15, 2, 7};
-  cout << TwoSum_v4(c, sizeof(c) / sizeof(*c))
+  cout << TwoSum_v3(c, sizeof(c) / sizeof(*c))
        << '\n';  // expected output: "6,11 10,7 15,2"
   const int d[]{7, 6, 4, 1, 7, -2, 3, 12};
-  cout << TwoSum_v4(d, sizeof(d) / sizeof(*d))
+  cout << TwoSum_v3(d, sizeof(d) / sizeof(*d))
        << '\n';  // expected output: "6,1 4,3"
   const int e[]{6, 2};
-  cout << TwoSum_v4(e, sizeof(e) / sizeof(*e))
+  cout << TwoSum_v3(e, sizeof(e) / sizeof(*e))
        << '\n';  // expected output: "-1"
   const int f[]{100, 90, 90, 90, 90, 11};
-  cout << TwoSum_v4(f, sizeof(f) / sizeof(*f))
+  cout << TwoSum_v3(f, sizeof(f) / sizeof(*f))
        << '\n';  // expected output: "-1"
   const int g[]{4, 5, 2, 1};
-  cout << TwoSum_v4(g, sizeof(g) / sizeof(*g))
+  cout << TwoSum_v3(g, sizeof(g) / sizeof(*g))
        << '\n';  // expected output: "-1"
 
   return 0;
