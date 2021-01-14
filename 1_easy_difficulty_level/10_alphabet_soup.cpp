@@ -20,8 +20,15 @@ Output: "ahhloop"
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <utility>
 
-using namespace std;
+using std::begin;
+using std::cout;
+using std::end;
+using std::move;
+using std::sort;
+using std::string;
+using std::swap;
 
 string AlphabetSoup_v1(string str) {
   sort(begin(str), end(str));
@@ -35,7 +42,7 @@ int compare(const void* lc, const void* rc) {
 string AlphabetSoup_v2(string str) {
   if (str.empty())
     return {};
-  qsort(&str[0], str.length(), sizeof(str.front()), compare);
+  qsort(str.data(), str.length(), sizeof(str.front()), compare);
   return str;
 }
 
@@ -47,12 +54,11 @@ string AlphabetSoup_v3(string str) {
 
   for (size_t i{1U}, did_swap_elements{1U};
        0U != did_swap_elements && i < str_len; ++i) {
-    did_swap_elements = 0U;
-    for (size_t j{}; j < str_len - i; j++) {
-      if (str[j] > str[j + 1]) {
+    for (size_t j{}; j < str_len - i; ++j) {
+      if (str[j] > str[j + 1])
         swap(str[j], str[j + 1]);
-        did_swap_elements = 1U;
-      }
+      else
+        did_swap_elements = 0U;
     }
   }
 
