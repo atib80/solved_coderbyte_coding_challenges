@@ -18,7 +18,7 @@ set(headers
         )
 
 set(sources
-        1_easy_difficulty_level/46_two_sum.cpp
+        1_easy_difficulty_level/02_first_factorial.cpp
         )
 
 add_executable(${This} ${headers} ${sources})
