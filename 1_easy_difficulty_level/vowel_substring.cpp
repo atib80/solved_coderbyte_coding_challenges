@@ -1,8 +1,6 @@
 #include <algorithm>
-#include <cstring>
 #include <iostream>
 #include <string>
-#include <unordered_set>
 
 using namespace std;
 
@@ -23,12 +21,15 @@ using namespace std;
  *  2. int k
  */
 
-string findSubstring(const string& s, size_t k) {
-  static int allowed_vowels[128]{};
-  allowed_vowels['a'] = allowed_vowels['e'] = allowed_vowels['i'] =
-      allowed_vowels['o'] = allowed_vowels['u'] = 1;
+static int allowed_vowels[256]{};
 
-  // static const unordered_set<char> vowels{'a', 'e', 'i', 'o', 'u'};
+static int _ = []() {
+  allowed_vowels['a'] = allowed_vowels['e'] = allowed_vowels['i'] = allowed_vowels['o'] = allowed_vowels['u'] = 1;
+  return 0;
+}();
+
+string findSubstring(const string& s, size_t k) {
+
   size_t start_pos{string::npos};
 
   k = min(k, s.length());
@@ -48,10 +49,9 @@ string findSubstring(const string& s, size_t k) {
     return s.substr(0, k);
 
   for (size_t i{offset}; i + k <= s.length(); ++i) {
-    if (1 == allowed_vowels[static_cast<size_t>(s[i - 1])])
-      --vowel_count;
-    if (1 == allowed_vowels[static_cast<size_t>(s[i + k - 1])])
-      ++vowel_count;
+    vowel_count -= allowed_vowels[static_cast<size_t>(s[i - 1])];
+    vowel_count += allowed_vowels[static_cast<size_t>(s[i + k - 1])];
+
     if (vowel_count > max_vowel_count) {
       if (k == vowel_count)
         return s.substr(i, k);
