@@ -20,6 +20,7 @@ Output: 16
 */
 
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -178,22 +179,24 @@ string TimeDifference(const string* str_arr, const size_t str_arr_size) {
   if (str_arr_size < 2)
     return 0;
 
+  constexpr static size_t buffer_size{24 * 60};
+
   size_t minimum_time_difference{numeric_limits<size_t>::max()};
-  vector<int> time_points(1440);
+  array<bool, buffer_size> time_points{};
 
   for (size_t i{}; i < str_arr_size; ++i) {
-    time_points[parseTimeInMinutesFromString(str_arr[i])] = 1;
+    time_points[parseTimeInMinutesFromString(str_arr[i])] = true;
   }
 
   size_t first{};
 
-  while (0 == time_points[first])
+  while (!time_points[first])
     ++first;
 
   size_t last{first};
 
   for (size_t next{first + 1}; next < time_points.size(); ++next) {
-    if (1 == time_points[next]) {
+    if (time_points[next]) {
       if (next - last < minimum_time_difference) {
         minimum_time_difference = next - last;
         if (0 == minimum_time_difference)
@@ -221,26 +224,6 @@ int main() {
   const string D[] = {"10:00am", "11:45pm", "5:00am", "12:01am"};
   cout << TimeDifference(D, sizeof(D) / sizeof(*D))
        << '\n';  // expected output: "16"
-
-  string s1 = "\tabc\n";
-  string s2 = "  abc";
-  string s3 = "abc \t";
-  string s4 = "   ";
-  string s5 = "\t\n \t\n";
-  string s6 = "abc";
-
-  s1 = trim(s1);
-  cout << "s1 = '" << s1 << "'\n";
-  s2 = trim(s2);
-  cout << "s2 = '" << s2 << "'\n";
-  s3 = trim(s3);
-  cout << "s3 = '" << s3 << "'\n";
-  s4 = trim(s4);
-  cout << "s4 = '" << s4 << "'\n";
-  s5 = trim(s5);
-  cout << "s5 = '" << s5 << "'\n";
-  s6 = trim(s6);
-  cout << "s6 = '" << s6 << "'\n";
 
   return 0;
 }
