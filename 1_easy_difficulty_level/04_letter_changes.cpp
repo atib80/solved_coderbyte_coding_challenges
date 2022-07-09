@@ -20,57 +20,36 @@ Output: "gvO Ujnft!"
 #include <array>
 #include <iostream>
 #include <limits>
-#include <mutex>
 #include <string>
 #include <unordered_set>
-#include <vector>
+
+#include <catch2/catch_test_macros.hpp>
+#define CATCH_CONFIG_MAIN
 
 using namespace std;
 
 string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (!str_len)
-    return {};
-
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return {};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
+  const size_t first = str.find_first_not_of(" \t\n\f\v ");
+  const size_t last = str.find_last_not_of(" \t\n\f\v ") + 1;
+  return first != string::npos ? string{cbegin(str) + first, cbegin(str) + last} : string{};
 }
 
 string LetterChanges_v1(string str) {
   str = trim(str);
 
   const unordered_set<char> vowels{'a', 'e', 'i', 'o', 'u'};
-
-  for (auto& ch : str) {
-    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z'))
-      ++ch;
-    else if ('z' == ch || 'Z' == ch)
-      ch -= 'z' - 'a';
-  }
-
   const auto& f = use_facet<std::ctype<char>>(locale{});
 
-  transform(cbegin(str), cend(str), begin(str), [&](const char ch) {
-    if (vowels.find(ch) != end(vowels))
-      return f.toupper(ch);
-    return ch;
-  });
+  for (auto& ch : str) {
+    if ((ch >= 'a' && ch < 'z') || (ch >= 'A' && ch < 'Z')) {
+      ++ch;
+      if (0u != vowels.count(ch)) {
+        ch = f.toupper(ch);
+      }
+    } else if ('z' == ch || 'Z' == ch) {
+      ch = 'A';
+    }
+  }
 
   return str;
 }
@@ -79,31 +58,31 @@ struct lookup_table {
   using byte = unsigned char;
   array<byte, 256> offsets;
   array<byte, 256> capitalized_letters;
-  static constexpr const byte byte_max_value{numeric_limits<byte>::max()};
+  static constexpr byte byte_max_value{numeric_limits<byte>::max()};
 
   constexpr lookup_table() : offsets{}, capitalized_letters{} {
-    for (byte i{}; i < 'A'; i++) {
+    for (byte i{}; i < 'A'; ++i) {
       offsets[i] = i;
       capitalized_letters[i] = i;
     }
-    for (byte i{'Z' + 1}; i < 'a'; i++) {
+    for (byte i{'Z' + 1}; i < 'a'; ++i) {
       offsets[i] = i;
       capitalized_letters[i] = i;
     }
-    for (byte i = 'z' + 1; i < byte_max_value; i++) {
+    for (byte i = 'z' + 1; i < byte_max_value; ++i) {
       offsets[i] = i;
       capitalized_letters[i] = i;
     }
 
-    for (byte i{'a'}, j{'A'}; i < 'z'; i++, j++) {
+    for (byte i{'a'}, j{'A'}; i < 'z'; ++i, ++j) {
       offsets[i] = i + 1;
       offsets[j] = j + 1;
       capitalized_letters[i] = i;
       capitalized_letters[j] = j;
     }
 
-    offsets['Z'] = 'A';
     offsets['z'] = 'a';
+    offsets['Z'] = 'A';
     capitalized_letters['a'] = 'A';
     capitalized_letters['e'] = 'E';
     capitalized_letters['i'] = 'I';
@@ -136,11 +115,25 @@ string LetterChanges_v2(string str) {
   return str;
 }
 
-int main() {
-  // cout << LetterChanges(gets(stdin));
-  cout << LetterChanges_v2("hello*3") << '\n';  // expected output: "Ifmmp*3"
-  cout << LetterChanges_v2("fun times!")
-       << '\n';  // expected output: "gvO Ujnft!"
+TEST_CASE("Letter Changes : LetterChanges_v1") {
 
-  return 0;
+  REQUIRE(LetterChanges_v1("hello*3") == "Ifmmp*3");
+  REQUIRE(LetterChanges_v1("fun times!") == "gvO Ujnft!");
+
 }
+
+TEST_CASE("Letter Changes : LetterChanges_v2") {
+
+  REQUIRE(LetterChanges_v2("hello*3") == "Ifmmp*3");
+  REQUIRE(LetterChanges_v2("fun times!") == "gvO Ujnft!");
+
+}
+
+//int main() {
+//  // cout << LetterChanges_v1(gets(stdin));
+//  cout << LetterChanges_v1("hello*3") << '\n';  // expected output: "Ifmmp*3"
+//  cout << LetterChanges_v1("fun times!")
+//       << '\n';  // expected output: "gvO Ujnft!"
+//
+//  return 0;
+//}

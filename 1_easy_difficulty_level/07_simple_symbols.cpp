@@ -18,35 +18,20 @@ Input:  "f++d+"
 Output: "false"
 */
 
+// #include <iostream>
 #include <cctype>
-#include <iostream>
 #include <string>
+#include <stack>
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 
 string trim(const string& str) {
-  const size_t str_len{str.length()};
-
-  if (0U == str_len)
-    return {};
-
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str]))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return {};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str]))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
+  const size_t first = str.find_first_not_of(" \t\n\f\v ");
+  const size_t last = str.find_last_not_of(" \t\n\f\v ") + 1;
+  return first != string::npos ? string{cbegin(str) + first, cbegin(str) + last} : string{};
 }
 
 string SimpleSymbols_v1(string str) {
@@ -63,11 +48,11 @@ string SimpleSymbols_v1(string str) {
   if (str_len < 3U)
     return "true";
 
-  for (size_t i{}; i < str_len - 2; i++) {
+  for (size_t i{}; i < str_len - 2; ++i) {
     if (str[i] == '+') {
       if (isalpha(str[i + 1])) {
         if (str[i + 2] == '+') {
-          i++;
+          ++i;
           continue;
         }
         return "false";
@@ -94,23 +79,62 @@ string SimpleSymbols_v2(string str) {
   if (str_len < 3U)
     return "true";
 
-  for (size_t i{1}; i < str_len - 1; i++) {
+  for (size_t i{1}; i < str_len - 1; ++i) {
     if (isalpha(str[i])) {
       if (!('+' == str[i - 1] && '+' == str[i + 1]))
         return "false";
-      i++;
+      ++i;
     }
   }
 
   return "true";
 }
 
-int main() {
-  // cout << SimpleSymbols_v2(gets(stdin));
-  cout << SimpleSymbols_v2("++d+===+c++==a")
-       << '\n';                                   // expected output: "false"
-  cout << SimpleSymbols_v2("+d+=3=+s+") << '\n';  // expected output: "true"
-  cout << SimpleSymbols_v2("f++d+") << '\n';      // expected output: "false"
+string SimpleSymbols_v3(string str) {
+  stack<char> s;
 
-  return 0;
+  for (const char ch : str) {
+    if (isalpha(ch) && (s.empty() || s.top() != '+')) return "false";
+
+    if (ch != '+' && !s.empty() && isalpha(s.top())) return "false";
+
+    s.push(ch);
+
+    }  
+
+  return "true";
 }
+
+TEST_CASE("Simple Symbols : SimpleSymbols_v1") {
+
+  REQUIRE(SimpleSymbols_v1("++d+===+c++==a") == "false");
+  REQUIRE(SimpleSymbols_v1("+d+=3=+s+") == "true");
+  REQUIRE(SimpleSymbols_v1("f++d+") == "false");
+
+}
+
+TEST_CASE("Simple Symbols : SimpleSymbols_v2") {
+
+  REQUIRE(SimpleSymbols_v2("++d+===+c++==a") == "false");
+  REQUIRE(SimpleSymbols_v2("+d+=3=+s+") == "true");
+  REQUIRE(SimpleSymbols_v2("f++d+") == "false");
+    
+}
+
+TEST_CASE("Simple Symbols : SimpleSymbols_v3") {
+
+  REQUIRE(SimpleSymbols_v3("++d+===+c++==a") == "false");
+  REQUIRE(SimpleSymbols_v3("+d+=3=+s+") == "true");
+  REQUIRE(SimpleSymbols_v3("f++d+") == "false");
+    
+}
+
+// int main() {
+//   // cout << SimpleSymbols_v2(gets(stdin));
+//   cout << SimpleSymbols_v2("++d+===+c++==a")
+//        << '\n';                                   // expected output: "false"
+//   cout << SimpleSymbols_v2("+d+=3=+s+") << '\n';  // expected output: "true"
+//   cout << SimpleSymbols_v2("f++d+") << '\n';      // expected output: "false"
+
+//   return 0;
+// }

@@ -16,12 +16,13 @@ Output: 9870
 */
 
 #include <array>
-#include <cmath>
 #include <cstdint>
-#include <iostream>
 #include <numeric>
 #include <stdexcept>
 #include <vector>
+
+#include <catch2/catch_test_macros.hpp>
+#define CATCH_CONFIG_MAIN
 
 using namespace std;
 
@@ -139,26 +140,38 @@ auto cend(const range<T>& r) {
 }
 
 uint64_t SimpleAdding_v2(const uint64_t num) {
-  range<size_t> r{1, num + 1};
+  range<uint64_t> r{1, num + 1};
 
   return accumulate(cbegin(r), cend(r), 0UL);
 }
 
-constexpr int64_t SimpleAdding_v3(int64_t num) {
-  const bool is_negative{num < 0};
-  if (is_negative)
-    num = -num;
-
-  const int64_t result{(num * (num + 1)) / 2};
-
-  return !is_negative ? result : -result;
+constexpr int64_t SimpleAdding_v3(const uint64_t num) {
+  return (num * (num + 1)) / 2;
 }
 
-int main() {
-  // cout << SimpleAdding_v3(gets(stdin));
-  cout << SimpleAdding_v3(4) << '\n';    // expected output: 10
-  cout << SimpleAdding_v3(12) << '\n';   // expected output: 78
-  cout << SimpleAdding_v3(140) << '\n';  // expected output: 9870
-
-  return 0;
+TEST_CASE("Simple Adding: SimpleAdding_v1") {
+  REQUIRE(SimpleAdding_v1(4) == 10);
+  REQUIRE(SimpleAdding_v1(12) == 78);
+  REQUIRE(SimpleAdding_v1(140) == 9870);
 }
+
+TEST_CASE("Simple Adding: SimpleAdding_v2") {
+  REQUIRE(SimpleAdding_v2(4) == 10);
+  REQUIRE(SimpleAdding_v2(12) == 78);
+  REQUIRE(SimpleAdding_v2(140) == 9870);
+}
+
+TEST_CASE("Simple Adding: SimpleAdding_v3") {
+  REQUIRE(SimpleAdding_v3(4) == 10);
+  REQUIRE(SimpleAdding_v3(12) == 78);
+  REQUIRE(SimpleAdding_v3(140) == 9870);
+}
+
+//int main() {s
+//  // cout << SimpleAdding_v3(gets(stdin));
+//  cout << SimpleAdding_v3(4) << '\n';    // expected output: 10
+//  cout << SimpleAdding_v3(12) << '\n';   // expected output: 78
+//  cout << SimpleAdding_v3(140) << '\n';  // expected output: 9870
+//
+//  return 0;
+//}

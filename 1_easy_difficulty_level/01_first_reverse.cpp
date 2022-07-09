@@ -16,18 +16,16 @@ Output: "edoC evoL I"
 */
 
 #include <algorithm>
-#include <cstdio>
-#include <iostream>
-#include <limits>
 #include <string>
-#include <type_traits>
-#include <unordered_set>
 
-#include "../include/stl_helper_functions.hpp"
+#include <stl_helper_functions.hpp>
+#include <catch2/catch_test_macros.hpp>
+#define CATCH_CONFIG_MAIN
 
 using namespace std;
+// using namespace string_literals;
 
-string FirstReverse(string str) {
+string FirstReverse_v1(string str) {
   str = stl::helper::trim(str);
   const size_t str_len{str.length()};
 
@@ -47,13 +45,25 @@ string FirstReverse_v2(string str) {
   return str;
 }
 
-int main() {
-  // cout << FirstReverse(gets(stdin));
-  cout << FirstReverse("Hello World and Coders")
-       << '\n';  // expected output: "sredoC dna dlroW olleH"
-  cout << FirstReverse("coderbyte") << '\n';  // expected output: "etybredoc"
-  cout << FirstReverse("I Love Code")
-       << '\n';  // expected output: "edoC evoL I"
-
-  return 0;
+TEST_CASE("First Reverse: FirstReverse_v1") {
+  REQUIRE(FirstReverse_v1("Hello World and Coders") == "sredoC dna dlroW olleH");
+  REQUIRE(FirstReverse_v1("coderbyte") == "etybredoc");
+  REQUIRE(FirstReverse_v1("I Love Code") == "edoC evoL I");
 }
+
+TEST_CASE("First Reverse: FirstReverse_v2") {
+  REQUIRE(FirstReverse_v2("Hello World and Coders") == "sredoC dna dlroW olleH");
+  REQUIRE(FirstReverse_v2("coderbyte") == "etybredoc");
+  REQUIRE(FirstReverse_v2("I Love Code") == "edoC evoL I");
+}
+
+//int main() {
+//  // cout << FirstReverse_v1(gets(stdin));
+//  cout << FirstReverse_v1("Hello World and Coders")
+//       << '\n';  // expected output: "sredoC dna dlroW olleH"
+//  cout << FirstReverse_v1("coderbyte") << '\n';  // expected output: "etybredoc"
+//  cout << FirstReverse_v1("I Love Code")
+//       << '\n';  // expected output: "edoC evoL I"
+//
+//  return 0;
+//}

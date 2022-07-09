@@ -1,85 +1,18 @@
 #ifndef _STL_HELPER_FUNCTIONS_HPP_
 #define _STL_HELPER_FUNCTIONS_HPP_
 
-#if defined(_MSC_VER)
-#if defined(_MSVC_LANG) && _MSVC_LANG < 201703L
-#error \
-    "You need a modern compiler that is fully compliant with the c++17 language standard or a newer one in order to use this header-only library!"
-#endif
-#elif defined(__cplusplus) && __cplusplus < 201703L
-#error \
-    "You need a modern compiler that is fully compliant with the c++17 language standard or a newer one in order to use this header-only library!"
-#endif
-
-#define _CRT_SECURE_NO_WARNINGS
-#define _SCL_SECURE_NO_WARNINGS
-
-#include <algorithm>
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <cstdio>
-#include <cstring>
-#include <cwchar>
-#include <deque>
-#include <forward_list>
-#include <iostream>
-#include <iterator>
-#include <limits>
-#include <list>
-#include <locale>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <numeric>
-#include <optional>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <stack>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <thread>
-#include <type_traits>
-#include <typeinfo>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
-#ifdef _MSC_VER
-#include <Strsafe.h>
-#include <windows.h>
-#define SNPRINTF StringCchPrintfA
-#define SNWPRINTF StringCchPrintfW
-#else
-#define SNPRINTF snprintf
-#define SNWPRINTF swprintf
-#endif
-
-#if defined(_MSC_VER)
-#include <crtdbg.h>
-#define ASSERT _ASSERTE_
-#else
-#include <cassert>
-#define ASSERT assert
-#endif
-
-#define VERIFY ASSERT
-#define VERIFY_(result, expression) ASSERT(result == expression)
-
-#define PRINT_VAR_NAME(arg) std::cout << #arg << ' '
-#define PRINT_VAR_NAMEW(arg) std::wcout << #arg << L' '
+#include "detail/stl_helper_functions_impl.hpp"
 
 namespace stl::helper {
 
 constexpr const char* __stl_helper_utility_library_version__{"0.0.1-devel"};
 
-struct tracer {
+class alignas(32) tracer {
   std::ostream& output_stream;
   const char* m_filename;
   const size_t m_line_number;
 
+ public:
   tracer(std::ostream& os, const char* filename, const size_t line_number)
       : output_stream{os}, m_filename{filename}, m_line_number{line_number} {}
 
@@ -88,8 +21,9 @@ struct tracer {
     const size_t buffer_len{1024U};
     char buffer[buffer_len];
 
-    const auto count = snprintf(buffer, buffer_len, "%s (line no.: %lu) -> ",
-                                m_filename, m_line_number);
+    const auto count =
+        snprintf(buffer, buffer_len, "%s (line no.: %" SIZE_T_PFORMAT ") -> ",
+                 m_filename, m_line_number);
 
     snprintf(buffer + count, buffer_len - count, format,
              std::forward<Args>(args)...);
@@ -158,20 +92,9 @@ std::u32string get_type_name_u32str(T&& t) {
   return u32str;
 }
 
-template <typename T, typename... T0_TN>
-struct is_all_of;
-
-template <typename T>
-struct is_all_of<T> : std::true_type {};
-
-template <typename T, typename... T1_TN>
-struct is_all_of<T, T, T1_TN...> : is_all_of<T, T1_TN...> {};
-
-template <typename T, typename T0, typename... T1_TN>
-struct is_all_of<T, T0, T1_TN...> : std::false_type {};
-
 template <typename T, typename First, typename... Rest>
-inline constexpr bool is_all_of_v = is_all_of<T, First, Rest...>::value;
+inline constexpr bool is_all_of_v =
+    detail::is_all_of_impl<T, First, Rest...>::value;
 
 template <typename T>
 constexpr bool are_data_types_equal(T&&) {
@@ -198,20 +121,9 @@ constexpr bool check_data_types_for_equality(T&& arg1,
                               std::forward<Args>(args)...);
 }
 
-template <typename T, typename... T0_TN>
-struct is_anyone_of;
-
-template <typename T>
-struct is_anyone_of<T> : std::false_type {};
-
-template <typename T, typename... T1_TN>
-struct is_anyone_of<T, T, T1_TN...> : std::true_type {};
-
-template <typename T, typename T0, typename... T1_TN>
-struct is_anyone_of<T, T0, T1_TN...> : is_anyone_of<T, T1_TN...> {};
-
 template <typename T, typename First, typename... Rest>
-inline constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
+inline constexpr bool is_anyone_of_v =
+    detail::is_anyone_of_impl<T, First, Rest...>::value;
 
 template <typename T>
 constexpr bool is_any_of(T&&) {
@@ -260,6 +172,21 @@ struct has_value_type<T, std::void_t<has_value_type_t<T>>> : std::true_type {};
 
 template <typename T>
 constexpr const bool has_value_type_v = has_value_type<T>::value;
+
+template <typename T, typename U>
+using has_insert_member_func_t =
+    decltype(std::declval<T&>().insert(std::declval<U>()));
+
+template <typename T, typename U, typename = void>
+struct has_insert_member_func : std::false_type {};
+
+template <typename T, typename U>
+struct has_insert_member_func<T, U, std::void_t<has_insert_member_func_t<T, U>>>
+    : std::true_type {};
+
+template <typename T, typename U>
+constexpr const bool has_insert_member_func_v =
+    has_insert_member_func<T, U>::value;
 
 template <typename T>
 using has_mapped_type_t = decltype(std::declval<typename T::mapped_type>());
@@ -624,21 +551,8 @@ void show_var_info_w(const T& arg, std::wostream& wos) {
 }
 
 template <typename T>
-struct is_valid_char_type {
-  static constexpr const bool value = is_anyone_of_v<std::remove_cv_t<T>,
-                                                     char,
-                                                     wchar_t,
-                                                     char16_t,
-                                                     char32_t
-#if defined(__cpp_char8_t) && __cpp_char8_t >= 201811L
-                                                     ,
-                                                     char8_t
-#endif
-                                                     >;
-};
-
-template <typename T>
-constexpr const bool is_valid_char_type_v = is_valid_char_type<T>::value;
+constexpr const bool is_valid_char_type_v =
+    detail::is_valid_char_type<T>::value;
 
 template <typename CharType>
 struct default_whitespace_chars {};
@@ -959,11 +873,10 @@ size_t say_slow(std::ostream& os,
 
   size_t ch_count{};
 
-  for (size_t i{}; i < output_buffer.size() - 1 && os.good(); ++i) {
-    os << output_buffer[i];
-    ++ch_count;
-    std::this_thread::sleep_for(std::chrono::milliseconds(time_delay_in_ms));
-  }
+  for (size_t i{}; i < output_buffer.size() - 1 && os << output_buffer[i];
+       ++i, ++ch_count,
+       std::this_thread::sleep_for(std::chrono::milliseconds(time_delay_in_ms)))
+    ;
 
   return ch_count;
 }
@@ -989,12 +902,11 @@ size_t say_slow(std::wostream& os,
     if (number_of_chars_written != -1) {
       size_t ch_count{};
 
-      for (int i{}; i < number_of_chars_written && os.good(); ++i) {
-        os << output_buffer[i];
-        ++ch_count;
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(time_delay_in_ms));
-      }
+      for (int i{}; i < number_of_chars_written && os << output_buffer[i];
+           ++i, ++ch_count,
+           std::this_thread::sleep_for(
+               std::chrono::milliseconds(time_delay_in_ms)))
+        ;
 
       return ch_count;
     }
@@ -1449,14 +1361,14 @@ std::basic_string<get_char_type_t<T>> rtrim(
   const std::unordered_set<char_type> trimmed_chars(
       chars_to_trim, chars_to_trim + len(chars_to_trim));
 
-  const auto last{std::find_if(std::crbegin(source_str), std::crend(source_str),
+  const auto last{std::find_if(std::rbegin(source_str), std::rend(source_str),
                                [&trimmed_chars](const auto ch) {
                                  return trimmed_chars.find(ch) ==
-                                        std::cend(trimmed_chars);
+                                        std::end(trimmed_chars);
                                })
                       .base()};
 
-  source_str.erase(last, cend(source_str));
+  source_str.erase(last, end(source_str));
 
   return source_str;
 }
@@ -1714,25 +1626,6 @@ size_t str_index_of(const T& src,
   }
 }
 
-template <typename T, typename = std::enable_if_t<is_valid_char_type_v<T>>>
-std::vector<size_t> str_find_all_of_impl(std::basic_string_view<T> src_sv,
-                                         std::basic_string_view<T> needle_sv,
-                                         const size_t start_pos = 0U) {
-  std::vector<size_t> start_indices{};
-  size_t search_pos{start_pos};
-  const size_t not_found_index{std::basic_string_view<T>::npos};
-
-  while (search_pos <= src_sv.length() - needle_sv.length()) {
-    search_pos = src_sv.find(needle_sv, search_pos);
-    if (not_found_index == search_pos)
-      break;
-    start_indices.emplace_back(search_pos);
-    search_pos += needle_sv.length();
-  }
-
-  return start_indices;
-}
-
 template <
     typename T,
     typename U,
@@ -1776,7 +1669,7 @@ std::vector<size_t> str_find_all_of(const T& src,
     needle_sv = needle;
 
   if (!ignore_case)
-    return str_find_all_of_impl(src_sv, needle_sv, start_pos);
+    return detail::str_find_all_of_impl(src_sv, needle_sv, start_pos);
 
   std::basic_string<char_type> src_lc{src_sv};
   std::basic_string<char_type> needle_lc{needle_sv};
@@ -1801,7 +1694,7 @@ std::vector<size_t> str_find_all_of(const T& src,
   src_sv = src_lc;
   needle_sv = needle_lc;
 
-  return str_find_all_of_impl(src_sv, needle_sv, start_pos);
+  return detail::str_find_all_of_impl(src_sv, needle_sv, start_pos);
 }
 
 template <typename SrcIterType,
@@ -9022,8 +8915,8 @@ std::basic_string<get_char_type_t<T>> to_title_case(
 
   bool is_new_sentence{true};
 
-  std::optional<decltype(
-      std::use_facet<std::ctype<char_type>>(std::declval<std::locale>()))>
+  std::optional<decltype(std::use_facet<std::ctype<char_type>>(
+      std::declval<std::locale>()))>
       f{};
 
   if (std::has_facet<std::ctype<char_type>>(loc))
@@ -9060,8 +8953,8 @@ void to_title_case_in_place(T& src, const std::locale& loc = std::locale{}) {
     return;
   bool is_new_sentence{true};
 
-  std::optional<decltype(
-      std::use_facet<std::ctype<char_type>>(std::declval<std::locale>()))>
+  std::optional<decltype(std::use_facet<std::ctype<char_type>>(
+      std::declval<std::locale>()))>
       f{};
 
   if (std::has_facet<std::ctype<char_type>>(loc))
@@ -12092,18 +11985,12 @@ constexpr std::pair<BidirIterType1, BidirIterType2> copy_backward_while_true(
     BidirIterType1 src_last,
     BidirIterType2 dst_last,
     Predicate p) {
-  bool is_copied{true};
-
   while (src_first != src_last) {
-    is_copied = p(*(--src_last));
-    if (is_copied)
+    if (p(*(--src_last)))
       *(--dst_last) = *src_last;
     else
-      break;
+      return {++src_last, dst_last};
   }
-
-  if (!is_copied)
-    ++src_last;
 
   return {src_last, dst_last};
 }
@@ -12131,18 +12018,12 @@ constexpr std::pair<BidirIterType1, BidirIterType2> copy_backward_while_false(
     BidirIterType1 src_last,
     BidirIterType2 dst_last,
     Predicate p) {
-  bool is_copied{true};
-
   while (src_first != src_last) {
-    is_copied = !p(*(--src_last));
-    if (is_copied)
+    if (!p(*(--src_last)))
       *(--dst_last) = *src_last;
     else
-      break;
+      return {++src_last, dst_last};
   }
-
-  if (!is_copied)
-    ++src_last;
 
   return {src_last, dst_last};
 }
@@ -12188,18 +12069,12 @@ constexpr std::pair<BidirIterType1, BidirIterType2> move_backward_while_true(
                                       std::add_lvalue_reference_t<
                                           const typename std::iterator_traits<
                                               BidirIterType1>::value_type>>) {
-  bool is_moved{true};
-
   while (src_first != src_last) {
-    is_moved = p(*(--src_last));
-    if (is_moved)
+    if (p(*(--src_last)))
       *(--dst_last) = std::move(*src_last);
     else
-      break;
+      return {++src_last, dst_last};
   }
-
-  if (!is_moved)
-    ++src_last;
 
   return {src_last, dst_last};
 }
@@ -12246,20 +12121,354 @@ constexpr std::pair<BidirIterType1, BidirIterType2> move_backward_while_false(
                                       std::add_lvalue_reference_t<
                                           const typename std::iterator_traits<
                                               BidirIterType1>::value_type>>) {
-  bool is_moved{true};
-
   while (src_first != src_last) {
-    is_moved = !p(*(--src_last));
-    if (is_moved)
+    if (!p(*(--src_last)))
       *(--dst_last) = std::move(*src_last);
     else
-      break;
+      return {++src_last, dst_last};
+  }
+  return {src_last, dst_last};
+}
+
+/**
+ * An alternative implementation of the generic stable_partition algorithm
+ *
+ * @param[in] first BidirIterType - a bidirectional or random iterator pointing
+ * to the first element of the input sequence [first, last)
+ * @param[in] last BidirIterType - a bidirectional or random iterator pointing
+ * to the first non-existing element located after the last valid position in
+ * the input sequence
+ * @param[in] p UnaryPredicate - a unary predicate [global function, functor,
+ * lambda] that returns true or false depending on the input element's value
+ *
+ * @return new_last BidirIterType - a bidirectional iterator that points to
+ * the first non-matching element in the modified input sequence [first, last)
+ *
+ * Generic algorithm stable_partition accepts a sequence of elements denoted by
+ * 'first' and 'last' bidirectional iterators and a unary predicate 'p', it
+ * processes the whole range of elements [first, last) by moving all the
+ * matching elements, for which the UnaryPredicate p returns true, to the
+ * beginning of the input range [first, last).
+ *
+ * The original relative order of the elements is kept intact.
+ */
+
+template <typename BidirIterType, typename UnaryPredicate>
+BidirIterType stable_partition(BidirIterType first,
+                               BidirIterType last,
+                               UnaryPredicate p) {
+  BidirIterType tmp_last{last};
+
+  if (first == last || first == --tmp_last)
+    return last;
+
+  std::queue<typename std::iterator_traits<BidirIterType>::value_type> q;
+
+  BidirIterType current{first};
+
+  while (current != last) {
+    if (!p(*current)) {
+      q.emplace(std::move(*current));
+    } else {
+      if (first != current)
+        *first = std::move(*current);
+
+      ++first;
+    }
+    ++current;
   }
 
-  if (!is_moved)
-    ++src_last;
+  const BidirIterType new_last{first};
 
-  return {src_last, dst_last};
+  while (!q.empty()) {
+    *first = std::move(q.front());
+    q.pop();
+    ++first;
+  }
+
+  return new_last;
+}
+
+/**
+ * A possible generic implementation of the stable_gather algorithm
+ *
+ * @param[in] first BidirIterType - a bidirectional or random iterator pointing
+ * to the first element of the input sequence
+ * @param[in] last BidirIterType - a bidirectional or random iterator pointing
+ * to the first non-existing element located behind the last valid position in
+ * the input sequence
+ * @param[in] target BidirIterType - a bidirectional or random iterator pointing
+ * to an existing element in the input sequence for which we want to find all
+ * the similar elements that are contained in the same input sequence [first,
+ * last)
+ * @param[in] p BinaryPredicate - a binary predicate [global function, functor,
+ * lambda] that returns true or false depending on the result of comparison
+ * between the target element and a custom element from the same input sequence
+ * [first, last)
+ *
+ * @return std::pair<BidirIterType, BidirIterType> - a pair of bidirectional
+ * iterators lower_bound and upper_bound that point to the first similar
+ * (matching) element located farthest to the left of the target element and the
+ * first non-matching element located closest to the right, respectively, in the
+ * modified input sequence [first, last)
+ *
+ * Generic algorithm stable_gather accepts a sequence of elements denoted by
+ * the 'first' and 'last' bidirectional iterators, a target element pointed to
+ * by the bidirectional iterator 'target', and a unary predicate 'p', it
+ * processes the whole range of elements [first, last) by moving all the
+ * matching similar elements from [first, target), for those that satisfy the
+ * BinaryPredicate p, in front of the target element and moving all the matching
+ * similar elements from (target, last) behind the target element resulting in 2
+ * logically related partial sequences [lower_bound, target) and [target,
+ * upper_bound), respectively.
+ *
+ * The algorithm returns a pair of bidirectional iterators that point to the
+ * first matching element located farthest to the left of the target element and
+ * the first non-matching element located closest to the right of the target
+ * element, respectively.
+ *
+ * The original relative order of the elements is kept intact.
+ */
+
+template <typename BidirIterType, typename BinaryPredicate>
+std::pair<BidirIterType, BidirIterType> stable_gather(
+    BidirIterType first,
+    BidirIterType last,
+    const BidirIterType target,
+    BinaryPredicate p) {
+  BidirIterType tmp_last{last};
+
+  if (first == last || target == last)
+    return {last, last};
+
+  std::queue<typename std::iterator_traits<BidirIterType>::value_type> q;
+
+  BidirIterType current{first};
+
+  while (current != target) {
+    if (p(*current, *target)) {
+      q.emplace(std::move(*current));
+    } else {
+      if (first != current)
+        *first = std::move(*current);
+
+      ++first;
+    }
+    ++current;
+  }
+
+  const BidirIterType similar_first{first};
+
+  while (!q.empty()) {
+    *first = std::move(q.front());
+    q.pop();
+    ++first;
+  }
+
+  first = ++current;
+
+  while (current != last) {
+    if (!p(*target, *current)) {
+      q.emplace(std::move(*current));
+    } else {
+      if (first != current)
+        *first = std::move(*current);
+
+      ++first;
+    }
+    ++current;
+  }
+
+  const BidirIterType similar_last{first};
+
+  while (!q.empty()) {
+    *first = std::move(q.front());
+    q.pop();
+    ++first;
+  }
+
+  return {similar_first, similar_last};
+}
+
+template <typename T, size_t N, typename X>
+constexpr const T* find_first(const T (&arr)[N], const X& x) {
+  return detail::find_first_impl(
+      arr, x, typename detail::container_traits<T[N]>::category{});
+}
+
+template <typename T, size_t N, typename Pred>
+constexpr const T* find_first_if(const T (&arr)[N], Pred p) {
+  return detail::find_first_if_impl(
+      arr, p, typename detail::container_traits<T[N]>::category{});
+}
+
+template <typename T, size_t N, typename X>
+constexpr const T* find_last(const T (&arr)[N], const X& x) {
+  return detail::find_last_impl(
+      arr, x, typename detail::container_traits<T[N]>::category{});
+}
+
+template <typename T, size_t N, typename Pred>
+constexpr const T* find_last_if(const T (&arr)[N], Pred p) {
+  return detail::find_last_if_impl(
+      arr, p, typename detail::container_traits<T[N]>::category{});
+}
+
+template <typename T, size_t N, typename X>
+constexpr std::vector<const T*> find_all(const T (&arr)[N], const X& x) {
+  return detail::find_all_impl(
+      arr, x, typename detail::container_traits<T[N]>::category{});
+}
+
+template <typename T, size_t N, typename Pred>
+constexpr std::vector<const T*> find_all_if(const T (&arr)[N], Pred p) {
+  return detail::find_all_if_impl(
+      arr, p, typename detail::container_traits<T[N]>::category{});
+}
+
+template <typename T, size_t N, typename X>
+constexpr typename std::array<T, N>::const_iterator find_first(
+    const std::array<T, N>& arr,
+    const X& x) {
+  return detail::find_first_impl(
+      arr, x, typename detail::container_traits<std::array<T, N>>::category{});
+}
+
+template <typename T, size_t N, typename Pred>
+constexpr typename std::array<T, N>::const_iterator find_first_if(
+    const std::array<T, N>& arr,
+    Pred p) {
+  return detail::find_first_if_impl(
+      arr, p, typename detail::container_traits<std::array<T, N>>::category{});
+}
+
+template <typename T, size_t N, typename X>
+constexpr typename std::array<T, N>::const_iterator find_last(
+    const std::array<T, N>& arr,
+    const X& x) {
+  return detail::find_last_impl(
+      arr, x, typename detail::container_traits<std::array<T, N>>::category{});
+}
+
+template <typename T, size_t N, typename Pred>
+constexpr typename std::array<T, N>::const_iterator find_last_if(
+    const std::array<T, N>& arr,
+    Pred p) {
+  return detail::find_last_if_impl(
+      arr, p, typename detail::container_traits<std::array<T, N>>::category{});
+}
+
+template <typename T, size_t N, typename X>
+constexpr std::vector<typename std::array<T, N>::const_iterator> find_all(
+    const std::array<T, N>& arr,
+    const X& x) {
+  return detail::find_all_impl(
+      arr, x, typename detail::container_traits<std::array<T, N>>::category{});
+}
+
+template <typename T, size_t N, typename Pred>
+constexpr std::vector<typename std::array<T, N>::const_iterator> find_all_if(
+    const std::array<T, N>& arr,
+    Pred p) {
+  return detail::find_all_if_impl(
+      arr, p, typename detail::container_traits<std::array<T, N>>::category{});
+}
+
+template <typename Container, typename X>
+constexpr typename Container::const_iterator find_first(const Container& c,
+                                                        const X& x) {
+  return detail::find_first_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename Pred>
+constexpr typename Container::const_iterator find_first_if(const Container& c,
+                                                           Pred p) {
+  return detail::find_first_if_impl(
+      c, p, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+constexpr typename Container::const_iterator find_last(const Container& c,
+                                                       const X& x) {
+  return detail::find_last_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename Pred>
+constexpr typename Container::const_iterator find_last_if(Container& c,
+                                                          Pred p) {
+  return detail::find_last_if_impl(
+      c, p, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+constexpr std::vector<typename Container::const_iterator> find_all(Container& c,
+                                                                   const X& x) {
+  return detail::find_all_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename Pred>
+constexpr std::vector<typename Container::const_iterator> find_all_if(
+    Container& c,
+    Pred p) {
+  return detail::find_all_if_impl(
+      c, p, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+CPP20_USE_CONSTEXPR auto insert(Container& c, const X& x) {
+  return detail::insert_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+CPP20_USE_CONSTEXPR auto insert_at_beginning(Container& c, const X& x) {
+  return detail::insert_at_beginning_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+CPP20_USE_CONSTEXPR auto insert_at_end(Container& c, const X& x) {
+  return detail::insert_at_end_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+CPP20_USE_CONSTEXPR bool erase_first(Container& c, const X& x) {
+  return detail::erase_first_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+CPP20_USE_CONSTEXPR bool erase_last(Container& c, const X& x) {
+  return detail::erase_last_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename X>
+CPP20_USE_CONSTEXPR bool erase_all(Container& c, const X& x) {
+  return detail::erase_all_impl(
+      c, x, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename Pred>
+CPP20_USE_CONSTEXPR bool erase_first_if(Container& c, Pred p) {
+  return detail::erase_first_if_impl(
+      c, p, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename Pred>
+CPP20_USE_CONSTEXPR bool erase_last_if(Container& c, Pred p) {
+  return detail::erase_last_if_impl(
+      c, p, typename detail::container_traits<Container>::category{});
+}
+
+template <typename Container, typename Pred>
+CPP20_USE_CONSTEXPR bool erase_all_if(Container& c, Pred p) {
+  return detail::erase_all_if_impl(
+      c, p, typename detail::container_traits<Container>::category{});
 }
 
 }  // namespace stl::helper

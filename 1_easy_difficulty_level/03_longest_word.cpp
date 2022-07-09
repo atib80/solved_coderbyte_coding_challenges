@@ -18,16 +18,16 @@ Output: "love"
 #include <algorithm>
 #include <cassert>
 #include <cctype>
-#include <iostream>
 #include <iterator>
 #include <list>
 #include <random>
 #include <string>
-#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
-#include "../include/stl_helper_functions.hpp"
+#include <stl_helper_functions.hpp>
+#include <catch2/catch_test_macros.hpp>
+#define CATCH_CONFIG_MAIN
 
 using namespace std;
 
@@ -37,8 +37,9 @@ string LongestWord_v1(string sen) {
 
   for (size_t i{}; i < sen.length(); ++i) {
     if (isalnum(sen[i])) {
-      if (string::npos == start_index)
+      if (string::npos == start_index) {
         start_index = i;
+      }
       ++word_len;
     } else {
       if (word_len > longest_first_word_length) {
@@ -94,6 +95,7 @@ string LongestWord_v2(string sen) {
  * sequence of elements which are all present in the provided @haystack
  * container.
  */
+// [1, 3, 4, 7, 8, 10) -> [1,2,3,4,5,6,7,8)
 template <typename ForwardIterType, typename ContainerType>
 std::pair<ForwardIterType, ForwardIterType>
 find_first_sequence_of_allowed_elements(ForwardIterType start,
@@ -110,7 +112,7 @@ find_first_sequence_of_allowed_elements(ForwardIterType start,
         std::find_if(start, last, [&haystack](const auto& current_element) {
           return std::cend(haystack) != haystack.find(current_element);
         })};
-    if (first == last)
+    if (last == first)
       return {last, last};
     auto second{first};
     ++second;
@@ -173,15 +175,12 @@ std::pair<IterType, IterType> find_longest_word(IterType first,
   using U = typename ContainerType::value_type;
 
   bool is_haystack_sorted{
-      stl::helper::has_find_member_function_v<ContainerType, T>};
+      stl::helper::has_find_member_function_v<ContainerType, T> || std::is_sorted(std::cbegin(haystack), std::cend(haystack))};
 
-  if constexpr (!stl::helper::has_find_member_function_v<ContainerType, T> &&
-                ((stl::helper::has_sort_member_function_v<ContainerType> &&
-                  stl::helper::is_operator_less_than_defined_v<U>) ||
-                 stl::helper::is_operator_less_than_defined_v<U>)) {
+  if (!is_haystack_sorted) {
     if constexpr (stl::helper::has_sort_member_function_v<ContainerType>)
       haystack.sort();
-    else
+    else if constexpr (std::is_same_v<std::random_access_iterator_tag, typename std::iterator_traits<typename ContainerType::iterator>::iterator_category>)
       std::sort(std::begin(haystack), std::end(haystack));
     is_haystack_sorted = true;
   }
@@ -253,12 +252,30 @@ string LongestWord_v3(string sen) {
   return move(results[0]);
 }
 
-int main() {
-  // cout << LongestWord_v1(gets(stdin));
-  cout << LongestWord_v3("fun&!! time") << '\n';  // expected output: "time"
-  cout << LongestWord_v3("I love dogs") << '\n';  // expected output: "love"
-  cout << LongestWord_v3("I love both cats and dogs as well!")
-       << '\n';  // expected output: "love"
-
-  return 0;
+TEST_CASE("Longest Word : LongestWord_v1") {
+  REQUIRE(LongestWord_v1("fun&!! time") == "time");
+  REQUIRE(LongestWord_v1("I love dogs") == "love");
+  REQUIRE(LongestWord_v1("I love both cats and dogs as well!") == "love");
 }
+
+TEST_CASE("Longest Word : LongestWord_v2") {
+  REQUIRE(LongestWord_v2("fun&!! time") == "time");
+  REQUIRE(LongestWord_v2("I love dogs") == "love");
+  REQUIRE(LongestWord_v2("I love both cats and dogs as well!") == "love");
+}
+
+TEST_CASE("Longest Word : LongestWord_v3") {
+  REQUIRE(LongestWord_v3("fun&!! time") == "time");
+  REQUIRE(LongestWord_v3("I love dogs") == "love");
+  REQUIRE(LongestWord_v3("I love both cats and dogs as well!") == "love");
+}
+
+//int main() {
+//  // cout << LongestWord_v1(gets(stdin));
+//  cout << LongestWord_v3("fun&!! time") << '\n';  // expected output: "time"
+//  cout << LongestWord_v3("I love dogs") << '\n';  // expected output: "love"
+//  cout << LongestWord_v3("I love both cats and dogs as well!")
+//       << '\n';  // expected output: "love"
+//
+//  return 0;
+//}

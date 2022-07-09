@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+# custom files to ignore
+?idea/vcs.xml
+?vscode/settings.json
+CMakeLists.txt.user
+
+# custom folders to ignore
+build
+debug
+release
+?idea
+?metals
+?vscode
+d*
+cmake-build-debug*

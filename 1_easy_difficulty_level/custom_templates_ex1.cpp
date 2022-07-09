@@ -5,6 +5,16 @@
 #include <type_traits>
 #include <vector>
 
+size_t find_missing_number(const size_t* first, const size_t* last) {
+  if (last - first == 1)
+    return *first + 1;
+
+  const std::ptrdiff_t middle = (last - first)/2;
+  if (*(first + middle) == *first + middle)
+    return find_missing_number(first + middle, last);
+  return find_missing_number(first, first + middle);
+}
+
 template <class ForwardIt, class T>
 typename std::iterator_traits<ForwardIt>::difference_type
 bsearch(ForwardIt first, ForwardIt last, const T& value) {

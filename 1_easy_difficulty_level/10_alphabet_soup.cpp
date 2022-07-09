@@ -18,17 +18,14 @@ Output: "ahhloop"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <iostream>
+// #include <iostream>
 #include <string>
 #include <utility>
 
-using std::begin;
-using std::cout;
-using std::end;
-using std::move;
-using std::sort;
-using std::string;
-using std::swap;
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
+
+using namespace std;
 
 string AlphabetSoup_v1(string str) {
   sort(begin(str), end(str));
@@ -52,24 +49,42 @@ string AlphabetSoup_v3(string str) {
   if (str_len < 2U)
     return str;
 
-  for (size_t i{1U}, did_swap_elements{1U};
-       0U != did_swap_elements && i < str_len; ++i) {
-    for (size_t j{}; j < str_len - i; ++j) {
-      if (str[j] > str[j + 1])
+  for (size_t i{1U}, did_swap_elements{1};
+       did_swap_elements != 0 && i < str_len; ++i) {
+    did_swap_elements = 0;
+    for (size_t j{}; j < str_len - i; ++j) {    
+      if (str[j] > str[j + 1]) {
         swap(str[j], str[j + 1]);
-      else
-        did_swap_elements = 0U;
+        did_swap_elements = 1;
+      }        
     }
   }
-
+  
   return str;
 }
 
-int main() {
-  // cout << AlphabetSoup_v2(gets(stdin));
-  cout << AlphabetSoup_v3("hello") << '\n';      // expected output: ehllo
-  cout << AlphabetSoup_v3("coderbyte") << '\n';  // expected output: bcdeeorty
-  cout << AlphabetSoup_v3("hooplah") << '\n';    // expected output: ahhloop
-
-  return 0;
+TEST_CASE("Alphabet Soup : AlphabetSoup_v1") {
+  REQUIRE(AlphabetSoup_v1("hello") == "ehllo");
+  REQUIRE(AlphabetSoup_v1("coderbyte") == "bcdeeorty");
+  REQUIRE(AlphabetSoup_v1("hooplah") == "ahhloop");
 }
+
+TEST_CASE("Alphabet Soup : AlphabetSoup_v2") {
+  REQUIRE(AlphabetSoup_v2("hello") == "ehllo");
+  REQUIRE(AlphabetSoup_v2("coderbyte") == "bcdeeorty");
+  REQUIRE(AlphabetSoup_v2("hooplah") == "ahhloop");
+}
+
+TEST_CASE("Alphabet Soup : AlphabetSoup_v3") {
+  REQUIRE(AlphabetSoup_v3("hello") == "ehllo");
+  REQUIRE(AlphabetSoup_v3("coderbyte") == "bcdeeorty");
+  REQUIRE(AlphabetSoup_v3("hooplah") == "ahhloop");
+}
+
+// int main() {
+//   // cout << AlphabetSoup_v2(gets(stdin));
+//   cout << AlphabetSoup_v3("hello") << '\n';      // expected output: ehllo
+//   cout << AlphabetSoup_v3("coderbyte") << '\n';  // expected output: bcdeeorty
+//   cout << AlphabetSoup_v3("hooplah") << '\n';    // expected output: ahhloop
+//   return 0;
+// }
