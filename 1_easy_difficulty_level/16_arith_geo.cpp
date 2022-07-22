@@ -21,8 +21,11 @@ Output: "-1"
 */
 
 #include <cmath>
-#include <iostream>
+// #include <iostream>
 #include <string>
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 
@@ -40,7 +43,7 @@ string ArithGeo(const int* arr, const size_t arr_size) {
       is_geometric ? (arr[1] > arr[0] ? arr[1] / arr[0] : arr[0] / arr[1]) : 1};
   const bool is_inc_geometric{arr[1] > arr[0]};
 
-  for (size_t i{2}; i < arr_size && (is_arithmetic || is_geometric); i++) {
+  for (size_t i{2}; i < arr_size && (is_arithmetic || is_geometric); ++i) {
     if (is_arithmetic && diff != arr[i] - arr[i - 1])
       is_arithmetic = false;
 
@@ -60,20 +63,32 @@ string ArithGeo(const int* arr, const size_t arr_size) {
   return "-1";
 }
 
-int main() {
-  // const int A[] = gets(stdin);
-  // cout << ArithGeo(A, sizeof(A)/sizeof(*A));
+TEST_CASE("Arith Geo : ArithGeo") {
   const int B[] = {2, 4, 6, 8};
-  cout << ArithGeo(B, sizeof(B) / sizeof(*B))
-       << '\n';  // expected output: "Arithmetic"
+  CHECK(ArithGeo(B, sizeof(B) / sizeof(*B)) == "Arithmetic");
   const int C[] = {2, 6, 18, 54};
-  cout << ArithGeo(C, sizeof(C) / sizeof(*C))
-       << '\n';  // expected output: "Geometric"
+  CHECK(ArithGeo(C, sizeof(C) / sizeof(*C)) == "Geometric");
   const int D[] = {5, 10, 15};
-  cout << ArithGeo(D, sizeof(D) / sizeof(*D))
-       << '\n';  // expected output: "Arithmetic"
+  CHECK(ArithGeo(D, sizeof(D) / sizeof(*D)) == "Arithmetic");
   const int E[] = {2, 4, 16, 24};
-  cout << ArithGeo(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output: "-1"
-
-  return 0;
+  CHECK(ArithGeo(E, sizeof(E) / sizeof(*E)) == "-1");
 }
+
+// int main() {
+//   // const int A[] = gets(stdin);
+//   // cout << ArithGeo(A, sizeof(A)/sizeof(*A));
+//   const int B[] = {2, 4, 6, 8};
+//   cout << ArithGeo(B, sizeof(B) / sizeof(*B))
+//        << '\n';  // expected output: "Arithmetic"
+//   const int C[] = {2, 6, 18, 54};
+//   cout << ArithGeo(C, sizeof(C) / sizeof(*C))
+//        << '\n';  // expected output: "Geometric"
+//   const int D[] = {5, 10, 15};
+//   cout << ArithGeo(D, sizeof(D) / sizeof(*D))
+//        << '\n';  // expected output: "Arithmetic"
+//   const int E[] = {2, 4, 16, 24};
+//   cout << ArithGeo(E, sizeof(E) / sizeof(*E)) << '\n';  // expected output:
+//   "-1"
+
+//   return 0;
+// }

@@ -20,8 +20,8 @@ Output: "false"
 
 // #include <iostream>
 #include <cctype>
-#include <string>
 #include <stack>
+#include <string>
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_test_macros.hpp>
@@ -31,7 +31,8 @@ using namespace std;
 string trim(const string& str) {
   const size_t first = str.find_first_not_of(" \t\n\f\v ");
   const size_t last = str.find_last_not_of(" \t\n\f\v ") + 1;
-  return first != string::npos ? string{cbegin(str) + first, cbegin(str) + last} : string{};
+  return first != string::npos ? string{cbegin(str) + first, cbegin(str) + last}
+                               : string{};
 }
 
 string SimpleSymbols_v1(string str) {
@@ -94,39 +95,34 @@ string SimpleSymbols_v3(string str) {
   stack<char> s;
 
   for (const char ch : str) {
-    if (isalpha(ch) && (s.empty() || s.top() != '+')) return "false";
+    if (isalpha(ch) && (s.empty() || s.top() != '+'))
+      return "false";
 
-    if (ch != '+' && !s.empty() && isalpha(s.top())) return "false";
+    if (ch != '+' && !s.empty() && isalpha(s.top()))
+      return "false";
 
     s.push(ch);
-
-    }  
+  }
 
   return "true";
 }
 
 TEST_CASE("Simple Symbols : SimpleSymbols_v1") {
-
   REQUIRE(SimpleSymbols_v1("++d+===+c++==a") == "false");
   REQUIRE(SimpleSymbols_v1("+d+=3=+s+") == "true");
   REQUIRE(SimpleSymbols_v1("f++d+") == "false");
-
 }
 
 TEST_CASE("Simple Symbols : SimpleSymbols_v2") {
-
   REQUIRE(SimpleSymbols_v2("++d+===+c++==a") == "false");
   REQUIRE(SimpleSymbols_v2("+d+=3=+s+") == "true");
   REQUIRE(SimpleSymbols_v2("f++d+") == "false");
-    
 }
 
 TEST_CASE("Simple Symbols : SimpleSymbols_v3") {
-
   REQUIRE(SimpleSymbols_v3("++d+===+c++==a") == "false");
   REQUIRE(SimpleSymbols_v3("+d+=3=+s+") == "true");
   REQUIRE(SimpleSymbols_v3("f++d+") == "false");
-    
 }
 
 // int main() {

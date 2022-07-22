@@ -37,6 +37,7 @@
 CMakeLists.txt.user
 
 # custom folders to ignore
+d:/
 build
 debug
 release

@@ -18,8 +18,8 @@ Output: "edoC evoL I"
 #include <algorithm>
 #include <string>
 
-#include <stl_helper_functions.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <stl_helper_functions.hpp>
 #define CATCH_CONFIG_MAIN
 
 using namespace std;
@@ -46,24 +46,26 @@ string FirstReverse_v2(string str) {
 }
 
 TEST_CASE("First Reverse: FirstReverse_v1") {
-  REQUIRE(FirstReverse_v1("Hello World and Coders") == "sredoC dna dlroW olleH");
+  REQUIRE(FirstReverse_v1("Hello World and Coders") ==
+          "sredoC dna dlroW olleH");
   REQUIRE(FirstReverse_v1("coderbyte") == "etybredoc");
   REQUIRE(FirstReverse_v1("I Love Code") == "edoC evoL I");
 }
 
 TEST_CASE("First Reverse: FirstReverse_v2") {
-  REQUIRE(FirstReverse_v2("Hello World and Coders") == "sredoC dna dlroW olleH");
+  REQUIRE(FirstReverse_v2("Hello World and Coders") ==
+          "sredoC dna dlroW olleH");
   REQUIRE(FirstReverse_v2("coderbyte") == "etybredoc");
   REQUIRE(FirstReverse_v2("I Love Code") == "edoC evoL I");
 }
 
-//int main() {
-//  // cout << FirstReverse_v1(gets(stdin));
-//  cout << FirstReverse_v1("Hello World and Coders")
-//       << '\n';  // expected output: "sredoC dna dlroW olleH"
-//  cout << FirstReverse_v1("coderbyte") << '\n';  // expected output: "etybredoc"
-//  cout << FirstReverse_v1("I Love Code")
-//       << '\n';  // expected output: "edoC evoL I"
+// int main() {
+//   // cout << FirstReverse_v1(gets(stdin));
+//   cout << FirstReverse_v1("Hello World and Coders")
+//        << '\n';  // expected output: "sredoC dna dlroW olleH"
+//   cout << FirstReverse_v1("coderbyte") << '\n';  // expected output:
+//   "etybredoc" cout << FirstReverse_v1("I Love Code")
+//        << '\n';  // expected output: "edoC evoL I"
 //
-//  return 0;
-//}
+//   return 0;
+// }

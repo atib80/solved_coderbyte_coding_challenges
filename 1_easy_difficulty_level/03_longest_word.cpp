@@ -25,8 +25,8 @@ Output: "love"
 #include <unordered_set>
 #include <vector>
 
-#include <stl_helper_functions.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <stl_helper_functions.hpp>
 #define CATCH_CONFIG_MAIN
 
 using namespace std;
@@ -175,12 +175,16 @@ std::pair<IterType, IterType> find_longest_word(IterType first,
   using U = typename ContainerType::value_type;
 
   bool is_haystack_sorted{
-      stl::helper::has_find_member_function_v<ContainerType, T> || std::is_sorted(std::cbegin(haystack), std::cend(haystack))};
+      stl::helper::has_find_member_function_v<ContainerType, T> ||
+      std::is_sorted(std::cbegin(haystack), std::cend(haystack))};
 
   if (!is_haystack_sorted) {
     if constexpr (stl::helper::has_sort_member_function_v<ContainerType>)
       haystack.sort();
-    else if constexpr (std::is_same_v<std::random_access_iterator_tag, typename std::iterator_traits<typename ContainerType::iterator>::iterator_category>)
+    else if constexpr (std::is_same_v<std::random_access_iterator_tag,
+                                      typename std::iterator_traits<
+                                          typename ContainerType::iterator>::
+                                          iterator_category>)
       std::sort(std::begin(haystack), std::end(haystack));
     is_haystack_sorted = true;
   }
@@ -270,12 +274,12 @@ TEST_CASE("Longest Word : LongestWord_v3") {
   REQUIRE(LongestWord_v3("I love both cats and dogs as well!") == "love");
 }
 
-//int main() {
-//  // cout << LongestWord_v1(gets(stdin));
-//  cout << LongestWord_v3("fun&!! time") << '\n';  // expected output: "time"
-//  cout << LongestWord_v3("I love dogs") << '\n';  // expected output: "love"
-//  cout << LongestWord_v3("I love both cats and dogs as well!")
-//       << '\n';  // expected output: "love"
+// int main() {
+//   // cout << LongestWord_v1(gets(stdin));
+//   cout << LongestWord_v3("fun&!! time") << '\n';  // expected output: "time"
+//   cout << LongestWord_v3("I love dogs") << '\n';  // expected output: "love"
+//   cout << LongestWord_v3("I love both cats and dogs as well!")
+//        << '\n';  // expected output: "love"
 //
-//  return 0;
-//}
+//   return 0;
+// }

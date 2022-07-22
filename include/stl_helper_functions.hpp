@@ -812,7 +812,7 @@ constexpr size_t len(const std::array<T, ARRAY_SIZE>& arr) {
   size_t length{};
 
   while (arr[length]) {
-    length++;
+    ++length;
 
     if (ARRAY_SIZE == length)
       return ARRAY_SIZE;
@@ -11579,7 +11579,8 @@ std::vector<std::basic_string<get_char_type_t<T>>> str_split(
 
   std::vector<std::basic_string_view<char_type>> needle_parts{};
 
-  if (needle_parts_separator_token_len > 0U && !split_on_whole_needle) {
+  if (!split_on_whole_needle) {
+    if (needle_parts_separator_token_len > 0U) {
     size_t start_pos{};
 
     while (true) {
@@ -11596,6 +11597,11 @@ std::vector<std::basic_string<get_char_type_t<T>>> str_split(
                                 next_pos - start_pos);
 
       start_pos = next_pos + needle_parts_separator_token_sv.length();
+     }
+    
+    } else {
+      for (size_t i{}; i < needle_len; ++i) 
+        needle_parts.emplace_back(needle_sv.data() + i, 1U);
     }
   } else
     needle_parts.emplace_back(needle_sv);

@@ -17,69 +17,45 @@ Output: "true"
 */
 
 #include <cctype>
-#include <iostream>
+// #include <iostream>
 #include <locale>
 #include <queue>
 #include <stack>
+#include <stl_helper_functions.hpp>
 #include <string>
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 
-string trim(const string& str, const locale& loc = locale{}) {
-  const size_t str_len{str.length()};
-
-  if (0U == str_len)
-    return {};
-
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str], loc))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return {};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str], loc))
-      break;
-  }
-
-  return {cbegin(str) + begin_str, cbegin(str) + end_str + 1};
-}
-
 string palindrome_v1(string str) {
-  str = trim(str);
+  str = stl::helper::trim(str);
 
   if (str.length() < 2)
     return "false";
 
-  stack<char> s{};
-  queue<char> q{};
+  deque<char> d{};
   locale loc{};
 
   for (const char ch : str) {
     if (isspace(ch, loc))
       continue;
-
-    s.emplace(ch);
-    q.emplace(ch);
+    d.push_back(ch);
   }
 
-  while (!s.empty()) {
-    if (s.top() != q.front())
+  while (d.size() > 1) {
+    if (d.front() != d.back())
       return "false";
-    s.pop();
-    q.pop();
+    d.pop_back();
+    d.pop_front();
   }
 
   return "true";
 }
 
 string palindrome_v2(string str) {
-  str = trim(str);
+  str = stl::helper::trim(str);
 
   const size_t str_len{str.length()};
 
@@ -111,7 +87,7 @@ string palindrome_v2(string str) {
 }
 
 string palindrome_v3(string str) {
-  str = trim(str);
+  str = stl::helper::trim(str);
 
   const size_t str_len{str.length()};
 
@@ -135,14 +111,38 @@ string palindrome_v3(string str) {
   return "true";
 }
 
-int main() {
-  // cout << palindrome_v3(gets(stdin));
-  cout << palindrome_v3("racecar") << '\n';  // expected output: "true"
-  cout << palindrome_v3("never odd or even")
-       << '\n';                            // expected output: "true"
-  cout << palindrome_v3("eye") << '\n';    // expected output: "true"
-  cout << palindrome_v3("apple") << '\n';  // expected output: "false"
-  cout << palindrome_v3("rotor") << '\n';  // expected output: "true"
-
-  return 0;
+TEST_CASE("Palindrome : std::string palindrome_v1(std::string)") {
+  REQUIRE(palindrome_v1("racecar") == "true");
+  REQUIRE(palindrome_v1("never odd or even") == "true");
+  REQUIRE(palindrome_v1("eye") == "true");
+  REQUIRE(palindrome_v1("apple") == "false");
+  REQUIRE(palindrome_v1("rotor") == "true");
 }
+
+TEST_CASE("Palindrome : std::string palindrome_v2(std::string)") {
+  REQUIRE(palindrome_v2("racecar") == "true");
+  REQUIRE(palindrome_v2("never odd or even") == "true");
+  REQUIRE(palindrome_v2("eye") == "true");
+  REQUIRE(palindrome_v2("apple") == "false");
+  REQUIRE(palindrome_v2("rotor") == "true");
+}
+
+TEST_CASE("Palindrome : std::string palindrome_v3(std::string)") {
+  REQUIRE(palindrome_v3("racecar") == "true");
+  REQUIRE(palindrome_v3("never odd or even") == "true");
+  REQUIRE(palindrome_v3("eye") == "true");
+  REQUIRE(palindrome_v3("apple") == "false");
+  REQUIRE(palindrome_v3("rotor") == "true");
+}
+
+// int main() {
+//   // cout << palindrome_v1(gets(stdin));
+//   cout << palindrome_v1("racecar") << '\n';  // expected output: "true"
+//   cout << palindrome_v1("never odd or even")
+//        << '\n';                            // expected output: "true"
+//   cout << palindrome_v1("eye") << '\n';    // expected output: "true"
+//   cout << palindrome_v1("apple") << '\n';  // expected output: "false"
+//   cout << palindrome_v1("rotor") << '\n';  // expected output: "true"
+
+//   return 0;
+// }

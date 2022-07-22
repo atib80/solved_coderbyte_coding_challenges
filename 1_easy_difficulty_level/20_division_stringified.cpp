@@ -18,13 +18,20 @@ Output: "103"
 
 #include <cmath>
 #include <cstdint>
-#include <exception>
-#include <iostream>
+// #include <iostream>
+#include <cstring>
+#include <stdexcept>
 #include <string>
+
+#include <stl_helper_functions.hpp>
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 
-string DivisionStringified(const int64_t numerator, const int64_t denumerator) {
+string division_stringified_v1(const int64_t numerator,
+                               const int64_t denumerator) {
   constexpr static size_t buffer_size{32U};
   char buffer[buffer_size];
 
@@ -50,7 +57,7 @@ string DivisionStringified(const int64_t numerator, const int64_t denumerator) {
     if (0U == digit_count % 3)
       buffer[--j] = ',';
 
-    digit_count++;
+    ++digit_count;
   }
 
   if (is_negative)
@@ -76,10 +83,10 @@ class division_stringified_v2 {
 
     if (whole_part > 0) {
       if (result - whole_part >= 0.5)
-        whole_part++;
+        ++whole_part;
     } else if (whole_part < 0) {
       if (result - whole_part <= -0.5)
-        whole_part--;
+        --whole_part;
     } else {
       buffer[--offset] = '0';
       return;
@@ -101,7 +108,7 @@ class division_stringified_v2 {
       if (0U == digit_count % 3)
         buffer[--offset] = ',';
 
-      digit_count++;
+      ++digit_count;
     }
 
     if (is_negative)
@@ -111,27 +118,60 @@ class division_stringified_v2 {
   constexpr const char* get_result() const { return buffer + offset; }
 };
 
-int main() {
-  // const vector<int64_t> numbers { gets(stdin) };
-  // cout << DivisionStringified(numbers[0], numbers[1]);
-  constexpr division_stringified_v2 div1{1, 10};
-  cout << div1.get_result() << '\n';  // expected output: "0"
-  constexpr division_stringified_v2 div2{5, 54};
-  cout << div2.get_result() << '\n';  // expected output: "0"
-  constexpr division_stringified_v2 div3{175, 24};
-  cout << div3.get_result() << '\n';  // expected output: "7"
-  constexpr division_stringified_v2 div4{101077282, 21123};
-  cout << div4.get_result() << '\n';  // expected output: "4,785"
-  constexpr division_stringified_v2 div5{-101077282, 21123};
-  cout << div5.get_result() << '\n';  // expected output: "-4,785"
-  constexpr division_stringified_v2 div6{101077282, -21123};
-  cout << div6.get_result() << '\n';  // expected output: "-4,785"
-  constexpr division_stringified_v2 div7{-101077282, -21123};
-  cout << div7.get_result() << '\n';  // expected output: "4,785"
-  constexpr division_stringified_v2 div8{100000, 1};
-  cout << div8.get_result() << '\n';  // expected output: "100,000"
-  constexpr division_stringified_v2 div9{10000000, 10};
-  cout << div9.get_result() << '\n';  // expected output: "1,000,000"
-
-  return 0;
+TEST_CASE("Division Stringified: division_stringified_v1") {
+  CHECK(division_stringified_v1(1, 10) == "0");
+  CHECK(division_stringified_v1(5, 54) == "0");
+  CHECK(division_stringified_v1(175, 24) == "7");
+  CHECK(division_stringified_v1(101077282, 21123) == "4,785");
+  CHECK(division_stringified_v1(-101077282, 21123) == "-4,785");
+  CHECK(division_stringified_v1(101077282, -21123) == "-4,785");
+  CHECK(division_stringified_v1(-101077282, -21123) == "4,785");
+  CHECK(division_stringified_v1(100000, 1) == "100,000");
+  CHECK(division_stringified_v1(10000000, 10) == "1,000,000");
 }
+
+TEST_CASE("Division Stringified: division_stringified_v2") {
+  constexpr division_stringified_v2 div1{1, 10};
+  CHECK(strcmp(div1.get_result(), "0") == 0);
+  constexpr division_stringified_v2 div2{5, 54};
+  CHECK(strcmp(div2.get_result(), "0") == 0);
+  constexpr division_stringified_v2 div3{175, 24};
+  CHECK(strcmp(div3.get_result(), "7") == 0);
+  constexpr division_stringified_v2 div4{101077282, 21123};
+  CHECK(strcmp(div4.get_result(), "4,785") == 0);
+  constexpr division_stringified_v2 div5{-101077282, 21123};
+  CHECK(strcmp(div5.get_result(), "-4,785") == 0);
+  constexpr division_stringified_v2 div6{101077282, -21123};
+  CHECK(strcmp(div6.get_result(), "-4,785") == 0);
+  constexpr division_stringified_v2 div7{-101077282, -21123};
+  CHECK(strcmp(div7.get_result(), "4,785") == 0);
+  constexpr division_stringified_v2 div8{100000, 1};
+  CHECK(strcmp(div8.get_result(), "100,000") == 0);
+  constexpr division_stringified_v2 div9{10000000, 10};
+  CHECK(strcmp(div9.get_result(), "1,000,000") == 0);
+}
+
+// int main() {
+//   // const vector<int64_t> numbers { gets(stdin) };
+//   // cout << DivisionStringified(numbers[0], numbers[1]);
+//   constexpr division_stringified_v2 div1{1, 10};
+//   cout << div1.get_result() << '\n';  // expected output: "0"
+//   constexpr division_stringified_v2 div2{5, 54};
+//   cout << div2.get_result() << '\n';  // expected output: "0"
+//   constexpr division_stringified_v2 div3{175, 24};
+//   cout << div3.get_result() << '\n';  // expected output: "7"
+//   constexpr division_stringified_v2 div4{101077282, 21123};
+//   cout << div4.get_result() << '\n';  // expected output: "4,785"
+//   constexpr division_stringified_v2 div5{-101077282, 21123};
+//   cout << div5.get_result() << '\n';  // expected output: "-4,785"
+//   constexpr division_stringified_v2 div6{101077282, -21123};
+//   cout << div6.get_result() << '\n';  // expected output: "-4,785"
+//   constexpr division_stringified_v2 div7{-101077282, -21123};
+//   cout << div7.get_result() << '\n';  // expected output: "4,785"
+//   constexpr division_stringified_v2 div8{100000, 1};
+//   cout << div8.get_result() << '\n';  // expected output: "100,000"
+//   constexpr division_stringified_v2 div9{10000000, 10};
+//   cout << div9.get_result() << '\n';  // expected output: "1,000,000"
+
+//   return 0;
+// }

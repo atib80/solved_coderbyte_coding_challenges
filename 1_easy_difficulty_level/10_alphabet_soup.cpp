@@ -52,14 +52,14 @@ string AlphabetSoup_v3(string str) {
   for (size_t i{1U}, did_swap_elements{1};
        did_swap_elements != 0 && i < str_len; ++i) {
     did_swap_elements = 0;
-    for (size_t j{}; j < str_len - i; ++j) {    
+    for (size_t j{}; j < str_len - i; ++j) {
       if (str[j] > str[j + 1]) {
         swap(str[j], str[j + 1]);
         did_swap_elements = 1;
-      }        
+      }
     }
   }
-  
+
   return str;
 }
 
@@ -84,7 +84,7 @@ TEST_CASE("Alphabet Soup : AlphabetSoup_v3") {
 // int main() {
 //   // cout << AlphabetSoup_v2(gets(stdin));
 //   cout << AlphabetSoup_v3("hello") << '\n';      // expected output: ehllo
-//   cout << AlphabetSoup_v3("coderbyte") << '\n';  // expected output: bcdeeorty
-//   cout << AlphabetSoup_v3("hooplah") << '\n';    // expected output: ahhloop
-//   return 0;
+//   cout << AlphabetSoup_v3("coderbyte") << '\n';  // expected output:
+//   bcdeeorty cout << AlphabetSoup_v3("hooplah") << '\n';    // expected
+//   output: ahhloop return 0;
 // }

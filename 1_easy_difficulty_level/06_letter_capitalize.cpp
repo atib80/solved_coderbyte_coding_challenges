@@ -37,9 +37,8 @@ string LetterCapitalize(string str) {
 
   for (auto& ch : str) {
     if (' ' == ch) {
-      is_space_char = true;      
-    }
-    else if (is_space_char) {
+      is_space_char = true;
+    } else if (is_space_char) {
       ch = f.toupper(ch);
       is_space_char = false;
     }

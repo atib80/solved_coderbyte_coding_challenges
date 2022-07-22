@@ -167,11 +167,11 @@ TEST_CASE("Simple Adding: SimpleAdding_v3") {
   REQUIRE(SimpleAdding_v3(140) == 9870);
 }
 
-//int main() {s
-//  // cout << SimpleAdding_v3(gets(stdin));
-//  cout << SimpleAdding_v3(4) << '\n';    // expected output: 10
-//  cout << SimpleAdding_v3(12) << '\n';   // expected output: 78
-//  cout << SimpleAdding_v3(140) << '\n';  // expected output: 9870
+// int main() {s
+//   // cout << SimpleAdding_v3(gets(stdin));
+//   cout << SimpleAdding_v3(4) << '\n';    // expected output: 10
+//   cout << SimpleAdding_v3(12) << '\n';   // expected output: 78
+//   cout << SimpleAdding_v3(140) << '\n';  // expected output: 9870
 //
-//  return 0;
-//}
+//   return 0;
+// }

@@ -18,13 +18,16 @@ Output: "true"
 */
 
 #include <algorithm>
-#include <iostream>
+// #include <iostream>
 #include <string>
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std;
 
 bool find_sum_of_numbers_equal_max_number(
-    int* numbers,
+    const int* numbers,
     const size_t numbers_size,
     const size_t current_index,
     const bool has_negative_numbers = false,
@@ -35,7 +38,7 @@ bool find_sum_of_numbers_equal_max_number(
   if (!has_negative_numbers && current_sum > numbers[0])
     return false;
 
-  for (size_t i{current_index}; i < numbers_size; i++) {
+  for (size_t i{current_index}; i < numbers_size; ++i) {
     if (find_sum_of_numbers_equal_max_number(numbers, numbers_size, i + 1,
                                              has_negative_numbers,
                                              current_sum + numbers[i]))
@@ -45,7 +48,7 @@ bool find_sum_of_numbers_equal_max_number(
   return false;
 }
 
-string array_addition_1(int* arr, const size_t arr_size) {
+string array_addition_1_v2(int* arr, const size_t arr_size) {
   if (arr_size < 2)
     return "false";
 
@@ -61,33 +64,52 @@ string array_addition_1(int* arr, const size_t arr_size) {
   return "false";
 }
 
-int main() {
-  // int A[] = gets(stdin);
-  // cout << array_addition_1(A, sizeof(A)/sizeof(A[0]));
+TEST_CASE("Array Addition I : array_addition_1_v2") {
   int A[] = {4, 6, 23, 10, 1, 3};
-  cout << array_addition_1(A, sizeof(A) / sizeof(A[0]))
-       << '\n';  // expected output: "true"
+  CHECK(array_addition_1_v2(A, sizeof(A) / sizeof(A[0])) == "true");
   int B[] = {5, 7, 16, 1, 2};
-  cout << array_addition_1(B, sizeof(B) / sizeof(B[0]))
-       << '\n';  // expected output: "false"
+  CHECK(array_addition_1_v2(B, sizeof(B) / sizeof(B[0])) == "false");
   int C[] = {3, 5, -1, 8, 12};
-  cout << array_addition_1(C, sizeof(C) / sizeof(C[0]))
-       << '\n';  // expected output: "true"
+  CHECK(array_addition_1_v2(C, sizeof(C) / sizeof(C[0])) == "true");
   int D[] = {3, 4, 5, 7};
-  cout << array_addition_1(D, sizeof(D) / sizeof(D[0]))
-       << '\n';  // expected output: "true"
+  CHECK(array_addition_1_v2(D, sizeof(D) / sizeof(D[0])) == "true");
   int E[] = {1, 1, 1, 1, 6};
-  cout << array_addition_1(E, sizeof(E) / sizeof(E[0]))
-       << '\n';  // expected output: "false"
+  CHECK(array_addition_1_v2(E, sizeof(E) / sizeof(E[0])) == "false");
   int F[] = {2, 4, 6, 12, 92};
-  cout << array_addition_1(F, sizeof(F) / sizeof(F[0]))
-       << '\n';  // expected output: "false"
+  CHECK(array_addition_1_v2(F, sizeof(F) / sizeof(F[0])) == "false");
   int G[] = {1, 2, 3, 4};
-  cout << array_addition_1(G, sizeof(G) / sizeof(G[0]))
-       << '\n';  // expected output: "true"
+  CHECK(array_addition_1_v2(G, sizeof(G) / sizeof(G[0])) == "true");
   int H[] = {54, 49, 1, 0, 7, 4};
-  cout << array_addition_1(H, sizeof(H) / sizeof(H[0]))
-       << '\n';  // expected output: "true"
-
-  return 0;
+  CHECK(array_addition_1_v2(H, sizeof(H) / sizeof(H[0])) == "true");
 }
+
+// int main() {
+//   // int A[] = gets(stdin);
+//   // cout << array_addition_1_v2(A, sizeof(A)/sizeof(A[0]));
+//   int A[] = {4, 6, 23, 10, 1, 3};
+//   cout << array_addition_1_v2(A, sizeof(A) / sizeof(A[0]))
+//        << '\n';  // expected output: "true"
+//   int B[] = {5, 7, 16, 1, 2};
+//   cout << array_addition_1_v2(B, sizeof(B) / sizeof(B[0]))
+//        << '\n';  // expected output: "false"
+//   int C[] = {3, 5, -1, 8, 12};
+//   cout << array_addition_1_v2(C, sizeof(C) / sizeof(C[0]))
+//        << '\n';  // expected output: "true"
+//   int D[] = {3, 4, 5, 7};
+//   cout << array_addition_1_v2(D, sizeof(D) / sizeof(D[0]))
+//        << '\n';  // expected output: "true"
+//   int E[] = {1, 1, 1, 1, 6};
+//   cout << array_addition_1_v2(E, sizeof(E) / sizeof(E[0]))
+//        << '\n';  // expected output: "false"
+//   int F[] = {2, 4, 6, 12, 92};
+//   cout << array_addition_1_v2(F, sizeof(F) / sizeof(F[0]))
+//        << '\n';  // expected output: "false"
+//   int G[] = {1, 2, 3, 4};
+//   cout << array_addition_1_v2(G, sizeof(G) / sizeof(G[0]))
+//        << '\n';  // expected output: "true"
+//   int H[] = {54, 49, 1, 0, 7, 4};
+//   cout << array_addition_1_v2(H, sizeof(H) / sizeof(H[0]))
+//        << '\n';  // expected output: "true"
+
+//   return 0;
+// }

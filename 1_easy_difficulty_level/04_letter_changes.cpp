@@ -31,7 +31,8 @@ using namespace std;
 string trim(const string& str) {
   const size_t first = str.find_first_not_of(" \t\n\f\v ");
   const size_t last = str.find_last_not_of(" \t\n\f\v ") + 1;
-  return first != string::npos ? string{cbegin(str) + first, cbegin(str) + last} : string{};
+  return first != string::npos ? string{cbegin(str) + first, cbegin(str) + last}
+                               : string{};
 }
 
 string LetterChanges_v1(string str) {
@@ -116,24 +117,20 @@ string LetterChanges_v2(string str) {
 }
 
 TEST_CASE("Letter Changes : LetterChanges_v1") {
-
   REQUIRE(LetterChanges_v1("hello*3") == "Ifmmp*3");
   REQUIRE(LetterChanges_v1("fun times!") == "gvO Ujnft!");
-
 }
 
 TEST_CASE("Letter Changes : LetterChanges_v2") {
-
   REQUIRE(LetterChanges_v2("hello*3") == "Ifmmp*3");
   REQUIRE(LetterChanges_v2("fun times!") == "gvO Ujnft!");
-
 }
 
-//int main() {
-//  // cout << LetterChanges_v1(gets(stdin));
-//  cout << LetterChanges_v1("hello*3") << '\n';  // expected output: "Ifmmp*3"
-//  cout << LetterChanges_v1("fun times!")
-//       << '\n';  // expected output: "gvO Ujnft!"
+// int main() {
+//   // cout << LetterChanges_v1(gets(stdin));
+//   cout << LetterChanges_v1("hello*3") << '\n';  // expected output: "Ifmmp*3"
+//   cout << LetterChanges_v1("fun times!")
+//        << '\n';  // expected output: "gvO Ujnft!"
 //
-//  return 0;
-//}
+//   return 0;
+// }

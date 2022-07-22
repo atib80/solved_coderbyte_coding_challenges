@@ -19,8 +19,8 @@ Output: 40320
 #include <cstdint>
 #include <iostream>
 
-#include <stl_helper_functions.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <stl_helper_functions.hpp>
 #define CATCH_CONFIG_MAIN
 
 using namespace std;
@@ -48,7 +48,8 @@ struct precalculated_factorials {
     return result;
   }
 
-  constexpr uint64_t get_factorial_of_specified_number(const uint64_t n) const noexcept {
+  constexpr uint64_t get_factorial_of_specified_number(
+      const uint64_t n) const noexcept {
     if (n <= N)
       return factorials[n];
     return calculate_factorial(n);
@@ -154,30 +155,30 @@ TEST_CASE("First Factorial: FirstFactorial_v3") {
   REQUIRE(FirstFactorial_v3(20) == 2432902008176640000ULL);
 }
 
-//int main() {
-//  // cout << FirstFactorial_v1(gets(stdin));
-//  cout << FirstFactorial_v1(0) << '\n';   // expected output: 1
-//  cout << FirstFactorial_v1(1) << '\n';   // expected output: 1
-//  cout << FirstFactorial_v1(2) << '\n';   // expected output: 2
-//  cout << FirstFactorial_v1(3) << '\n';   // expected output: 6
-//  cout << FirstFactorial_v1(4) << '\n';   // expected output: 24
-//  cout << FirstFactorial_v1(5) << '\n';   // expected output: 120
-//  cout << FirstFactorial_v1(6) << '\n';   // expected output: 720
-//  cout << FirstFactorial_v1(7) << '\n';   // expected output: 5040
-//  cout << FirstFactorial_v1(8) << '\n';   // expected output: 40320
-//  cout << FirstFactorial_v1(9) << '\n';   // expected output: 362880
-//  cout << FirstFactorial_v1(10) << '\n';  // expected output: 3628800
-//  cout << FirstFactorial_v1(11) << '\n';  // expected output: 39916800
-//  cout << FirstFactorial_v1(12) << '\n';  // expected output: 479001600
-//  cout << FirstFactorial_v1(13) << '\n';  // expected output: 6227020800
-//  cout << FirstFactorial_v1(14) << '\n';  // expected output: 87178291200
-//  cout << FirstFactorial_v1(15) << '\n';  // expected output: 1307674368000
-//  cout << FirstFactorial_v1(16) << '\n';  // expected output: 20922789888000
-//  cout << FirstFactorial_v1(17) << '\n';  // expected output: 355687428096000
-//  cout << FirstFactorial_v1(18) << '\n';  // expected output: 6402373705728000
-//  cout << FirstFactorial_v1(19) << '\n';  // expected output: 121645100408832000
-//  cout << FirstFactorial_v1(20)
-//       << '\n';  // expected output: 2432902008176640000
+// int main() {
+//   // cout << FirstFactorial_v1(gets(stdin));
+//   cout << FirstFactorial_v1(0) << '\n';   // expected output: 1
+//   cout << FirstFactorial_v1(1) << '\n';   // expected output: 1
+//   cout << FirstFactorial_v1(2) << '\n';   // expected output: 2
+//   cout << FirstFactorial_v1(3) << '\n';   // expected output: 6
+//   cout << FirstFactorial_v1(4) << '\n';   // expected output: 24
+//   cout << FirstFactorial_v1(5) << '\n';   // expected output: 120
+//   cout << FirstFactorial_v1(6) << '\n';   // expected output: 720
+//   cout << FirstFactorial_v1(7) << '\n';   // expected output: 5040
+//   cout << FirstFactorial_v1(8) << '\n';   // expected output: 40320
+//   cout << FirstFactorial_v1(9) << '\n';   // expected output: 362880
+//   cout << FirstFactorial_v1(10) << '\n';  // expected output: 3628800
+//   cout << FirstFactorial_v1(11) << '\n';  // expected output: 39916800
+//   cout << FirstFactorial_v1(12) << '\n';  // expected output: 479001600
+//   cout << FirstFactorial_v1(13) << '\n';  // expected output: 6227020800
+//   cout << FirstFactorial_v1(14) << '\n';  // expected output: 87178291200
+//   cout << FirstFactorial_v1(15) << '\n';  // expected output: 1307674368000
+//   cout << FirstFactorial_v1(16) << '\n';  // expected output: 20922789888000
+//   cout << FirstFactorial_v1(17) << '\n';  // expected output: 355687428096000
+//   cout << FirstFactorial_v1(18) << '\n';  // expected output:
+//   6402373705728000 cout << FirstFactorial_v1(19) << '\n';  // expected
+//   output: 121645100408832000 cout << FirstFactorial_v1(20)
+//        << '\n';  // expected output: 2432902008176640000
 //
-//  return 0;
-//}
+//   return 0;
+// }

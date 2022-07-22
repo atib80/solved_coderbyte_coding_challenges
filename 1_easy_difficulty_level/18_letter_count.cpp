@@ -18,310 +18,22 @@ Output: -1
 */
 
 #include <algorithm>
-#include <cctype>
+// #include <cctype>
 #include <cstring>
-#include <iostream>
+// #include <iostream>
 #include <set>
-#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <type_traits>
-#include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
+// #include <utility>
+#include <stl_helper_functions.hpp>
 #include <vector>
 
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
+
 using namespace std;
-
-template <typename T, typename... Rest>
-struct is_anyone_of : std::false_type {};
-
-template <typename T, typename First>
-struct is_anyone_of<T, First> : std::is_same<T, First> {};
-
-template <typename T, typename First, typename... Rest>
-struct is_anyone_of<T, First, Rest...>
-    : std::integral_constant<bool,
-                             std::is_same<T, First>::value ||
-                                 is_anyone_of<T, Rest...>::value> {};
-
-template <typename T, typename First, typename... Rest>
-constexpr bool is_anyone_of_v = is_anyone_of<T, First, Rest...>::value;
-
-template <typename CharType>
-struct default_whitespace_chars {};
-
-template <>
-struct default_whitespace_chars<char> {
-  static constexpr const char* value = " \t\n\f\v\r";
-};
-
-template <>
-struct default_whitespace_chars<wchar_t> {
-  static constexpr const wchar_t* value = L" \t\n\f\v\r";
-};
-
-template <>
-struct default_whitespace_chars<char16_t> {
-  static constexpr const char16_t* value = u" \t\n\f\v\r";
-};
-
-template <>
-struct default_whitespace_chars<char32_t> {
-  static constexpr const char32_t* value = U" \t\n\f\v\r";
-};
-
-template <typename CharType>
-constexpr const CharType* default_whitespace_chars_v =
-    default_whitespace_chars<CharType>::value;
-
-template <typename T>
-struct is_valid_char_type {
-  static constexpr const bool value =
-      is_anyone_of_v<std::remove_cv_t<T>, char, wchar_t, char16_t, char32_t>;
-};
-
-template <typename T>
-constexpr const bool is_valid_char_type_v = is_valid_char_type<T>::value;
-
-template <typename T>
-struct is_non_const_char_pointer_type {
-  static constexpr const bool value = is_anyone_of_v<T,
-                                                     char*,
-                                                     wchar_t*,
-                                                     char16_t*,
-                                                     char32_t*,
-                                                     char* const,
-                                                     wchar_t* const,
-                                                     char16_t* const,
-                                                     char32_t* const>;
-};
-
-template <typename T>
-constexpr const bool is_non_const_char_pointer_type_v =
-    is_non_const_char_pointer_type<T>::value;
-
-template <typename T>
-struct is_const_char_pointer_type {
-  static constexpr const bool value = is_anyone_of_v<T,
-                                                     const char*,
-                                                     const wchar_t*,
-                                                     const char16_t*,
-                                                     const char32_t*,
-                                                     const char* const,
-                                                     const wchar_t* const,
-                                                     const char16_t* const,
-                                                     const char32_t* const>;
-};
-
-template <typename T>
-constexpr const bool is_const_char_pointer_type_v =
-    is_const_char_pointer_type<T>::value;
-
-template <typename T>
-struct is_non_const_char_array_type {
-  static constexpr bool value = 1u == std::rank_v<T> &&
-                                is_valid_char_type_v<std::remove_extent_t<T>> &&
-                                !std::is_const_v<std::remove_extent_t<T>>;
-};
-
-template <typename T>
-constexpr const bool is_non_const_char_array_type_v =
-    is_non_const_char_array_type<T>::value;
-
-template <typename T>
-struct is_const_char_array_type {
-  static constexpr bool value = 1u == std::rank_v<T> &&
-                                is_valid_char_type_v<std::remove_extent_t<T>> &&
-                                std::is_const_v<std::remove_extent_t<T>>;
-};
-
-template <typename T>
-constexpr const bool is_const_char_array_type_v =
-    is_const_char_array_type<T>::value;
-
-template <typename T>
-struct is_char_pointer_type {
-  static constexpr const bool value =
-      is_non_const_char_pointer_type_v<T> || is_const_char_pointer_type_v<T>;
-};
-
-template <typename T>
-constexpr const bool is_char_pointer_type_v = is_char_pointer_type<T>::value;
-
-template <typename T>
-struct is_char_array_type {
-  static constexpr const bool value =
-      is_non_const_char_array_type_v<T> || is_const_char_array_type_v<T>;
-};
-
-template <typename T>
-constexpr const bool is_char_array_type_v = is_char_array_type<T>::value;
-
-template <typename T>
-struct remove_all_decorations {
-  using dt = std::decay_t<T>;
-
-  using mt1 = std::conditional_t<std::is_const_v<dt> || std::is_volatile_v<dt>,
-                                 std::remove_cv_t<dt>,
-                                 dt>;
-  using mt2 = std::
-      conditional_t<std::is_array_v<mt1>, std::remove_all_extents_t<mt1>, mt1>;
-  using mt3 = std::
-      conditional_t<std::is_pointer_v<mt2>, std::remove_pointer_t<mt2>, mt2>;
-  using mt4 = std::conditional_t<std::is_reference_v<mt3>,
-                                 std::remove_reference_t<mt3>,
-                                 mt3>;
-  using type =
-      std::conditional_t<std::is_const_v<mt4> || std::is_volatile_v<mt4>,
-                         std::remove_cv_t<mt4>,
-                         mt4>;
-};
-
-template <typename T>
-using remove_all_decorations_t = typename remove_all_decorations<T>::type;
-
-template <typename T>
-struct is_valid_string_type {
-  static constexpr const bool value =
-      is_anyone_of_v<remove_all_decorations_t<T>,
-                     std::string,
-                     std::wstring,
-                     std::u16string,
-                     std::u32string>;
-};
-
-template <typename T>
-constexpr const bool is_valid_string_type_v = is_valid_string_type<T>::value;
-
-template <typename T>
-struct is_valid_string_view_type {
-  static constexpr const bool value =
-      is_anyone_of_v<remove_all_decorations_t<T>,
-                     std::string_view,
-                     std::wstring_view,
-                     std::u16string_view,
-                     std::u32string_view>;
-};
-
-template <typename T>
-constexpr const bool is_valid_string_view_type_v =
-    is_valid_string_view_type<T>::value;
-
-template <typename T>
-using has_value_type_t = decltype(std::declval<typename T::value_type>());
-
-template <typename T, typename = void>
-struct has_value_type : std::false_type {};
-
-template <typename T>
-struct has_value_type<T, std::void_t<has_value_type_t<T>>> : std::true_type {};
-
-template <typename T>
-constexpr const bool has_value_type_v = has_value_type<T>::value;
-
-template <typename T, typename = void>
-struct get_char_type {
-  using type = remove_all_decorations_t<T>;
-  static_assert(is_valid_char_type_v<type>,
-                "Underlying type is not an intrinsic character type!");
-};
-
-template <typename T>
-struct get_char_type<
-    T,
-    std::void_t<has_value_type_t<remove_all_decorations_t<T>>>> {
-  using type = typename remove_all_decorations_t<T>::value_type;
-  static_assert(is_valid_char_type_v<type>,
-                "Underlying type is not an intrinsic character type!");
-};
-
-template <typename T>
-using get_char_type_t = typename get_char_type<T>::type;
-
-template <typename T>
-struct add_const_pointer_to_char_type {
-  using type = std::add_const_t<
-      std::add_pointer_t<std::add_const_t<get_char_type_t<T>>>>;
-};
-
-template <typename T>
-using add_const_pointer_to_char_type_t =
-    typename add_const_pointer_to_char_type<T>::type;
-
-template <
-    typename T,
-    typename U,
-    typename = enable_if_t<
-        (is_valid_string_type_v<T> || is_valid_string_view_type_v<T> ||
-         is_char_array_type_v<T> ||
-         is_char_pointer_type_v<
-             T>)&&(is_valid_string_type_v<U> ||
-                   is_valid_string_view_type_v<U> || is_char_array_type_v<U> ||
-                   is_char_pointer_type_v<U>)&&(is_same_v<get_char_type_t<T>,
-                                                          get_char_type_t<U>>)>>
-vector<basic_string<get_char_type_t<T>>> split(
-    const T& source,
-    const U& needle,
-    const bool split_on_whole_needle = true,
-    const bool ignore_empty_string = true,
-    size_t const max_count = basic_string<get_char_type_t<T>>::npos) {
-  using char_type = get_char_type_t<T>;
-  if constexpr (is_char_pointer_type_v<T>) {
-    if (nullptr == source)
-      return {};
-  }
-  const basic_string_view<char_type> sv{source};
-  const size_t source_len{sv.length()};
-  if (0U == source_len)
-    return {};
-
-  const basic_string_view<char_type> nv{needle};
-  const size_t needle_len{split_on_whole_needle ? nv.length() : 1U};
-
-  if (0U == needle_len) {
-    const size_t upper_limit{max_count < source_len ? max_count : source_len};
-    vector<basic_string<char_type>> parts(upper_limit);
-    for (size_t i{}; i < upper_limit; i++)
-      parts[i].assign({1, sv[i]});
-    return parts;
-  }
-
-  vector<basic_string<char_type>> parts{};
-  size_t number_of_parts{}, prev{};
-
-  while (true) {
-    const size_t current = split_on_whole_needle
-                               ? sv.find(nv.data(), prev)
-                               : sv.find_first_of(nv.data(), prev);
-
-    if (basic_string<char_type>::npos == current)
-      break;
-
-    if (basic_string<char_type>::npos != max_count && parts.size() == max_count)
-      break;
-
-    if (current - prev > 0 || !ignore_empty_string) {
-      if (!ignore_empty_string)
-        parts.emplace_back();
-      else
-        parts.emplace_back(cbegin(sv) + prev, cbegin(sv) + current);
-      number_of_parts++;
-    }
-
-    prev = current + needle_len;
-
-    if (prev >= source_len)
-      break;
-  }
-
-  if (prev < source_len &&
-      (basic_string<char_type>::npos == max_count || parts.size() < max_count))
-    parts.emplace_back(cbegin(sv) + prev, cend(sv));
-
-  return parts;
-}
 
 string LetterCountI_v1(string str) {
   const size_t str_len{str.length()};
@@ -370,7 +82,7 @@ string LetterCountI_v1(string str) {
 }
 
 string LetterCountI_v2(string str) {
-  vector<string> words{split(str, " \t\f\v\n\r", false)};
+  vector<string> words{stl::helper::str_split(str, " \t\f\v\n\r", "")};
 
   bool found_word_with_repeated_characters{};
 
@@ -430,7 +142,7 @@ string LetterCountI_v3(string str) {
   size_t max_number_of_repeated_letters{1U};
   size_t found_word_index{string::npos};
 
-  vector<string> words{split(str, " \t\f\v\n\r", false)};
+  vector<string> words{stl::helper::str_split(str, " \t\f\v\n\r", "")};
 
   for (size_t i{}; i < words.size(); ++i) {
     const string& w{words.at(i)};
@@ -462,13 +174,31 @@ string LetterCountI_v3(string str) {
   return "-1";
 }
 
-int main() {
-  // cout << LetterCountI_v3(gets(stdin));
-  cout << LetterCountI_v3("Today, is the greatest day ever!")
-       << '\n';  // expected output: "greatest"
-  cout << LetterCountI_v3("Hello apple pie")
-       << '\n';                                 // expected output: "Hello"
-  cout << LetterCountI_v3("No words") << '\n';  // expected output: "-1"
-
-  return 0;
+TEST_CASE("Letter Count I : LetterCountI_v1") {
+  CHECK(LetterCountI_v1("Today, is the greatest day ever!") == "greatest");
+  CHECK(LetterCountI_v1("Hello apple pie") == "Hello");
+  CHECK(LetterCountI_v1("No words") == "-1");
 }
+
+TEST_CASE("Letter Count I : LetterCountI_v2") {
+  CHECK(LetterCountI_v2("Today, is the greatest day ever!") == "greatest");
+  CHECK(LetterCountI_v2("Hello apple pie") == "Hello");
+  CHECK(LetterCountI_v2("No words") == "-1");
+}
+
+TEST_CASE("Letter Count I : LetterCountI_v3") {
+  CHECK(LetterCountI_v3("Today, is the greatest day ever!") == "greatest");
+  CHECK(LetterCountI_v3("Hello apple pie") == "Hello");
+  CHECK(LetterCountI_v3("No words") == "-1");
+}
+
+// int main() {
+//   // cout << LetterCountI_v3(gets(stdin));
+//   cout << LetterCountI_v3("Today, is the greatest day ever!")
+//        << '\n';  // expected output: "greatest"
+//   cout << LetterCountI_v3("Hello apple pie")
+//        << '\n';                                 // expected output: "Hello"
+//   cout << LetterCountI_v3("No words") << '\n';  // expected output: "-1"
+
+//   return 0;
+// }

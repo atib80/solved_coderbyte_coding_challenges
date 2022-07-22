@@ -19,7 +19,7 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 include(CTest)
 
-set(sources 1_easy_difficulty_level/10_alphabet_soup.cpp)
+set(sources 1_easy_difficulty_level/20_division_stringified.cpp)
 
 add_executable(${This} ${sources})
 target_include_directories(${This} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

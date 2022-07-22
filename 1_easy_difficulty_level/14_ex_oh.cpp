@@ -17,41 +17,18 @@ Output: "false"
 */
 
 #include <algorithm>
-#include <cctype>
-#include <iostream>
-#include <locale>
+// #include <iostream>
+#include <stl_helper_functions.hpp>
 #include <string>
 #include <unordered_set>
 
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
+
 using namespace std;
 
-string trim(const string& str, const locale& loc = locale{}) {
-  const size_t str_len{str.length()};
-
-  if (0U == str_len)
-    return {};
-
-  size_t begin_str{};
-  size_t end_str{str_len - 1};
-
-  for (; begin_str <= end_str; ++begin_str) {
-    if (!isspace(str[begin_str], loc))
-      break;
-  }
-
-  if (begin_str > end_str)
-    return {};
-
-  for (; end_str > begin_str; --end_str) {
-    if (!isspace(str[end_str], loc))
-      break;
-  }
-
-  return str.substr(begin_str, end_str - begin_str + 1);
-}
-
 string ex_oh_v1(string str) {
-  str = trim(str);
+  str = stl::helper::trim(str);
 
   const size_t str_len{str.length()};
 
@@ -71,23 +48,25 @@ string ex_oh_v1(string str) {
 }
 
 string ex_oh_v2(string str) {
-  str = trim(str);
+  str = stl::helper::trim(str);
 
   const size_t str_len{str.length()};
 
   if (0U == str_len || str_len % 2 == 1)
     return "false";
 
-  sort(begin(str), end(str));
+  int balance{};
+  for (const char ch : str)
+    balance += (ch == 'o') ? -1 : 1;
 
-  if (str[str_len / 2 - 1] != 'o' && str[str_len / 2] != 'x')
+  if (0 != balance)
     return "false";
 
   return "true";
 }
 
 string ex_oh_v3(string str) {
-  str = trim(str);
+  str = stl::helper::trim(str);
 
   const size_t str_len{str.length()};
 
@@ -102,11 +81,51 @@ string ex_oh_v3(string str) {
   return "true";
 }
 
-int main() {
-  // cout << ex_oh_v1(gets(stdin));
-  cout << ex_oh_v3("xooxxxxooxo") << '\n';  // expected output: "false"
-  cout << ex_oh_v3("xooxxo") << '\n';       // expected output: "true"
-  cout << ex_oh_v3("x") << '\n';            // expected output: "false"
+string ex_oh_v4(string str) {
+  str = stl::helper::trim(str);
 
-  return 0;
+  const size_t str_len{str.length()};
+
+  if (0U == str_len || str_len % 2 == 1)
+    return "false";
+
+  sort(begin(str), end(str));
+
+  if (str[str_len / 2 - 1] != 'o' && str[str_len / 2] != 'x')
+    return "false";
+
+  return "true";
 }
+
+TEST_CASE("Ex Oh : ex_oh_v1()") {
+  REQUIRE(ex_oh_v1("xooxxxxooxo") == "false");
+  REQUIRE(ex_oh_v1("xooxxo") == "true");
+  REQUIRE(ex_oh_v1("x") == "false");
+}
+
+TEST_CASE("Ex Oh : ex_oh_v2()") {
+  REQUIRE(ex_oh_v2("xooxxxxooxo") == "false");
+  REQUIRE(ex_oh_v2("xooxxo") == "true");
+  REQUIRE(ex_oh_v2("x") == "false");
+}
+
+TEST_CASE("Ex Oh : ex_oh_v3()") {
+  REQUIRE(ex_oh_v3("xooxxxxooxo") == "false");
+  REQUIRE(ex_oh_v3("xooxxo") == "true");
+  REQUIRE(ex_oh_v3("x") == "false");
+}
+
+TEST_CASE("Ex Oh : ex_oh_v4()") {
+  REQUIRE(ex_oh_v4("xooxxxxooxo") == "false");
+  REQUIRE(ex_oh_v4("xooxxo") == "true");
+  REQUIRE(ex_oh_v4("x") == "false");
+}
+
+// int main() {
+//   // cout << ex_oh_v1(gets(stdin));
+//   cout << ex_oh_v1("xooxxxxooxo") << '\n';  // expected output: "false"
+//   cout << ex_oh_v1("xooxxo") << '\n';       // expected output: "true"
+//   cout << ex_oh_v1("x") << '\n';            // expected output: "false"
+
+//   return 0;
+// }
